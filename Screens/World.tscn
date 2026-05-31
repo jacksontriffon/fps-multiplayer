@@ -91,7 +91,7 @@ size = Vector3(51.1416, 3.043213, 1)
 material = SubResource("StandardMaterial3D_brmms")
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="Environment" unique_id=168980613]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -26.33992)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -22.933514)
 use_collision = true
 size = Vector3(51.1416, 3.043213, 1)
 material = SubResource("StandardMaterial3D_brmms")
@@ -114,5 +114,11 @@ use_collision = true
 size = Vector3(6.2143555, 1, 3.953247)
 material = SubResource("StandardMaterial3D_hgiyk")
 
-[node name="Dodgeball" parent="." unique_id=1350528711 instance=ExtResource("7_brmms")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6570387, 0.08549446, -3.5048828)
+[node name="Dodgeball" parent="." unique_id=1478034269 instance=ExtResource("7_brmms")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0582702, -0.1894773, -2.719102)
+
+[node name="Dodgeball2" parent="." unique_id=1368013419 instance=ExtResource("7_brmms")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12516665, -0.1894773, -2.719102)
+
+[node name="Dodgeball3" parent="." unique_id=873048251 instance=ExtResource("7_brmms")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2243147, -0.1894773, -2.719102)

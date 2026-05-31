@@ -22,16 +22,18 @@ _surfaces = [{
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u5hmv"]
 albedo_color = Color(0.3019608, 0.8784314, 0.39215687, 1)
 
-[node name="RigidBody3D" type="RigidBody3D" unique_id=1478034269]
+[node name="Dodgeball" type="RigidBody3D" unique_id=1478034269]
 script = ExtResource("1_3lprl")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=97879006]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 shape = SubResource("SphereShape3D_u5hmv")
 
-[node name="BallMesh" type="MeshInstance3D" parent="." unique_id=1876681663]
+[node name="BallMesh" type="MeshInstance3D" parent="CollisionShape3D" unique_id=1876681663]
 mesh = SubResource("SphereMesh_j4ycq")
 
-[node name="OutlineMesh" type="MeshInstance3D" parent="BallMesh" unique_id=887567070]
+[node name="OutlineMesh" type="MeshInstance3D" parent="CollisionShape3D/BallMesh" unique_id=887567070]
+unique_name_in_owner = true
 visible = false
 mesh = SubResource("ArrayMesh_3lprl")
 surface_material_override/0 = SubResource("StandardMaterial3D_u5hmv")

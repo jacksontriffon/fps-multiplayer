@@ -25,4 +25,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.201397, 0)
 [node name="Camera3D" type="Camera3D" parent="Head" unique_id=328757481]
 current = true
 
-[node name="Hands" parent="Head/Camera3D" unique_id=1513868170 instance=ExtResource("2_1xasy")]
+[node name="Hands" parent="Head/Camera3D" unique_id=1513868170 node_paths=PackedStringArray("camera") instance=ExtResource("2_1xasy")]
+camera = NodePath("..")
