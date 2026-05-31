@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://br0nkwt1yd1i5"]
+
+[ext_resource type="Script" uid="uid://cuspmr1u1lg6o" path="res://Components/Player/Hands/hands.gd" id="1_1ivw5"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1vjd0"]
+radius = 0.7470703
+height = 2.2822266
+
+[sub_resource type="TorusMesh" id="TorusMesh_1vjd0"]
+
+[node name="Hands" type="Node3D" unique_id=1513868170]
+script = ExtResource("1_1ivw5")
+
+[node name="GrabbableArea" type="Area3D" parent="." unique_id=671999518]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GrabbableArea" unique_id=1073914537]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.017211914, -0.89054793)
+shape = SubResource("CapsuleShape3D_1vjd0")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=877224008]
+transform = Transform3D(0.06516186, -0.030109007, 0, 0.029406635, 0.06364178, -0.015414079, 0.0064654676, 0.013992554, 0.07010725, 0.5155559, -0.35744357, -0.7034691)
+mesh = SubResource("TorusMesh_1vjd0")
+
+[node name="RightHandMarker" type="Marker3D" parent="MeshInstance3D" unique_id=744176290]
+transform = Transform3D(12.646354, 5.707122, 1.2547917, -5.843436, 12.351343, 2.7156196, 5.473655e-07, -2.9915042, 13.606135, 0.0021820068, 0.37627697, -0.03800869)
+
+[node name="Target" type="Marker3D" parent="MeshInstance3D/RightHandMarker" unique_id=87348519]
+transform = Transform3D(1, 1.110223e-16, 7.450581e-09, -2.7376519e-08, 1, -2.0397096e-16, -1.1033184e-08, 1.4901161e-08, 1, 0.50000006, 0.18917811, -1.0000222)
+
+[connection signal="area_entered" from="GrabbableArea" to="." method="_on_grabbable_area_area_entered"]
+[connection signal="area_exited" from="GrabbableArea" to="." method="_on_grabbable_area_area_exited"]
+[connection signal="body_entered" from="GrabbableArea" to="." method="_on_grabbable_area_body_entered"]
+[connection signal="body_exited" from="GrabbableArea" to="." method="_on_grabbable_area_body_exited"]
