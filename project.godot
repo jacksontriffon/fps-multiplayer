@@ -21,6 +21,11 @@ Global="*uid://d4pybumfu3rq"
 SaveSystem="*uid://dn0omqbav807h"
 TimeSystem="*uid://cr2fe0ndrp7o2"
 
+[editor]
+
+version_control/plugin_name="GitPlugin"
+version_control/autoload_on_startup=true
+
 [input]
 
 left={
