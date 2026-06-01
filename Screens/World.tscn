@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://bk2argf0qyxx8" path="res://Assets/Textures/Prototype/Dark/texture_05.png" id="4_1vjd0"]
 [ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="5_brmms"]
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="7_brmms"]
+[ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="8_hgiyk"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ts6yl"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -122,3 +123,93 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12516665, -0.1894773, -2.71
 
 [node name="Dodgeball3" parent="." unique_id=873048251 instance=ExtResource("7_brmms")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2243147, -0.1894773, -2.719102)
+
+[node name="TestEnv" type="Node3D" parent="." unique_id=1003361410]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.65677)
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="TestEnv" unique_id=1737436048]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6907449, 5.64093, -21.455313)
+use_collision = true
+size = Vector3(10.645386, 6.244629, 1)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="TestEnv" unique_id=771568755]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.331604, 3.0220337, 0)
+use_collision = true
+size = Vector3(5.336792, 7.0440674, 1)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="TestEnv" unique_id=2130054148]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8117442, 3.0220337, 0)
+use_collision = true
+size = Vector3(4.369629, 7.0440674, 1)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="TestEnv" unique_id=1659158537]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8075185, 4.5865173, 0)
+use_collision = true
+size = Vector3(6.683838, 3.9151, 1)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="TestEnv" unique_id=762603172]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.4890623, 4.1368103, -10.714355)
+use_collision = true
+size = Vector3(1, 9.273621, 22.42871)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="TestEnv" unique_id=619030846]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5134377, 4.131439, -10.711792)
+use_collision = true
+size = Vector3(1, 9.262878, 22.423584)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="TestEnv" unique_id=733438926]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.53464746, 1.5361938, -13.406574)
+use_collision = true
+size = Vector3(10.957581, 3.9648438, 1)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="TestEnv" unique_id=285929435]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.13085938, 6.0489697, -0.7243657)
+use_collision = true
+size = Vector3(10.21875, 1, 2.4487305)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="TestEnv" unique_id=1802964311]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9594727, 6.0489697, -2.5939012)
+use_collision = true
+size = Vector3(4.5615234, 1, 2.4487305)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="TestEnv" unique_id=43438722]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0790386, 6.0489697, -2.5939012)
+use_collision = true
+size = Vector3(3.7978516, 1, 2.4487305)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="TestEnv" unique_id=848454313]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.13085938, 6.0489697, -7.7651563)
+use_collision = true
+size = Vector3(10.21875, 1, 9.046997)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="TestEnv" unique_id=255884054]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.13085938, 2.9852595, -17.419863)
+use_collision = true
+size = Vector3(10.21875, 1, 9.046997)
+material = ExtResource("8_hgiyk")
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="TestEnv" unique_id=1664758914]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2974784, 0, -12.487843)
+use_collision = true
+size = Vector3(1.4003906, 1, 1)
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="TestEnv" unique_id=1229118126]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.903839, 1.1299291, -12.415752)
+use_collision = true
+size = Vector3(1.4003906, 1, 1)
+
+[node name="CSGBox3D15" type="CSGBox3D" parent="TestEnv" unique_id=862692636]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5690656, 2.0969293, -12.689667)
+use_collision = true
+size = Vector3(1.4003906, 1, 1)

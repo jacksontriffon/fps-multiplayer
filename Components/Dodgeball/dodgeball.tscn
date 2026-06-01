@@ -2,6 +2,10 @@
 
 [ext_resource type="Script" uid="uid://cb2ovuepby4ha" path="res://Components/Dodgeball/dodgeball.gd" id="1_3lprl"]
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_3lprl"]
+friction = 0.5
+bounce = 1.0
+
 [sub_resource type="SphereShape3D" id="SphereShape3D_u5hmv"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_j4ycq"]
@@ -23,6 +27,7 @@ _surfaces = [{
 albedo_color = Color(0.3019608, 0.8784314, 0.39215687, 1)
 
 [node name="Dodgeball" type="RigidBody3D" unique_id=1478034269]
+physics_material_override = SubResource("PhysicsMaterial_3lprl")
 script = ExtResource("1_3lprl")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=97879006]
