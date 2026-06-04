@@ -1,4 +1,4 @@
-extends MultiplayerCharacterBody3D
+extends CharacterBody3D
 
 
 const WALK_SPEED = 5.0
@@ -19,10 +19,18 @@ const FOV_CHANGE = 1.2
 
 var speed = WALK_SPEED
 
+func _enter_tree() -> void:
+	set_multiplayer_authority(name.to_int())
+
 func _ready() -> void:
+	camera.current = is_multiplayer_authority()
+	if not is_multiplayer_authority():
+		return
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	
+
 func _unhandled_input(event: InputEvent) -> void:
+	if not is_multiplayer_authority():
+		return
 	if event is InputEventMouseMotion:
 		head.rotate_y(-event.relative.x * SENSITIVITY)
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
@@ -30,6 +38,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 
 func _physics_process(delta: float) -> void:
+	if not is_multiplayer_authority():
+		return
+
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
