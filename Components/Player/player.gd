@@ -21,8 +21,16 @@ const FOV_CHANGE = 1.2
 # layered on top of the input-driven velocity, which would otherwise clobber it.
 const KNOCKBACK_DECAY = 8.0
 
+const TEAM_COLORS := [Color.RED, Color.BLUE]
+
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
+@onready var mesh: MeshInstance3D = $MeshInstance3D
+
+@export var team: int = 0:
+	set(value):
+		team = value
+		_apply_team_color()
 
 var speed = WALK_SPEED
 var knockback := Vector3.ZERO
@@ -43,6 +51,40 @@ func apply_knockback_remote(impulse: Vector3) -> void:
 
 func _enter_tree() -> void:
 	set_multiplayer_authority(name.to_int())
+
+func _ready() -> void:
+	_apply_team_color()
+	if is_multiplayer_authority():
+		_request_spawn.rpc_id(1)
+
+func _apply_team_color() -> void:
+	if not is_node_ready():
+		return
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = TEAM_COLORS[team % TEAM_COLORS.size()]
+	mesh.material_override = mat
+
+@rpc("any_peer", "reliable")
+func _request_spawn() -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	if peer_id == 0:
+		peer_id = 1
+	var spawner := get_tree().get_first_node_in_group("spawn_points")
+	if spawner == null:
+		return
+	var spawn: Dictionary = spawner.reserve(peer_id)
+	_apply_spawn.rpc_id(peer_id, spawn["position"], spawn["yaw"], spawn["team"])
+
+@rpc("any_peer", "reliable")
+func _apply_spawn(pos: Vector3, yaw: float, t: int) -> void:
+	if not (multiplayer.get_remote_sender_id() in [0, 1]):
+		return
+	team = t
+	velocity = Vector3.ZERO
+	position = pos
+	head.rotation.y = yaw
 
 func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():

@@ -16,6 +16,7 @@ var is_joining: bool = false
 
 @onready var join_game_button: Button = $CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/JoinGameButton
 @onready var line_edit: LineEdit = $CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/LineEdit
+@onready var spawn_points: SpawnPoints = $SpawnPoints
 
 
 func _ready() -> void:
@@ -102,11 +103,17 @@ func _join_enet():
 # --- Player spawn / despawn (transport-agnostic) ---------------------------
 
 func _add_player(id: int = 1):
+	var spawn := spawn_points.reserve(id)
 	var player = player_scene.instantiate()
 	player.name = str(id)
+	player.team = spawn["team"]
+	player.position = spawn["position"]
+	player.get_node("Head").rotation.y = spawn["yaw"]
 	call_deferred("add_child", player)
 
 func _remove_player(id: int):
+	spawn_points.release(id)
+
 	if !self.has_node(str(id)):
 		print("Removing player id thatis not in Lobby")
 		return
