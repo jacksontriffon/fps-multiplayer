@@ -7,14 +7,18 @@ class_name SpawnPoints
 var _team_of: Dictionary = {}
 var _slot_of: Dictionary = {}
 
+func _ready() -> void:
+	add_to_group("spawn_points")
+
 func reserve(id: int) -> Dictionary:
-	var team := _choose_team()
-	var slot := _next_free_slot(team)
-	_team_of[id] = team
-	_slot_of[id] = slot
-	var marker := _marker(team, slot)
+	if not _team_of.has(id):
+		var team := _choose_team()
+		var slot := _next_free_slot(team)
+		_team_of[id] = team
+		_slot_of[id] = slot
+	var marker := _marker(_team_of[id], _slot_of[id])
 	return {
-		"team": team,
+		"team": _team_of[id],
 		"position": marker.global_position if marker else global_position,
 		"yaw": marker.global_rotation.y if marker else 0.0,
 	}

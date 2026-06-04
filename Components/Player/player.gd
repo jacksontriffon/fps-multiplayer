@@ -46,6 +46,32 @@ func apply_knockback_remote(impulse: Vector3) -> void:
 func _enter_tree() -> void:
 	set_multiplayer_authority(name.to_int())
 
+func _ready() -> void:
+	if is_multiplayer_authority():
+		_request_spawn.rpc_id(1)
+
+@rpc("any_peer", "reliable")
+func _request_spawn() -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	if peer_id == 0:
+		peer_id = 1
+	var spawner := get_tree().get_first_node_in_group("spawn_points")
+	if spawner == null:
+		return
+	var spawn: Dictionary = spawner.reserve(peer_id)
+	_apply_spawn.rpc_id(peer_id, spawn["position"], spawn["yaw"], spawn["team"])
+
+@rpc("any_peer", "reliable")
+func _apply_spawn(pos: Vector3, yaw: float, t: int) -> void:
+	if not (multiplayer.get_remote_sender_id() in [0, 1]):
+		return
+	team = t
+	velocity = Vector3.ZERO
+	position = pos
+	head.rotation.y = yaw
+
 func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
