@@ -21,10 +21,16 @@ const FOV_CHANGE = 1.2
 # layered on top of the input-driven velocity, which would otherwise clobber it.
 const KNOCKBACK_DECAY = 8.0
 
+const TEAM_COLORS := [Color.RED, Color.BLUE]
+
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
+@onready var mesh: MeshInstance3D = $MeshInstance3D
 
-@export var team: int = 0
+@export var team: int = 0:
+	set(value):
+		team = value
+		_apply_team_color()
 
 var speed = WALK_SPEED
 var knockback := Vector3.ZERO
@@ -47,8 +53,16 @@ func _enter_tree() -> void:
 	set_multiplayer_authority(name.to_int())
 
 func _ready() -> void:
+	_apply_team_color()
 	if is_multiplayer_authority():
 		_request_spawn.rpc_id(1)
+
+func _apply_team_color() -> void:
+	if not is_node_ready():
+		return
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = TEAM_COLORS[team % TEAM_COLORS.size()]
+	mesh.material_override = mat
 
 @rpc("any_peer", "reliable")
 func _request_spawn() -> void:
