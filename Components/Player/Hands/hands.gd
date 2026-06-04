@@ -8,15 +8,31 @@ class_name Hands
 
 @export var camera: Camera3D
 
+# Throw recoil. The camera kick is a purely local positional offset (camera position
+# isn't replicated, so remotes never see it) that springs back; the shove is a small
+# backward knockback predicted on the throwing player's own body.
+const RECOIL_KICK := Vector3(0.0, 0.05, 0.18)  # local cam space: up + back
+const RECOIL_RECOVER := 14.0
+const RECOIL_SHOVE := 2.0
+
 var grabbable_objects: Array[Grabbable] = []
 var highlighted: Grabbable = null
 
+var _cam_base_pos := Vector3.ZERO
+var _recoil_offset := Vector3.ZERO
+
 @onready var right_hand_marker := $MeshInstance3D/RightHandMarker
 
-func _physics_process(_delta: float) -> void:
+func _ready() -> void:
+	_cam_base_pos = camera.position
+
+func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 	update_highlight()
+	# Spring the camera back toward its resting position.
+	_recoil_offset = _recoil_offset.lerp(Vector3.ZERO, delta * RECOIL_RECOVER)
+	camera.position = _cam_base_pos + _recoil_offset
 
 func _input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():
@@ -24,11 +40,28 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interaction"):
 		var target_path: NodePath = highlighted.get_path() if highlighted else NodePath()
 		var aim := -camera.global_transform.basis.z
+		# Holding a ball => this press is a throw; predict the recoil locally.
+		var is_throw := _held_ball_of(get_multiplayer_authority()) != null
 		# Decide on the server. The host (peer 1) runs it directly; clients ask it to.
 		if multiplayer.is_server():
 			_do_interact(get_multiplayer_authority(), target_path, aim)
 		else:
 			_request_interact.rpc_id(1, target_path, aim)
+		if is_throw:
+			_apply_throw_recoil(aim)
+
+# Local-only feedback for the throwing player (not replicated).
+func _apply_throw_recoil(aim: Vector3) -> void:
+	_recoil_offset += RECOIL_KICK
+	var player := _get_player()
+	if player:
+		player.apply_knockback(-aim * RECOIL_SHOVE)
+
+func _get_player() -> Player:
+	var node := get_parent()
+	while node and not (node is Player):
+		node = node.get_parent()
+	return node
 
 # --- Server-authoritative grab/throw ---------------------------------------
 
