@@ -1,10 +1,10 @@
-[gd_scene format=4 uid="uid://1xfx84i2ndhj"]
+[gd_scene load_steps=7 format=4 uid="uid://1xfx84i2ndhj"]
 
 [ext_resource type="Script" uid="uid://cb2ovuepby4ha" path="res://Components/Dodgeball/dodgeball.gd" id="1_3lprl"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_3lprl"]
 friction = 0.5
-bounce = 1.0
+bounce = 0.7
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_u5hmv"]
 
@@ -26,18 +26,18 @@ _surfaces = [{
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u5hmv"]
 albedo_color = Color(0.3019608, 0.8784314, 0.39215687, 1)
 
-[node name="Dodgeball" type="RigidBody3D" unique_id=1478034269]
+[node name="Dodgeball" type="RigidBody3D"]
 physics_material_override = SubResource("PhysicsMaterial_3lprl")
 script = ExtResource("1_3lprl")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=97879006]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 shape = SubResource("SphereShape3D_u5hmv")
 
-[node name="BallMesh" type="MeshInstance3D" parent="CollisionShape3D" unique_id=1876681663]
+[node name="BallMesh" type="MeshInstance3D" parent="CollisionShape3D"]
 mesh = SubResource("SphereMesh_j4ycq")
 
-[node name="OutlineMesh" type="MeshInstance3D" parent="CollisionShape3D/BallMesh" unique_id=887567070]
+[node name="OutlineMesh" type="MeshInstance3D" parent="CollisionShape3D/BallMesh"]
 unique_name_in_owner = true
 visible = false
 mesh = SubResource("ArrayMesh_3lprl")

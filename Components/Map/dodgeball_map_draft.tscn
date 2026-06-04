@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://cyx5wleknjl7m"]
+
+[ext_resource type="PackedScene" uid="uid://bcxp2d1pdoy2r" path="res://DodgeballMapDraft.glb" id="1_d3a1f"]
+
+[node name="DodgeballMapDraft" unique_id=232328701 instance=ExtResource("1_d3a1f")]
+
+[node name="Cube" parent="." index="0" unique_id=1154245197]
+transform = Transform3D(-1, 0, 0, 0, -0.011, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="3" unique_id=964621417]

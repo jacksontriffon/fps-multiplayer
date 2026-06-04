@@ -1,4 +1,4 @@
-extends CharacterBody3D
+extends MultiplayerCharacterBody3D
 
 
 const WALK_SPEED = 5.0

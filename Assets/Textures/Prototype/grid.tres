@@ -1,4 +1,4 @@
-[gd_resource type="StandardMaterial3D" format=3 uid="uid://dmqveijwescc"]
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://dmqveijwescc"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_jjsjv"]
 load_path = "res://.godot/imported/texture_09.png-0f3656cbd8796bc65e026827b60ef1b3.s3tc.ctex"
