@@ -24,10 +24,6 @@ const KNOCKBACK_DECAY = 8.0
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
 
-# Team assignment (0 = West side, 1 = East side). Decided by the host when the
-# player spawns and replicated to every peer via the synchronizer's spawn state
-# (see player.tscn). Drives which side of the court the player starts on and is
-# available for later use (team colours, scoring).
 @export var team: int = 0
 
 var speed = WALK_SPEED

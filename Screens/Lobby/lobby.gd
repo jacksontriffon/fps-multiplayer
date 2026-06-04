@@ -14,16 +14,12 @@ var peer: MultiplayerPeer
 var is_host: bool = false
 var is_joining: bool = false
 
-# Server-side team bookkeeping (only meaningful on the host, where _add_player
-# runs). team_of maps peer id -> team index (0/1); slot_of maps peer id -> which
-# spawn marker on that team's side it occupies. Slots are reclaimed on disconnect.
 var team_of: Dictionary = {}
 var slot_of: Dictionary = {}
 
 @onready var join_game_button: Button = $CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/JoinGameButton
 @onready var line_edit: LineEdit = $CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/LineEdit
 
-# Spawn marker roots per team, populated in Lobby.tscn under SpawnPoints.
 @onready var team_spawn_roots: Array[Node] = [
 	$SpawnPoints/Team1,
 	$SpawnPoints/Team2,
@@ -114,9 +110,6 @@ func _join_enet():
 # --- Player spawn / despawn (transport-agnostic) ---------------------------
 
 func _add_player(id: int = 1):
-	# Balance teams as players arrive, then drop them onto the next free spawn
-	# marker on their side. Both team and starting transform are part of the
-	# player's spawn state (player.tscn), so they replicate to every peer.
 	var team := _choose_team()
 	var slot := _next_free_slot(team)
 	team_of[id] = team
@@ -129,8 +122,6 @@ func _add_player(id: int = 1):
 	var marker := _spawn_marker(team, slot)
 	if marker:
 		player.position = marker.global_position
-		# Face the player toward the centre line (the marker's yaw); look is
-		# driven by the Head node, which replicates its rotation at spawn.
 		player.get_node("Head").rotation.y = marker.global_rotation.y
 
 	call_deferred("add_child", player)
@@ -148,15 +139,12 @@ func _remove_player(id: int):
 
 # --- Team assignment / spawn slots -----------------------------------------
 
-# Put the new player on whichever side has fewer members (ties go to team 0).
 func _choose_team() -> int:
 	var counts := [0, 0]
 	for pid in team_of:
 		counts[team_of[pid]] += 1
 	return 0 if counts[0] <= counts[1] else 1
 
-# Lowest spawn index on this team not already taken by a connected member, so
-# disconnected players' slots get reused rather than leaving gaps.
 func _next_free_slot(team: int) -> int:
 	var used := {}
 	for pid in team_of:
@@ -167,8 +155,6 @@ func _next_free_slot(team: int) -> int:
 		i += 1
 	return i
 
-# Resolve a (team, slot) pair to its Marker3D. Wraps if a side somehow gets more
-# players than markers so we never index out of bounds.
 func _spawn_marker(team: int, slot: int) -> Marker3D:
 	var root := team_spawn_roots[team]
 	var markers := root.get_children()
