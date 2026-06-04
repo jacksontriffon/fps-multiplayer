@@ -13,7 +13,7 @@ class_name Hands
 # backward knockback predicted on the throwing player's own body.
 const RECOIL_KICK := Vector3(0.0, 0.05, 0.18)  # local cam space: up + back
 const RECOIL_RECOVER := 14.0
-const RECOIL_SHOVE := 2.0
+const RECOIL_SHOVE := 0.7
 
 var grabbable_objects: Array[Grabbable] = []
 var highlighted: Grabbable = null

@@ -14,7 +14,6 @@ const THROW_FORCE = 15.0
 const HIT_SPEED = 6.0        # min ball speed to count as a hit
 const HIT_KNOCKBACK = 6.0    # shove strength applied to the struck player
 const HIT_COOLDOWN = 0.3     # min seconds between hits from the same ball
-const THROW_GRACE = 0.4      # thrower is immune to their own ball this long
 
 ## Peer id of the holder, or 0 when free. Replicated; only the authority writes it.
 ## The setter runs on every peer (including clients, when the synchronizer applies the
@@ -27,8 +26,9 @@ const THROW_GRACE = 0.4      # thrower is immune to their own ball this long
 		_apply_held_collision()
 
 # Server-only hit bookkeeping (the server is the only peer that detects hits).
+# thrower_id stays set until someone else throws the ball, so a ball can never
+# hit whoever last threw it — only opponents' balls get you out.
 var thrower_id := 0
-var _throw_grace := 0.0
 var _hit_cooldown := 0.0
 
 func _ready() -> void:
@@ -36,7 +36,9 @@ func _ready() -> void:
 	_apply_held_collision()
 	# Needed for get_colliding_bodies() in the server's hit check.
 	contact_monitor = true
-	max_contacts_reported = 4
+	max_contacts_reported = 8
+	# Stop fast throws from tunnelling through the thin player capsule.
+	continuous_cd = true
 
 func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
@@ -74,9 +76,8 @@ func grab(peer_id: int) -> bool:
 
 func throw(direction: Vector3) -> void:
 	# held_by still names the holder here — remember them before release() clears it,
-	# so the thrower's own body can ignore this ball during its grace window.
+	# so this ball can never knock back its own thrower.
 	thrower_id = held_by
-	_throw_grace = THROW_GRACE
 	_hit_cooldown = 0.0
 	release()
 	apply_central_impulse(direction * THROW_FORCE)
@@ -88,8 +89,6 @@ func release() -> void:
 # --- Server-side hit detection ---------------------------------------------
 
 func _server_check_hit(delta: float) -> void:
-	if _throw_grace > 0.0:
-		_throw_grace -= delta
 	if _hit_cooldown > 0.0:
 		_hit_cooldown -= delta
 		return
@@ -100,10 +99,17 @@ func _server_check_hit(delta: float) -> void:
 		if player == null:
 			continue
 		var victim_id := player.name.to_int()
-		# Don't let a freshly-thrown ball knock back its own thrower.
-		if victim_id == thrower_id and _throw_grace > 0.0:
+		# Only opponents' balls hit you — never the one you last threw.
+		if victim_id == thrower_id:
 			continue
-		var impulse := linear_velocity.normalized() * HIT_KNOCKBACK
+		# Shove the player away from the ball. We can't use the ball's velocity:
+		# get_colliding_bodies() reports the contact a frame late, by which point
+		# the ball has already bounced and its velocity points the wrong way.
+		var away := player.global_position - global_position
+		away.y = 0.0
+		if away.length() < 0.01:
+			away = -linear_velocity  # degenerate fallback
+		var impulse := away.normalized() * HIT_KNOCKBACK
 		player.apply_knockback_remote.rpc_id(victim_id, impulse)
 		_hit_cooldown = HIT_COOLDOWN
 		return
