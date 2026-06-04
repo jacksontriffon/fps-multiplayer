@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=4 uid="uid://1xfx84i2ndhj"]
+[gd_scene load_steps=8 format=4 uid="uid://1xfx84i2ndhj"]
 
 [ext_resource type="Script" uid="uid://cb2ovuepby4ha" path="res://Components/Dodgeball/dodgeball.gd" id="1_3lprl"]
 
@@ -26,6 +26,17 @@ _surfaces = [{
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u5hmv"]
 albedo_color = Color(0.3019608, 0.8784314, 0.39215687, 1)
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ball"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:held_by")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+
 [node name="Dodgeball" type="RigidBody3D"]
 physics_material_override = SubResource("PhysicsMaterial_3lprl")
 script = ExtResource("1_3lprl")
@@ -42,3 +53,6 @@ unique_name_in_owner = true
 visible = false
 mesh = SubResource("ArrayMesh_3lprl")
 surface_material_override/0 = SubResource("StandardMaterial3D_u5hmv")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_ball")
