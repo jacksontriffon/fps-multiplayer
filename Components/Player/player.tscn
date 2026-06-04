@@ -28,7 +28,7 @@ shape = SubResource("ConvexPolygonShape3D_1vjd0")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.201397, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
-current = true
+current = false
 
 [node name="Hands" parent="Head/Camera3D" node_paths=PackedStringArray("camera") instance=ExtResource("2_1xasy")]
 camera = NodePath("..")
