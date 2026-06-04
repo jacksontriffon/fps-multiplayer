@@ -14,16 +14,9 @@ var peer: MultiplayerPeer
 var is_host: bool = false
 var is_joining: bool = false
 
-var team_of: Dictionary = {}
-var slot_of: Dictionary = {}
-
 @onready var join_game_button: Button = $CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/JoinGameButton
 @onready var line_edit: LineEdit = $CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/LineEdit
-
-@onready var team_spawn_roots: Array[Node] = [
-	$SpawnPoints/Team1,
-	$SpawnPoints/Team2,
-]
+@onready var spawn_points: SpawnPoints = $SpawnPoints
 
 
 func _ready() -> void:
@@ -110,58 +103,22 @@ func _join_enet():
 # --- Player spawn / despawn (transport-agnostic) ---------------------------
 
 func _add_player(id: int = 1):
-	var team := _choose_team()
-	var slot := _next_free_slot(team)
-	team_of[id] = team
-	slot_of[id] = slot
-
+	var spawn := spawn_points.reserve(id)
 	var player = player_scene.instantiate()
 	player.name = str(id)
-	player.team = team
-
-	var marker := _spawn_marker(team, slot)
-	if marker:
-		player.position = marker.global_position
-		player.get_node("Head").rotation.y = marker.global_rotation.y
-
+	player.team = spawn["team"]
+	player.position = spawn["position"]
+	player.get_node("Head").rotation.y = spawn["yaw"]
 	call_deferred("add_child", player)
 
 func _remove_player(id: int):
-	team_of.erase(id)
-	slot_of.erase(id)
+	spawn_points.release(id)
 
 	if !self.has_node(str(id)):
 		print("Removing player id thatis not in Lobby")
 		return
 
 	self.get_node(str(id)).queue_free()
-
-
-# --- Team assignment / spawn slots -----------------------------------------
-
-func _choose_team() -> int:
-	var counts := [0, 0]
-	for pid in team_of:
-		counts[team_of[pid]] += 1
-	return 0 if counts[0] <= counts[1] else 1
-
-func _next_free_slot(team: int) -> int:
-	var used := {}
-	for pid in team_of:
-		if team_of[pid] == team:
-			used[slot_of[pid]] = true
-	var i := 0
-	while used.has(i):
-		i += 1
-	return i
-
-func _spawn_marker(team: int, slot: int) -> Marker3D:
-	var root := team_spawn_roots[team]
-	var markers := root.get_children()
-	if markers.is_empty():
-		push_warning("No spawn markers for team %d" % team)
-		return null
-	return markers[slot % markers.size()]
 
 
 # --- UI --------------------------------------------------------------------

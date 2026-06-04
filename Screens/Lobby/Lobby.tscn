@@ -1,10 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://c4r4yl77barqb"]
+[gd_scene load_steps=11 format=3 uid="uid://c4r4yl77barqb"]
 
 [ext_resource type="Script" uid="uid://bejfknjei1g6j" path="res://Screens/Lobby/lobby.gd" id="1_hp6t6"]
 [ext_resource type="PackedScene" uid="uid://dn5gm2e014upj" path="res://Components/Player/player.tscn" id="2_1eq5a"]
 [ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="3_t6eea"]
 [ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="4_sxmp2"]
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="5_t6eea"]
+[ext_resource type="PackedScene" uid="uid://b8sp4wnp0ints1" path="res://Components/SpawnPoints/spawn_points.tscn" id="6_spawn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1eq5a"]
 
@@ -114,59 +115,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2907367, 0.26177016, -3.473
 [node name="Dodgeball5" parent="LobbyTerrain" instance=ExtResource("5_t6eea")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.753357, 0.26177016, -3.3111625)
 
-[node name="SpawnPoints" type="Node3D" parent="."]
-
-[node name="Team1" type="Node3D" parent="SpawnPoints"]
-
-[node name="Spawn1" type="Marker3D" parent="SpawnPoints/Team1"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 0.1, -16)
-
-[node name="Spawn2" type="Marker3D" parent="SpawnPoints/Team1"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 0.1, -13.7)
-
-[node name="Spawn3" type="Marker3D" parent="SpawnPoints/Team1"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 0.1, -11.4)
-
-[node name="Spawn4" type="Marker3D" parent="SpawnPoints/Team1"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 0.1, -9.1)
-
-[node name="Spawn5" type="Marker3D" parent="SpawnPoints/Team1"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 0.1, -6.9)
-
-[node name="Spawn6" type="Marker3D" parent="SpawnPoints/Team1"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 0.1, -4.6)
-
-[node name="Spawn7" type="Marker3D" parent="SpawnPoints/Team1"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 0.1, -2.3)
-
-[node name="Spawn8" type="Marker3D" parent="SpawnPoints/Team1"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 0.1, 0)
-
-[node name="Team2" type="Node3D" parent="SpawnPoints"]
-
-[node name="Spawn1" type="Marker3D" parent="SpawnPoints/Team2"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0.1, -16)
-
-[node name="Spawn2" type="Marker3D" parent="SpawnPoints/Team2"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0.1, -13.7)
-
-[node name="Spawn3" type="Marker3D" parent="SpawnPoints/Team2"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0.1, -11.4)
-
-[node name="Spawn4" type="Marker3D" parent="SpawnPoints/Team2"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0.1, -9.1)
-
-[node name="Spawn5" type="Marker3D" parent="SpawnPoints/Team2"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0.1, -6.9)
-
-[node name="Spawn6" type="Marker3D" parent="SpawnPoints/Team2"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0.1, -4.6)
-
-[node name="Spawn7" type="Marker3D" parent="SpawnPoints/Team2"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0.1, -2.3)
-
-[node name="Spawn8" type="Marker3D" parent="SpawnPoints/Team2"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0.1, 0)
+[node name="SpawnPoints" parent="." instance=ExtResource("6_spawn")]
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://dn5gm2e014upj")
