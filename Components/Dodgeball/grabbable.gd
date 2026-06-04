@@ -6,14 +6,20 @@ class_name Grabbable
 # rotation and held_by via the MultiplayerSynchronizer. Every other peer freezes its
 # copy and just displays the synced transform.
 
-const THROW_FORCE = 15.0
+# Throw force scales with charge: a quick click throws at THROW_FORCE_MIN, a
+# fully held-and-released throw at THROW_FORCE_MAX. throw() takes a 0..1 power.
+const THROW_FORCE_MIN = 10.0
+const THROW_FORCE_MAX = 30.0
 
 # Hit pushback. Detection runs on the server (the only peer with real ball
 # velocities — clients freeze their copies), which then RPCs the shove to the
-# struck player's own authority peer, where its movement is simulated.
-const HIT_SPEED = 6.0        # min ball speed to count as a hit
-const HIT_KNOCKBACK = 6.0    # shove strength applied to the struck player
-const HIT_COOLDOWN = 0.3     # min seconds between hits from the same ball
+# struck player's own authority peer, where its movement is simulated. The shove
+# scales with the ball's speed, so a charged throw hits harder than a lobbed one.
+const HIT_SPEED = 6.0           # min ball speed to count as a hit
+const HIT_SPEED_MAX = 24.0      # speed at which knockback maxes out
+const HIT_KNOCKBACK_MIN = 4.0   # shove at the hit threshold
+const HIT_KNOCKBACK_MAX = 14.0  # shove at (or above) HIT_SPEED_MAX
+const HIT_COOLDOWN = 0.3        # min seconds between hits from the same ball
 
 ## Peer id of the holder, or 0 when free. Replicated; only the authority writes it.
 ## The setter runs on every peer (including clients, when the synchronizer applies the
@@ -74,13 +80,15 @@ func grab(peer_id: int) -> bool:
 	held_by = peer_id  # setter disables collision on every peer
 	return true
 
-func throw(direction: Vector3) -> void:
+# power is the 0..1 charge from the thrower (0 = quick click, 1 = full charge).
+func throw(direction: Vector3, power: float = 1.0) -> void:
 	# held_by still names the holder here — remember them before release() clears it,
 	# so this ball can never knock back its own thrower.
 	thrower_id = held_by
 	_hit_cooldown = 0.0
 	release()
-	apply_central_impulse(direction * THROW_FORCE)
+	var force := lerpf(THROW_FORCE_MIN, THROW_FORCE_MAX, clampf(power, 0.0, 1.0))
+	apply_central_impulse(direction * force)
 
 func release() -> void:
 	held_by = 0  # setter re-enables collision on every peer
@@ -92,8 +100,13 @@ func _server_check_hit(delta: float) -> void:
 	if _hit_cooldown > 0.0:
 		_hit_cooldown -= delta
 		return
-	if linear_velocity.length() < HIT_SPEED:
+	var speed := linear_velocity.length()
+	if speed < HIT_SPEED:
 		return
+	# Faster balls shove harder. Captured here, before the contact loop, since a
+	# bounce can change the velocity by the time we react to the collision.
+	var speed_t := clampf((speed - HIT_SPEED) / (HIT_SPEED_MAX - HIT_SPEED), 0.0, 1.0)
+	var knockback := lerpf(HIT_KNOCKBACK_MIN, HIT_KNOCKBACK_MAX, speed_t)
 	for body in get_colliding_bodies():
 		var player := body as Player
 		if player == null:
@@ -109,7 +122,7 @@ func _server_check_hit(delta: float) -> void:
 		away.y = 0.0
 		if away.length() < 0.01:
 			away = -linear_velocity  # degenerate fallback
-		var impulse := away.normalized() * HIT_KNOCKBACK
+		var impulse := away.normalized() * knockback
 		player.apply_knockback_remote.rpc_id(victim_id, impulse)
 		_hit_cooldown = HIT_COOLDOWN
 		return

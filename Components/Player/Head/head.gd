@@ -9,12 +9,15 @@ const SENSITIVITY = 0.003
 const PITCH_LIMIT = deg_to_rad(60)
 
 @onready var camera: Camera3D = $Camera3D
+@onready var crosshairs: CanvasLayer = %Crosshairs
+
 
 func _ready() -> void:
 	if not is_multiplayer_authority():
 		return
 	camera.make_current()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	crosshairs.visible = true
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():

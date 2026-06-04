@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b0dhcl4edi5pu" path="res://Components/Player/player.gd" id="1_1xasy"]
 [ext_resource type="PackedScene" uid="uid://br0nkwt1yd1i5" path="res://Components/Player/Hands/hands.tscn" id="2_1xasy"]
-[ext_resource type="Script" uid="uid://bheadlook3d01a" path="res://Components/Player/Head/head.gd" id="3_head"]
+[ext_resource type="Script" uid="uid://cp6no4h2gdagm" path="res://Components/Player/Head/head.gd" id="3_head"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_y2flf"]
 
@@ -35,8 +35,32 @@ shape = SubResource("ConvexPolygonShape3D_1vjd0")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.201397, 0)
 script = ExtResource("3_head")
 
+[node name="Crosshairs" type="CanvasLayer" parent="Head"]
+unique_name_in_owner = true
+visible = false
+
+[node name="Control" type="Control" parent="Head/Crosshairs"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="Head/Crosshairs/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Head/Crosshairs/Control/CenterContainer"]
+layout_mode = 2
+text = "+"
+
 [node name="Camera3D" type="Camera3D" parent="Head"]
-current = false
 
 [node name="Hands" parent="Head/Camera3D" node_paths=PackedStringArray("camera") instance=ExtResource("2_1xasy")]
 camera = NodePath("..")
