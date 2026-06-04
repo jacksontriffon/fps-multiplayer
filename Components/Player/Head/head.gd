@@ -10,6 +10,8 @@ const PITCH_LIMIT = deg_to_rad(60)
 
 @onready var camera: Camera3D = $Camera3D
 @onready var crosshairs: CanvasLayer = %Crosshairs
+@onready var charge_bar: ProgressBar = %ChargeBar
+@onready var hands: Hands = $Camera3D/Hands
 
 
 func _ready() -> void:
@@ -18,6 +20,15 @@ func _ready() -> void:
 	camera.make_current()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	crosshairs.visible = true
+
+func _process(_delta: float) -> void:
+	if not is_multiplayer_authority():
+		return
+	# Local-only charge bar for the player winding up a throw.
+	var charging := hands.is_charging()
+	charge_bar.visible = charging
+	if charging:
+		charge_bar.value = hands.get_charge()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():
