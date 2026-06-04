@@ -162,12 +162,10 @@ func _hand_marker_of(peer_id: int) -> Node3D:
 		return null
 	return player.get_node_or_null("Head/Camera3D/Hands/MeshInstance3D/RightHandMarker")
 
-# Ease displayed redness toward charge; the local holder sees no tint (they get the bar).
+# Ease displayed redness toward charge; seen by every peer, holder included.
 func _update_charge_tint(delta: float) -> void:
-	var mine := held_by != 0 and held_by == multiplayer.get_unique_id()
-	var target := 0.0 if mine else charge
-	var speed := TINT_RISE if target > _tint else TINT_FALL
-	_tint = move_toward(_tint, target, speed * delta)
+	var speed := TINT_RISE if charge > _tint else TINT_FALL
+	_tint = move_toward(_tint, charge, speed * delta)
 	set_charge_visual(_tint)
 
 # Overridden by subclasses that have a highlight visual.
