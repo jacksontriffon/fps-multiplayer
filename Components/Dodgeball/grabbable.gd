@@ -21,6 +21,10 @@ const HIT_KNOCKBACK_MIN = 4.0   # shove at the hit threshold
 const HIT_KNOCKBACK_MAX = 14.0  # shove at (or above) HIT_SPEED_MAX
 const HIT_COOLDOWN = 0.3        # min seconds between hits from the same ball
 
+# Charge tint reddens the ball for observers; it rises with charge, falls fast on release.
+const TINT_RISE = 5.0
+const TINT_FALL = 7.0
+
 ## Peer id of the holder, or 0 when free. Replicated; only the authority writes it.
 ## The setter runs on every peer (including clients, when the synchronizer applies the
 ## replicated value), so a held ball stops colliding everywhere. Without this, a client
@@ -31,11 +35,17 @@ const HIT_COOLDOWN = 0.3        # min seconds between hits from the same ball
 		held_by = value
 		_apply_held_collision()
 
+## Charge 0..1 while held; server-authoritative, replicated so every peer can redden the ball.
+@export var charge: float = 0.0
+
 # Server-only hit bookkeeping (the server is the only peer that detects hits).
 # thrower_id stays set until someone else throws the ball, so a ball can never
 # hit whoever last threw it — only opponents' balls get you out.
 var thrower_id := 0
 var _hit_cooldown := 0.0
+
+# Local smoothed redness (0..1) driven from charge; visual only, not replicated.
+var _tint := 0.0
 
 func _ready() -> void:
 	add_to_group("grabbable")
@@ -47,6 +57,7 @@ func _ready() -> void:
 	continuous_cd = true
 
 func _physics_process(delta: float) -> void:
+	_update_charge_tint(delta)
 	if not is_multiplayer_authority():
 		# Clients don't simulate — freeze and let the synchronizer drive the transform.
 		# Done here (not _ready) so it also applies after a peer connects.
@@ -92,7 +103,17 @@ func throw(direction: Vector3, power: float = 1.0) -> void:
 
 func release() -> void:
 	held_by = 0  # setter re-enables collision on every peer
+	charge = 0.0  # stop reddening; observers fade their tint out
 	freeze = false
+
+# Streamed by the holding client each frame while charging. Server-authoritative.
+@rpc("any_peer", "unreliable_ordered")
+func _set_charge(value: float) -> void:
+	if not multiplayer.is_server():
+		return
+	if multiplayer.get_remote_sender_id() != held_by:
+		return
+	charge = clampf(value, 0.0, 1.0)
 
 # --- Server-side hit detection ---------------------------------------------
 
@@ -141,6 +162,18 @@ func _hand_marker_of(peer_id: int) -> Node3D:
 		return null
 	return player.get_node_or_null("Head/Camera3D/Hands/MeshInstance3D/RightHandMarker")
 
+# Ease displayed redness toward charge; the local holder sees no tint (they get the bar).
+func _update_charge_tint(delta: float) -> void:
+	var mine := held_by != 0 and held_by == multiplayer.get_unique_id()
+	var target := 0.0 if mine else charge
+	var speed := TINT_RISE if target > _tint else TINT_FALL
+	_tint = move_toward(_tint, target, speed * delta)
+	set_charge_visual(_tint)
+
 # Overridden by subclasses that have a highlight visual.
 func toggle_highlight(_is_highlighted: bool) -> void:
+	pass
+
+# Overridden by subclasses to tint the ball by charge (0..1).
+func set_charge_visual(_tint_amount: float) -> void:
 	pass

@@ -42,9 +42,10 @@ func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 	update_highlight()
-	# Wind up the throw while the button is held.
+	# Wind up the throw while held, streaming charge to the ball so peers can redden it.
 	if _charging:
 		_charge = minf(_charge + delta / THROW_CHARGE_TIME, 1.0)
+		_push_charge(_charge)
 	# Spring the camera back toward its resting position.
 	_recoil_offset = _recoil_offset.lerp(Vector3.ZERO, delta * RECOIL_RECOVER)
 	camera.position = _cam_base_pos + _recoil_offset
@@ -91,6 +92,23 @@ func _get_player() -> Player:
 	while node and not (node is Player):
 		node = node.get_parent()
 	return node
+
+# Push charge to the held ball; host writes it, clients ask the server (it replicates).
+func _push_charge(value: float) -> void:
+	var held := _held_ball_of(get_multiplayer_authority())
+	if held == null:
+		return
+	if multiplayer.is_server():
+		held.charge = value
+	else:
+		held._set_charge.rpc_id(1, value)
+
+# Read by the local HUD to drive the charge bar.
+func is_charging() -> bool:
+	return _charging
+
+func get_charge() -> float:
+	return _charge
 
 # --- Server-authoritative grab/throw ---------------------------------------
 

@@ -1,7 +1,25 @@
 extends Grabbable
 class_name Dodgeball
 
+const CHARGE_COLOR := Color(0.9, 0.1, 0.1)
+
 @onready var outline_mesh = %OutlineMesh
+@onready var ball_mesh: MeshInstance3D = $CollisionShape3D/BallMesh
+
+var _ball_material: StandardMaterial3D
+var _base_color := Color.WHITE
+
+func _ready() -> void:
+	super()
+	# Own a per-instance material so tinting one ball doesn't touch the others.
+	var src := ball_mesh.get_active_material(0)
+	_ball_material = src.duplicate() if src is StandardMaterial3D else StandardMaterial3D.new()
+	_base_color = _ball_material.albedo_color
+	ball_mesh.material_override = _ball_material
 
 func toggle_highlight(is_highlighted: bool) -> void:
 	outline_mesh.visible = is_highlighted
+
+func set_charge_visual(tint_amount: float) -> void:
+	if _ball_material:
+		_ball_material.albedo_color = _base_color.lerp(CHARGE_COLOR, tint_amount)
