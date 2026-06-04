@@ -21,6 +21,7 @@ glow_enabled = true
 
 [node name="Lobby" type="Node3D"]
 script = ExtResource("1_hp6t6")
+net_mode = 1
 player_scene = ExtResource("2_1eq5a")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
