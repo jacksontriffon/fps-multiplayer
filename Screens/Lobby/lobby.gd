@@ -38,6 +38,7 @@ func _on_lobby_created(result: int, lobby_id: int):
 func join_lobby(lobby_id: int):
 	is_joining = true
 	Steam.joinLobby(lobby_id)
+	$CanvasLayer.hide()
 
 func _on_lobby_joined(lobby_id: int, permissions: int, locked: bool, response: int):
 	if !is_joining:
