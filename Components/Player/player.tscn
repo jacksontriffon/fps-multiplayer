@@ -63,6 +63,26 @@ grow_vertical = 2
 layout_mode = 2
 text = "+"
 
+[node name="ChargeBar" type="ProgressBar" parent="Head/Crosshairs/Control"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -70.0
+offset_top = -300.0
+offset_right = -46.0
+offset_bottom = -140.0
+grow_horizontal = 0
+grow_vertical = 0
+max_value = 1.0
+step = 0.01
+value = 0.0
+fill_mode = 3
+show_percentage = false
+
 [node name="Camera3D" type="Camera3D" parent="Head"]
 
 [node name="Hands" parent="Head/Camera3D" node_paths=PackedStringArray("camera") instance=ExtResource("2_1xasy")]
