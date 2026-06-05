@@ -10,12 +10,19 @@ const ENABLED_ALPHA := 1.0
 const DISABLED_ALPHA := 0.16
 const ALPHA_LERP := 8.0
 
+# Gentle idle bob of the orb (local visual; eased by the sine itself).
+const BOB_AMPLITUDE := 0.09
+const BOB_SPEED := 1.6
+
 @onready var orb: CSGSphere3D = $CSGCylinder3D/CSGSphere3D
 
 var _mat: StandardMaterial3D
+var _orb_base_y := 0.0
+var _bob_time := 0.0
 
 func _ready() -> void:
 	add_to_group("pedestal")
+	_orb_base_y = orb.position.y
 	_mat = StandardMaterial3D.new()
 	_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_mat.albedo_color = Color(0.35, 0.85, 1.0, DISABLED_ALPHA)
@@ -24,6 +31,8 @@ func _ready() -> void:
 	orb.material = _mat
 
 func _process(delta: float) -> void:
+	_bob_time += delta
+	orb.position.y = _orb_base_y + sin(_bob_time * BOB_SPEED) * BOB_AMPLITUDE
 	var enabled := MatchManager.can_start()
 	var target: float = ENABLED_ALPHA if enabled else DISABLED_ALPHA
 	_mat.albedo_color.a = lerpf(_mat.albedo_color.a, target, delta * ALPHA_LERP)
