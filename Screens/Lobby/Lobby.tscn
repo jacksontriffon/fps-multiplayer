@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://c4r4yl77barqb"]
+[gd_scene load_steps=12 format=3 uid="uid://c4r4yl77barqb"]
 
 [ext_resource type="Script" uid="uid://bejfknjei1g6j" path="res://Screens/Lobby/lobby.gd" id="1_hp6t6"]
 [ext_resource type="PackedScene" uid="uid://dn5gm2e014upj" path="res://Components/Player/player.tscn" id="2_1eq5a"]
@@ -6,6 +6,7 @@
 [ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="4_sxmp2"]
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="5_t6eea"]
 [ext_resource type="PackedScene" uid="uid://b8sp4wnp0ints1" path="res://Components/SpawnPoints/spawn_points.tscn" id="6_spawn"]
+[ext_resource type="PackedScene" uid="uid://c60hxnsma28oh" path="res://Components/Pedestal/pedestal.tscn" id="7_albdk"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1eq5a"]
 
@@ -134,6 +135,10 @@ shadow_enabled = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.99097383, 0.13405538, 0, -0.13405538, 0.99097383, 0, 1.5856624, 0)
+
+[node name="Pedestal" parent="." instance=ExtResource("7_albdk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11)
+script = null
 
 [connection signal="pressed" from="CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/HostGameButton" to="." method="_on_host_game_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/JoinGameButton" to="." method="_on_join_game_button_pressed"]

@@ -55,6 +55,9 @@ func _physics_process(delta: float) -> void:
 # events that all read as "pressed", which would reset the charge every frame.
 # Input.is_action_just_* edge-detects correctly for both buttons and axes.
 func _handle_interaction_input() -> void:
+	var me := _get_player()
+	if me and not me.alive:
+		return
 	# Grab happens immediately on press, and only with empty hands.
 	var grabbed_this_frame := false
 	if Input.is_action_just_pressed("interaction") and not _held_ball_of(get_multiplayer_authority()):
@@ -128,6 +131,9 @@ func _request_interact(target_path: NodePath, aim: Vector3, power: float) -> voi
 # Server only. Holding a ball => throw it (at the given charge); otherwise grab
 # the requested target.
 func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: float) -> void:
+	var actor := get_tree().current_scene.get_node_or_null(str(peer_id)) as Player
+	if actor and not actor.alive:
+		return
 	var held := _held_ball_of(peer_id)
 	if held:
 		held.throw(aim, power)

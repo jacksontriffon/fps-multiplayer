@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3 uid="uid://c60hxnsma28oh"]
+
+[ext_resource type="Script" uid="uid://dt76gtgvtw2if" path="res://Components/Pedestal/pedestal.gd" id="1_wxhbb"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e888g"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_wxhbb"]
+height = 1.7393188
+radius = 2.0361328
+
+[node name="Pedestal" type="Node3D"]
+script = ExtResource("1_wxhbb")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+use_collision = true
+height = 1.0
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="CSGCylinder3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8865266, 0)
+radius = 0.25268716
+material = SubResource("StandardMaterial3D_e888g")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3373108, 0)
+shape = SubResource("CylinderShape3D_wxhbb")
+
+[node name="Prompt" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, 0)
+billboard = 1
+fixed_size = true
+pixel_size = 0.0007
+font_size = 96
+outline_size = 28
+text = ""

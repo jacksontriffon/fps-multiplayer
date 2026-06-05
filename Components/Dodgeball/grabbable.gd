@@ -44,11 +44,13 @@ const TINT_FALL = 7.0
 var thrower_id := 0
 var _hit_cooldown := 0.0
 
+var _spawn_transform := Transform3D.IDENTITY
 # Local smoothed redness (0..1) driven from charge; visual only, not replicated.
 var _tint := 0.0
 
 func _ready() -> void:
 	add_to_group("grabbable")
+	_spawn_transform = global_transform
 	_apply_held_collision()
 	# Needed for get_colliding_bodies() in the server's hit check.
 	contact_monitor = true
@@ -106,6 +108,16 @@ func release() -> void:
 	charge = 0.0  # stop reddening; observers fade their tint out
 	freeze = false
 
+func server_reset() -> void:
+	if not is_multiplayer_authority():
+		return
+	release()
+	thrower_id = 0
+	_hit_cooldown = 0.0
+	global_transform = _spawn_transform
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+
 # Streamed by the holding client each frame while charging. Server-authoritative.
 @rpc("any_peer", "unreliable_ordered")
 func _set_charge(value: float) -> void:
@@ -145,6 +157,7 @@ func _server_check_hit(delta: float) -> void:
 			away = -linear_velocity  # degenerate fallback
 		var impulse := away.normalized() * knockback
 		player.apply_knockback_remote.rpc_id(victim_id, impulse)
+		MatchManager.server_on_hit(victim_id, thrower_id)
 		_hit_cooldown = HIT_COOLDOWN
 		return
 

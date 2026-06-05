@@ -117,6 +117,7 @@ func _add_player(id: int = 1):
 
 func _remove_player(id: int):
 	spawn_points.release(id)
+	MatchManager.server_player_left(id)
 
 	if !self.has_node(str(id)):
 		print("Removing player id thatis not in Lobby")
