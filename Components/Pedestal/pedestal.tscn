@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://c60hxnsma28oh"]
+
+[ext_resource type="Script" uid="uid://dt76gtgvtw2if" path="res://Components/Pedestal/pedestal.gd" id="1_wxhbb"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e888g"]
+
+[node name="Pedestal" type="Node3D"]
+script = ExtResource("1_wxhbb")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+use_collision = true
+height = 1.0
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="CSGCylinder3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8865266, 0)
+radius = 0.25268716
+material = SubResource("StandardMaterial3D_e888g")

@@ -32,7 +32,11 @@ func server_player_ready(id: int, team: int) -> void:
 		_set_spectator(id, true)
 	_broadcast()
 
-# Host-only: kick off a fresh match once both teams have enough players.
+# Any player at the podium can ask the server to start; it validates and begins.
+@rpc("any_peer", "reliable")
+func request_start() -> void:
+	server_request_start()
+
 func server_request_start() -> void:
 	if not multiplayer.is_server() or not can_start():
 		return
@@ -42,9 +46,6 @@ func server_request_start() -> void:
 
 func can_start() -> bool:
 	return state == State.WAITING and _both_teams_present()
-
-func get_team_counts() -> Array:
-	return _team_player_counts()
 
 func server_player_left(id: int) -> void:
 	if not multiplayer.is_server():

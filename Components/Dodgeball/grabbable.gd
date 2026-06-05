@@ -25,6 +25,13 @@ const HIT_COOLDOWN = 0.3        # min seconds between hits from the same ball
 const TINT_RISE = 5.0
 const TINT_FALL = 7.0
 
+# Idle hover: a free ball that has come to rest gently floats and bobs in place.
+const FLOAT_AMPLITUDE = 0.12
+const FLOAT_HOVER = 0.25
+const FLOAT_SPEED = 1.4
+const FLOAT_RAMP = 0.8
+const SETTLE_SPEED = 0.6
+
 ## Peer id of the holder, or 0 when free. Replicated; only the authority writes it.
 ## The setter runs on every peer (including clients, when the synchronizer applies the
 ## replicated value), so a held ball stops colliding everywhere. Without this, a client
@@ -48,6 +55,11 @@ var _spawn_transform := Transform3D.IDENTITY
 # Local smoothed redness (0..1) driven from charge; visual only, not replicated.
 var _tint := 0.0
 
+# Server-only idle-hover state.
+var _floating := false
+var _float_time := 0.0
+var _float_base := Vector3.ZERO
+
 func _ready() -> void:
 	add_to_group("grabbable")
 	_spawn_transform = global_transform
@@ -68,8 +80,13 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if held_by == 0:
-		# Free ball: the server simulates it and checks whether it has struck a player.
-		_server_check_hit(delta)
+		# Free ball: the server simulates it, checks for hits, and hovers it once at rest.
+		if _floating:
+			_server_float(delta)
+		else:
+			_server_check_hit(delta)
+			if linear_velocity.length() < SETTLE_SPEED:
+				_begin_float()
 		return
 
 	# While held, snap to the holder's hand each frame; the synchronizer replicates the
@@ -87,6 +104,7 @@ func _physics_process(delta: float) -> void:
 func grab(peer_id: int) -> bool:
 	if held_by != 0:
 		return false  # already held; first grab wins
+	_floating = false
 	freeze = true
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
@@ -106,7 +124,22 @@ func throw(direction: Vector3, power: float = 1.0) -> void:
 func release() -> void:
 	held_by = 0  # setter re-enables collision on every peer
 	charge = 0.0  # stop reddening; observers fade their tint out
+	_floating = false
 	freeze = false
+
+func _begin_float() -> void:
+	_floating = true
+	_float_time = 0.0
+	_float_base = global_position
+	freeze = true
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+
+func _server_float(delta: float) -> void:
+	_float_time += delta
+	var ramp := minf(_float_time / FLOAT_RAMP, 1.0)
+	var offset := (FLOAT_HOVER + sin(_float_time * FLOAT_SPEED) * FLOAT_AMPLITUDE) * ramp
+	global_position = Vector3(_float_base.x, _float_base.y + offset, _float_base.z)
 
 func server_reset() -> void:
 	if not is_multiplayer_authority():
