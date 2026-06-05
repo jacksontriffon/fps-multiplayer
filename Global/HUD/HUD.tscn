@@ -35,6 +35,37 @@ theme_override_font_sizes/font_size = 22
 text = ""
 horizontal_alignment = 1
 
+[node name="Top" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchor_right = 1.0
+offset_top = 52.0
+offset_bottom = 160.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="RedDots" type="Label" parent="Root/Top"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.36, 0.36, 1)
+theme_override_font_sizes/font_size = 22
+text = ""
+horizontal_alignment = 1
+
+[node name="BlueDots" type="Label" parent="Root/Top"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.38, 0.62, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = ""
+horizontal_alignment = 1
+
+[node name="StartButton" type="Button" parent="Root/Top"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 22
+text = "Start Match"
+
 [node name="Banner" type="Label" parent="Root"]
 layout_mode = 1
 anchors_preset = 15

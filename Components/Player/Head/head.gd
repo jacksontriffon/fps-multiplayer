@@ -43,7 +43,7 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():
 		return
-	if event is InputEventMouseMotion:
+	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		var s := SENSITIVITY * Global.mouse_sensitivity
 		_apply_look(-event.relative.x * s, -event.relative.y * s)
 

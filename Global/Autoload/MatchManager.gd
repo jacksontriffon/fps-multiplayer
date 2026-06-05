@@ -8,6 +8,7 @@ enum State { WAITING, PLAYING, ROUND_OVER, MATCH_OVER }
 const STARTING_LIVES := 3
 const WIN_SCORE := 5
 const TEAM_COUNT := 2
+const MIN_PER_TEAM := 1
 const ROUND_RESET_DELAY := 3.0
 const MATCH_RESET_DELAY := 6.0
 const TEAM_NAMES := ["Red", "Blue"]
@@ -27,11 +28,23 @@ func server_player_ready(id: int, team: int) -> void:
 	_team_of[id] = team
 	if not lives.has(id):
 		lives[id] = 0
-	if state == State.WAITING:
-		_try_start_match()
-	else:
+	if state != State.WAITING:
 		_set_spectator(id, true)
-		_broadcast()
+	_broadcast()
+
+# Host-only: kick off a fresh match once both teams have enough players.
+func server_request_start() -> void:
+	if not multiplayer.is_server() or not can_start():
+		return
+	team_scores = [0, 0]
+	round_num = 0
+	_start_round()
+
+func can_start() -> bool:
+	return state == State.WAITING and _both_teams_present()
+
+func get_team_counts() -> Array:
+	return _team_player_counts()
 
 func server_player_left(id: int) -> void:
 	if not multiplayer.is_server():
@@ -55,16 +68,10 @@ func server_on_hit(victim_id: int, thrower_id: int) -> void:
 	_broadcast()
 	_check_round_end()
 
-func _try_start_match() -> void:
-	if _both_teams_present():
-		team_scores = [0, 0]
-		round_num = 0
-		_start_round()
-
 func _start_round() -> void:
 	if not _both_teams_present():
 		state = State.WAITING
-		status_text = "Waiting for players..."
+		status_text = ""
 		_broadcast()
 		return
 	round_num += 1
@@ -108,18 +115,19 @@ func _end_match(winner: int) -> void:
 	state = State.MATCH_OVER
 	status_text = "%s wins the match!" % TEAM_NAMES[winner]
 	_broadcast()
-	_schedule(_reset_match, MATCH_RESET_DELAY)
+	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
 
-func _reset_match() -> void:
+func _reset_to_waiting() -> void:
 	team_scores = [0, 0]
 	round_num = 0
 	state = State.WAITING
-	_start_round()
+	status_text = ""
+	_broadcast()
 
 func _both_teams_present() -> bool:
 	var counts := _team_player_counts()
 	for t in range(TEAM_COUNT):
-		if counts[t] == 0:
+		if counts[t] < MIN_PER_TEAM:
 			return false
 	return true
 
@@ -168,12 +176,13 @@ func _schedule(cb: Callable, delay: float) -> void:
 func _broadcast() -> void:
 	if not multiplayer.is_server():
 		return
-	_sync.rpc(state, team_scores, lives, round_num, status_text)
+	_sync.rpc(state, team_scores, lives, _team_of, round_num, status_text)
 
 @rpc("authority", "call_remote", "reliable")
-func _sync(s: int, scores: Array, lv: Dictionary, rnd: int, txt: String) -> void:
+func _sync(s: int, scores: Array, lv: Dictionary, teams: Dictionary, rnd: int, txt: String) -> void:
 	state = s
 	team_scores = scores
 	lives = lv
+	_team_of = teams
 	round_num = rnd
 	status_text = txt
