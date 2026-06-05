@@ -56,10 +56,13 @@ func _physics_process(delta: float) -> void:
 # Input.is_action_just_* edge-detects correctly for both buttons and axes.
 func _handle_interaction_input() -> void:
 	# Grab happens immediately on press, and only with empty hands.
+	var grabbed_this_frame := false
 	if Input.is_action_just_pressed("interaction") and not _held_ball_of(get_multiplayer_authority()):
 		_send_interact(0.0)
+		grabbed_this_frame = true
 	# Throw: hold to wind up power, release to let go — only while holding a ball.
-	if Input.is_action_just_pressed("throw") and _held_ball_of(get_multiplayer_authority()):
+	# Skip the press that just grabbed so a shared grab/throw key can't do both.
+	if not grabbed_this_frame and Input.is_action_just_pressed("throw") and _held_ball_of(get_multiplayer_authority()):
 		_charging = true
 		_charge = 0.0
 	elif Input.is_action_just_released("throw") and _charging:
