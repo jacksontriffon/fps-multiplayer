@@ -18,6 +18,11 @@ signal fade_in(time: float)
 var paused := true
 var paused_movement := false
 
+# Look sensitivity multipliers (1.0 = baseline feel). Applied by Head/head.gd to
+# both mouse and joypad look, and persisted via SaveSystem.
+var mouse_sensitivity := 1.0
+var joypad_sensitivity := 1.0
+
 # References
 
 
@@ -27,6 +32,9 @@ func _ready():
 	# Connect pause/play to TimeSystem
 	pause_game.connect(Callable(TimeSystem, "pause"))
 	play_game.connect(Callable(TimeSystem, "play"))
+
+	# Deferred so SaveSystem (a later autoload) has populated game_data first.
+	_load_settings.call_deferred()
 
 	# --- CONNECT TO SIGNALS ---
 
@@ -52,9 +60,25 @@ func restart_game() -> void:
 	restart.emit()
 
 
+# --- SETTINGS ---
+
+func _load_settings() -> void:
+	mouse_sensitivity = SaveSystem.game_data.get("mouse_sensitivity", 1.0)
+	joypad_sensitivity = SaveSystem.game_data.get("joypad_sensitivity", 1.0)
+
+# Persisted setter for a future options menu to call.
+func set_look_sensitivity(mouse: float, joypad: float) -> void:
+	mouse_sensitivity = maxf(mouse, 0.01)
+	joypad_sensitivity = maxf(joypad, 0.01)
+	SaveSystem.game_data["mouse_sensitivity"] = mouse_sensitivity
+	SaveSystem.game_data["joypad_sensitivity"] = joypad_sensitivity
+	SaveSystem.save_data()
+
+
 # --- HANDLE SIGNALS ---
 
 func _input(event):
-	# Handle Esc to close window
-	if event.is_action_pressed("ui_cancel"):
+	# Dedicated quit action (not ui_cancel) so menu-back / gameplay buttons that
+	# share ui_cancel don't close the whole game.
+	if event.is_action_pressed("quit_game"):
 		get_tree().quit()
