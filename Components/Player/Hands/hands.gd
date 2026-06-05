@@ -53,15 +53,14 @@ func _physics_process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():
 		return
-	if event.is_action_pressed("interaction"):
-		# Holding a ball => begin charging a throw; release decides the power.
-		# Otherwise it's a grab, which happens immediately on press.
-		if _held_ball_of(get_multiplayer_authority()):
-			_charging = true
-			_charge = 0.0
-		else:
-			_send_interact(0.0)
-	elif event.is_action_released("interaction") and _charging:
+	# Grab happens immediately on press, and only with empty hands.
+	if event.is_action_pressed("interaction") and not _held_ball_of(get_multiplayer_authority()):
+		_send_interact(0.0)
+	# Throw: hold to wind up power, release to let go — only while holding a ball.
+	elif event.is_action_pressed("throw") and _held_ball_of(get_multiplayer_authority()):
+		_charging = true
+		_charge = 0.0
+	elif event.is_action_released("throw") and _charging:
 		_charging = false
 		var aim := -camera.global_transform.basis.z
 		var power := _charge
