@@ -8,7 +8,6 @@ const BANNER_HOLD := 2.5
 @onready var lives_label: Label = $Root/Lives
 @onready var score_label: Label = $Root/Score
 @onready var banner_label: Label = $Root/Banner
-@onready var prompt_label: Label = $Root/Prompt
 
 var _last_banner_text := ""
 var _banner_age := 0.0
@@ -22,7 +21,6 @@ func _process(delta: float) -> void:
 	_update_lives(id)
 	_update_score()
 	_update_banner(delta)
-	_update_prompt()
 
 func _update_lives(id: int) -> void:
 	if MatchManager.state == MatchManager.State.WAITING or not MatchManager.lives.has(id):
@@ -60,7 +58,3 @@ func _update_banner(delta: float) -> void:
 		banner_label.text = ""
 	else:
 		banner_label.text = text
-
-func _update_prompt() -> void:
-	var pedestal := get_tree().get_first_node_in_group("pedestal")
-	prompt_label.text = pedestal.prompt_text() if pedestal else ""
