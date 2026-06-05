@@ -14,6 +14,7 @@ var peer: MultiplayerPeer
 var is_host: bool = false
 var is_joining: bool = false
 
+@onready var host_game_button: Button = $CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/HostGameButton
 @onready var join_game_button: Button = $CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/JoinGameButton
 @onready var line_edit: LineEdit = $CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/LineEdit
 @onready var spawn_points: SpawnPoints = $SpawnPoints
@@ -29,6 +30,9 @@ func _ready() -> void:
 		print("Network mode: LOCAL (ENet %s:%d)" % [local_address, local_port])
 		# No lobby id needed locally — join straight to loopback.
 		join_game_button.disabled = false
+
+	# Give the controller something to drive; menus auto-resolve focus neighbours.
+	host_game_button.grab_focus()
 
 
 # --- Hosting ---------------------------------------------------------------
@@ -135,3 +139,6 @@ func _on_join_game_button_pressed() -> void:
 		join_lobby(line_edit.text.to_int())
 	else:
 		_join_enet()
+
+func _on_quit_pressed() -> void:
+	get_tree().quit()
