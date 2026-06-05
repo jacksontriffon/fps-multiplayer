@@ -91,7 +91,9 @@ func _apply_team_color() -> void:
 	mat.albedo_color = TEAM_COLORS[team % TEAM_COLORS.size()]
 	mesh.material_override = mat
 
-@rpc("any_peer", "reliable")
+# call_local so the host's own rpc_id(1) runs on the server too — a self-RPC is
+# skipped without it, which would leave the host unregistered with MatchManager.
+@rpc("any_peer", "call_local", "reliable")
 func _request_spawn() -> void:
 	if not multiplayer.is_server():
 		return
