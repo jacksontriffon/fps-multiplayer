@@ -22,6 +22,9 @@ const RECOIL_RECOVER := 14.0
 const RECOIL_SHOVE := 1.1  # full-charge backward shove
 const RECOIL_MIN_SCALE := 0.3
 
+# Distance down the crosshair ray that throws converge on.
+const AIM_DISTANCE := 50.0
+
 var grabbable_objects: Array[Grabbable] = []
 var highlighted: Grabbable = null
 
@@ -70,7 +73,7 @@ func _handle_interaction_input() -> void:
 		_charge = 0.0
 	elif Input.is_action_just_released("throw") and _charging:
 		_charging = false
-		var aim := -camera.global_transform.basis.z
+		var aim := _aim_dir()
 		var power := _charge
 		_send_interact(power)
 		_apply_throw_recoil(aim, power)
@@ -79,11 +82,18 @@ func _handle_interaction_input() -> void:
 # ask it to. power is the 0..1 throw charge (ignored by the server for grabs).
 func _send_interact(power: float) -> void:
 	var target_path: NodePath = highlighted.get_path() if highlighted else NodePath()
-	var aim := -camera.global_transform.basis.z
+	var aim := _aim_dir()
 	if multiplayer.is_server():
 		_do_interact(get_multiplayer_authority(), target_path, aim, power)
 	else:
 		_request_interact.rpc_id(1, target_path, aim, power)
+
+# Throw direction: aim from the hand toward a far point on the crosshair ray, so the
+# throw converges on the crosshair instead of running parallel to it (the hand sits
+# ~0.5m right of the camera axis, which made throws veer right).
+func _aim_dir() -> Vector3:
+	var far_point := camera.global_position - camera.global_transform.basis.z * AIM_DISTANCE
+	return (far_point - right_hand_marker.global_position).normalized()
 
 # Local-only feedback for the throwing player (not replicated). Recoil scales with
 # the throw charge, with a floor so even a light throw kicks a little.
