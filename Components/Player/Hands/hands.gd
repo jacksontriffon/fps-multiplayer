@@ -42,6 +42,7 @@ func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 	update_highlight()
+	_handle_interaction_input()
 	# Wind up the throw while held, streaming charge to the ball so peers can redden it.
 	if _charging:
 		_charge = minf(_charge + delta / THROW_CHARGE_TIME, 1.0)
@@ -50,17 +51,18 @@ func _physics_process(delta: float) -> void:
 	_recoil_offset = _recoil_offset.lerp(Vector3.ZERO, delta * RECOIL_RECOVER)
 	camera.position = _cam_base_pos + _recoil_offset
 
-func _input(event: InputEvent) -> void:
-	if not is_multiplayer_authority():
-		return
+# Polled, not event-driven: an analog trigger (e.g. R2 on throw) streams motion
+# events that all read as "pressed", which would reset the charge every frame.
+# Input.is_action_just_* edge-detects correctly for both buttons and axes.
+func _handle_interaction_input() -> void:
 	# Grab happens immediately on press, and only with empty hands.
-	if event.is_action_pressed("interaction") and not _held_ball_of(get_multiplayer_authority()):
+	if Input.is_action_just_pressed("interaction") and not _held_ball_of(get_multiplayer_authority()):
 		_send_interact(0.0)
 	# Throw: hold to wind up power, release to let go — only while holding a ball.
-	elif event.is_action_pressed("throw") and _held_ball_of(get_multiplayer_authority()):
+	if Input.is_action_just_pressed("throw") and _held_ball_of(get_multiplayer_authority()):
 		_charging = true
 		_charge = 0.0
-	elif event.is_action_released("throw") and _charging:
+	elif Input.is_action_just_released("throw") and _charging:
 		_charging = false
 		var aim := -camera.global_transform.basis.z
 		var power := _charge
