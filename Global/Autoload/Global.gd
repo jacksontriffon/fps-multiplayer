@@ -78,6 +78,7 @@ func set_look_sensitivity(mouse: float, joypad: float) -> void:
 # --- HANDLE SIGNALS ---
 
 func _input(event):
-	# Handle Esc to close window
-	if event.is_action_pressed("ui_cancel"):
+	# Dedicated quit action (not ui_cancel) so menu-back / gameplay buttons that
+	# share ui_cancel don't close the whole game.
+	if event.is_action_pressed("quit_game"):
 		get_tree().quit()
