@@ -22,8 +22,10 @@ const RECOIL_RECOVER := 14.0
 const RECOIL_SHOVE := 1.1  # full-charge backward shove
 const RECOIL_MIN_SCALE := 0.3
 
-# Distance down the crosshair ray that throws converge on.
+# Crosshair aiming. The ray probes up to AIM_MAX_DISTANCE for a target; on a miss
+# (e.g. aiming at sky) the throw converges on a point AIM_DISTANCE down the sight line.
 const AIM_DISTANCE := 50.0
+const AIM_MAX_DISTANCE := 1000.0
 
 var grabbable_objects: Array[Grabbable] = []
 var highlighted: Grabbable = null
@@ -88,12 +90,23 @@ func _send_interact(power: float) -> void:
 	else:
 		_request_interact.rpc_id(1, target_path, aim, power)
 
-# Throw direction: aim from the hand toward a far point on the crosshair ray, so the
-# throw converges on the crosshair instead of running parallel to it (the hand sits
-# ~0.5m right of the camera axis, which made throws veer right).
+# Throw direction: raycast down the crosshair to find what it actually points at,
+# then aim the hand at that point. The hand sits ~0.5m right of the camera axis, so
+# aiming parallel to the sight line (or at a fixed far distance) leaves the throw
+# offset right at close range — converging on the real target point fixes it at any
+# distance. Falls back to a far point on the sight line when the ray hits nothing.
 func _aim_dir() -> Vector3:
-	var far_point := camera.global_position - camera.global_transform.basis.z * AIM_DISTANCE
-	return (far_point - right_hand_marker.global_position).normalized()
+	var origin := camera.global_position
+	var forward := -camera.global_transform.basis.z
+	var target := origin + forward * AIM_DISTANCE
+	var query := PhysicsRayQueryParameters3D.create(origin, origin + forward * AIM_MAX_DISTANCE)
+	var player := _get_player()
+	if player:
+		query.exclude = [player.get_rid()]  # don't aim at our own body
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit:
+		target = hit.position
+	return (target - right_hand_marker.global_position).normalized()
 
 # Local-only feedback for the throwing player (not replicated). Recoil scales with
 # the throw charge, with a floor so even a light throw kicks a little.
