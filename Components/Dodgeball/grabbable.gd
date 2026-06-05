@@ -31,8 +31,11 @@ const HIT_COOLDOWN = 0.3     # min seconds between hits from the same ball
 var thrower_id := 0
 var _hit_cooldown := 0.0
 
+var _spawn_transform := Transform3D.IDENTITY
+
 func _ready() -> void:
 	add_to_group("grabbable")
+	_spawn_transform = global_transform
 	_apply_held_collision()
 	# Needed for get_colliding_bodies() in the server's hit check.
 	contact_monitor = true
@@ -86,6 +89,16 @@ func release() -> void:
 	held_by = 0  # setter re-enables collision on every peer
 	freeze = false
 
+func server_reset() -> void:
+	if not is_multiplayer_authority():
+		return
+	release()
+	thrower_id = 0
+	_hit_cooldown = 0.0
+	global_transform = _spawn_transform
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+
 # --- Server-side hit detection ---------------------------------------------
 
 func _server_check_hit(delta: float) -> void:
@@ -111,6 +124,7 @@ func _server_check_hit(delta: float) -> void:
 			away = -linear_velocity  # degenerate fallback
 		var impulse := away.normalized() * HIT_KNOCKBACK
 		player.apply_knockback_remote.rpc_id(victim_id, impulse)
+		MatchManager.server_on_hit(victim_id, thrower_id)
 		_hit_cooldown = HIT_COOLDOWN
 		return
 

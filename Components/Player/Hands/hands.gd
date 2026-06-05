@@ -38,6 +38,9 @@ func _input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():
 		return
 	if event.is_action_pressed("interaction"):
+		var me := _get_player()
+		if me and not me.alive:
+			return
 		var target_path: NodePath = highlighted.get_path() if highlighted else NodePath()
 		var aim := -camera.global_transform.basis.z
 		# Holding a ball => this press is a throw; predict the recoil locally.
@@ -76,6 +79,9 @@ func _request_interact(target_path: NodePath, aim: Vector3) -> void:
 
 # Server only. Holding a ball => throw it; otherwise grab the requested target.
 func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3) -> void:
+	var actor := get_tree().current_scene.get_node_or_null(str(peer_id)) as Player
+	if actor and not actor.alive:
+		return
 	var held := _held_ball_of(peer_id)
 	if held:
 		held.throw(aim)

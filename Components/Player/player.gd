@@ -21,11 +21,14 @@ const FOV_CHANGE = 1.2
 # layered on top of the input-driven velocity, which would otherwise clobber it.
 const KNOCKBACK_DECAY = 8.0
 
+const FLY_SPEED = 10.0
+
 const TEAM_COLORS := [Color.RED, Color.BLUE]
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var mesh: MeshInstance3D = $MeshInstance3D
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 @export var team: int = 0:
 	set(value):
@@ -34,6 +37,8 @@ const TEAM_COLORS := [Color.RED, Color.BLUE]
 
 var speed = WALK_SPEED
 var knockback := Vector3.ZERO
+
+var alive := true
 
 # Push this body around. Movement is simulated on this player's own authority peer,
 # so knockback must be applied there: the local throw recoil calls this directly,
@@ -53,9 +58,31 @@ func _enter_tree() -> void:
 	set_multiplayer_authority(name.to_int())
 
 func _ready() -> void:
+	add_to_group("players")
 	_apply_team_color()
 	if is_multiplayer_authority():
 		_request_spawn.rpc_id(1)
+
+# Broadcast so the body stops colliding on every peer, including the server's copy.
+@rpc("any_peer", "call_local", "reliable")
+func set_alive_remote(value: bool) -> void:
+	if not (multiplayer.get_remote_sender_id() in [0, 1]):
+		return
+	alive = value
+	mesh.visible = value
+	collision_shape.disabled = not value
+	if not value:
+		velocity = Vector3.ZERO
+		knockback = Vector3.ZERO
+
+@rpc("any_peer", "reliable")
+func respawn_remote(pos: Vector3, yaw: float) -> void:
+	if not (multiplayer.get_remote_sender_id() in [0, 1]):
+		return
+	velocity = Vector3.ZERO
+	knockback = Vector3.ZERO
+	position = pos
+	head.rotation.y = yaw
 
 func _apply_team_color() -> void:
 	if not is_node_ready():
@@ -76,6 +103,7 @@ func _request_spawn() -> void:
 		return
 	var spawn: Dictionary = spawner.reserve(peer_id)
 	_apply_spawn.rpc_id(peer_id, spawn["position"], spawn["yaw"], spawn["team"])
+	MatchManager.server_player_ready(peer_id, spawn["team"])
 
 @rpc("any_peer", "reliable")
 func _apply_spawn(pos: Vector3, yaw: float, t: int) -> void:
@@ -88,6 +116,10 @@ func _apply_spawn(pos: Vector3, yaw: float, t: int) -> void:
 
 func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
+		return
+
+	if not alive:
+		_spectate()
 		return
 
 	# Add the gravity.
@@ -130,4 +162,14 @@ func _physics_process(delta: float) -> void:
 	var target_fov = BASE_FOV + FOV_CHANGE * velocity_clamped
 	camera.fov = lerp(camera.fov, target_fov, delta * 8.0)
 
+	move_and_slide()
+
+func _spectate() -> void:
+	var input_dir := Input.get_vector("left", "right", "up", "down")
+	var dir := camera.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)
+	if Input.is_action_pressed("jump"):
+		dir.y += 1.0
+	if Input.is_action_pressed("sprint"):
+		dir.y -= 1.0
+	velocity = dir.normalized() * FLY_SPEED if dir.length() > 0.01 else Vector3.ZERO
 	move_and_slide()

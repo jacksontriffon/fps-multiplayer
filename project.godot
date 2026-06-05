@@ -24,6 +24,8 @@ config/icon="res://icon.svg"
 Global="*uid://d4pybumfu3rq"
 SaveSystem="*uid://dn0omqbav807h"
 TimeSystem="*uid://cr2fe0ndrp7o2"
+MatchManager="*res://Global/Autoload/MatchManager.gd"
+HUD="*res://Global/HUD/HUD.tscn"
 
 [editor]
 
