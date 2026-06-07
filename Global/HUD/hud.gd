@@ -197,7 +197,7 @@ func _mount_preview(i: int, visual: Node3D) -> void:
 	visual.position = -bounds.get_center()
 	var radius: float = maxf(bounds.size.length() * 0.5, 0.1)
 	var cam := _preview_cams[i]
-	var dist: float = radius / sin(deg_to_rad(cam.fov * 0.5)) * 1.25
+	var dist: float = radius / sin(deg_to_rad(cam.fov * 0.5)) * 1.05
 	cam.position = Vector3(0, radius * 0.4, dist)
 	cam.look_at(Vector3.ZERO, Vector3.UP)
 
