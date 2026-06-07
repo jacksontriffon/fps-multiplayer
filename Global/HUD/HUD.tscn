@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://bpyg1482b2ose" path="res://Global/HUD/damage_indicator.gd" id="2_dmg"]
 
 [sub_resource type="StyleBoxFlat" id="slot_empty"]
-bg_color = Color(1, 1, 1, 0.05)
+bg_color = Color(0, 0, 0, 0.5)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
