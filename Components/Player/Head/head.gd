@@ -66,6 +66,9 @@ func _update_shake(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():
 		return
+	# Ignore mouse look while the cursor is free (e.g. the pause overlay is open).
+	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+		return
 	if event is InputEventMouseMotion:
 		var s := SENSITIVITY * Global.mouse_sensitivity
 		_apply_look(-event.relative.x * s, -event.relative.y * s)
