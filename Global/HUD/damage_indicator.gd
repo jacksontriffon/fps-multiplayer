@@ -11,10 +11,9 @@ const THICKNESS := 6.0
 const SPAN := deg_to_rad(55.0)
 const SEGMENTS := 14
 const COLOR := Color(1.0, 0.15, 0.15)
-# Small triangle inside the arc's midpoint, pointing toward screen center.
+# Small triangle on the arc's midpoint, pointing outward away from screen center.
 const TRI_HEIGHT := 12.0
 const TRI_HALF_WIDTH := 7.0
-const TRI_GAP := 5.0
 
 # Each hit: { dir: Vector3 (horizontal, normalized), age: float, angle: float }.
 var _hits: Array = []
@@ -60,12 +59,12 @@ func _draw() -> void:
 			var a: float = lerpf(a1, a0, float(i) / SEGMENTS)
 			pts.append(center + Vector2(sin(a), -cos(a)) * RADIUS)
 		draw_colored_polygon(pts, col)
-		# Triangle at the arc midpoint, tip aimed inward at the screen center.
+		# Triangle on the arc midpoint, tip aimed outward away from the screen center.
 		var out := Vector2(sin(hit.angle), -cos(hit.angle))
 		var tan := Vector2(cos(hit.angle), sin(hit.angle))
-		var base := RADIUS - TRI_GAP
+		var base := RADIUS + THICKNESS
 		var tri := PackedVector2Array([
-			center + out * (base - TRI_HEIGHT),
+			center + out * (base + TRI_HEIGHT),
 			center + out * base + tan * TRI_HALF_WIDTH,
 			center + out * base - tan * TRI_HALF_WIDTH,
 		])
