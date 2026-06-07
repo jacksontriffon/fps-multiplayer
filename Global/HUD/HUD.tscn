@@ -1,6 +1,30 @@
-[gd_scene load_steps=2 format=3 uid="uid://b3hudmatch01a"]
+[gd_scene load_steps=5 format=3 uid="uid://b3hudmatch01a"]
 
 [ext_resource type="Script" path="res://Global/HUD/hud.gd" id="1_hud"]
+[ext_resource type="Texture2D" uid="uid://8vq01vqjkr08" path="res://Assets/Textures/UI/ball.svg" id="2_ball"]
+
+[sub_resource type="StyleBoxFlat" id="bar_bg"]
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+bg_color = Color(0, 0, 0, 0.45)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="slot_empty"]
+bg_color = Color(1, 1, 1, 0.05)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.18)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -13,25 +37,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-
-[node name="Lives" type="HBoxContainer" parent="Root"]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 12.0
-offset_right = 360.0
-offset_bottom = 44.0
-mouse_filter = 2
-theme_override_constants/separation = 4
-
-[node name="LivesText" type="Label" parent="Root"]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 12.0
-offset_right = 360.0
-offset_bottom = 40.0
-mouse_filter = 2
-theme_override_font_sizes/font_size = 20
-text = ""
 
 [node name="Score" type="Label" parent="Root"]
 layout_mode = 1
@@ -55,4 +60,245 @@ mouse_filter = 2
 theme_override_font_sizes/font_size = 40
 text = ""
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomBar" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -340.0
+offset_top = -98.0
+offset_right = 340.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("bar_bg")
+
+[node name="Row" type="HBoxContainer" parent="Root/BottomBar"]
+custom_minimum_size = Vector2(644, 56)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="LivesSection" type="HBoxContainer" parent="Root/BottomBar/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
+mouse_filter = 2
+
+[node name="Lives" type="HBoxContainer" parent="Root/BottomBar/Row/LivesSection"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="LivesText" type="Label" parent="Root/BottomBar/Row/LivesSection"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+text = ""
+
+[node name="Slots" type="HBoxContainer" parent="Root/BottomBar/Row"]
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Slot0" type="Panel" parent="Root/BottomBar/Row/Slots"]
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("slot_empty")
+
+[node name="Icon" type="TextureRect" parent="Root/BottomBar/Row/Slots/Slot0"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Key" type="Label" parent="Root/BottomBar/Row/Slots/Slot0"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -16.0
+offset_top = -20.0
+offset_right = -4.0
+offset_bottom = -2.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 13
+text = "1"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="Slot1" type="Panel" parent="Root/BottomBar/Row/Slots"]
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("slot_empty")
+
+[node name="Icon" type="TextureRect" parent="Root/BottomBar/Row/Slots/Slot1"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Key" type="Label" parent="Root/BottomBar/Row/Slots/Slot1"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -16.0
+offset_top = -20.0
+offset_right = -4.0
+offset_bottom = -2.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 13
+text = "2"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="Slot2" type="Panel" parent="Root/BottomBar/Row/Slots"]
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("slot_empty")
+
+[node name="Icon" type="TextureRect" parent="Root/BottomBar/Row/Slots/Slot2"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Key" type="Label" parent="Root/BottomBar/Row/Slots/Slot2"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -16.0
+offset_top = -20.0
+offset_right = -4.0
+offset_bottom = -2.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 13
+text = "3"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="Slot3" type="Panel" parent="Root/BottomBar/Row/Slots"]
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("slot_empty")
+
+[node name="Icon" type="TextureRect" parent="Root/BottomBar/Row/Slots/Slot3"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Key" type="Label" parent="Root/BottomBar/Row/Slots/Slot3"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -16.0
+offset_top = -20.0
+offset_right = -4.0
+offset_bottom = -2.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 13
+text = "4"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="AmmoSection" type="HBoxContainer" parent="Root/BottomBar/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
+alignment = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="BallIcon" type="TextureRect" parent="Root/BottomBar/Row/AmmoSection"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("2_ball")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AmmoCount" type="Label" parent="Root/BottomBar/Row/AmmoSection"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_font_sizes/font_size = 22
+text = "×0"
 vertical_alignment = 1
