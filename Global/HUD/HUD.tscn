@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://b3hudmatch01a"]
+[gd_scene load_steps=8 format=3 uid="uid://b3hudmatch01a"]
 
 [ext_resource type="Script" uid="uid://c1oblsv1fyfqg" path="res://Global/HUD/hud.gd" id="1_hud"]
+[ext_resource type="Shader" path="res://Global/HUD/hurt.gdshader" id="2_hurt"]
 [ext_resource type="Script" uid="uid://bpyg1482b2ose" path="res://Global/HUD/damage_indicator.gd" id="2_dmg"]
 [ext_resource type="Texture2D" uid="uid://8vq01vqjkr08" path="res://Assets/Textures/UI/ball.svg" id="3_ball"]
 
@@ -27,11 +28,27 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hurt"]
+shader = ExtResource("2_hurt")
+shader_parameter/intensity = 0.0
+shader_parameter/pulse = 0.0
+shader_parameter/hurt_color = Color(0.55, 0, 0, 1)
+
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
 [node name="Root" type="Control" parent="."]
 layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HurtOverlay" type="ColorRect" parent="Root"]
+material = SubResource("ShaderMaterial_hurt")
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
