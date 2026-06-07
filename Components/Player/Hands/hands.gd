@@ -55,12 +55,18 @@ func _physics_process(delta: float) -> void:
 	# Charging burns stamina; once it's empty the wind-up bleeds back down to zero.
 	if _charging:
 		var player := _get_player()
-		if player and player.has_stamina():
-			_charge = minf(_charge + delta / THROW_CHARGE_TIME, 1.0)
-			player.drain_stamina(Player.CHARGE_DRAIN * delta)
+		# Drop the wind-up if we died or lost the ball (e.g. a round reset), so it
+		# stops draining stamina with nothing in hand.
+		if player == null or not player.alive or _equipped_ball_of(player) == null:
+			_charging = false
+			_charge = 0.0
 		else:
-			_charge = maxf(_charge - delta / THROW_DISCHARGE_TIME, 0.0)
-		_push_charge(_charge)
+			if player.has_stamina():
+				_charge = minf(_charge + delta / THROW_CHARGE_TIME, 1.0)
+				player.drain_stamina(Player.CHARGE_DRAIN * delta)
+			else:
+				_charge = maxf(_charge - delta / THROW_DISCHARGE_TIME, 0.0)
+			_push_charge(_charge)
 	# Spring the camera back toward its resting position.
 	_recoil_offset = _recoil_offset.lerp(Vector3.ZERO, delta * RECOIL_RECOVER)
 	camera.position = _cam_base_pos + _recoil_offset
