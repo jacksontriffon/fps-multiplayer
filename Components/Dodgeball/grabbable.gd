@@ -47,8 +47,9 @@ const TINT_FALL = 7.0
 @export var item_ui: Texture2D
 
 # Server-only hit bookkeeping (the server is the only peer that detects hits).
-# thrower_id stays set until someone else throws the ball, so a ball can never
-# hit whoever last threw it — only opponents' balls get you out.
+# thrower_id is 0 for a free ball that's never been thrown (those can't hurt
+# anyone) and stays set to the last thrower otherwise; MatchManager.can_hit
+# turns it into the actual hit ruling.
 var thrower_id := 0
 var _hit_cooldown := 0.0
 
@@ -160,8 +161,9 @@ func _server_check_hit(delta: float) -> void:
 		if player == null:
 			continue
 		var victim_id := player.name.to_int()
-		# Only opponents' balls hit you — never the one you last threw.
-		if victim_id == thrower_id:
+		# Match rules decide eligibility: the ball must have been thrown, and the
+		# friendly-fire / self-hit toggles govern teammates and the thrower.
+		if not MatchManager.can_hit(victim_id, thrower_id):
 			continue
 		# Shove the player away from the ball. We can't use the ball's velocity:
 		# get_colliding_bodies() reports the contact a frame late, by which point
