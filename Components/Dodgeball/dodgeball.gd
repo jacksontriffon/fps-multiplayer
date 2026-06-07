@@ -23,3 +23,12 @@ func toggle_highlight(is_highlighted: bool) -> void:
 func set_charge_visual(tint_amount: float) -> void:
 	if _ball_material:
 		_ball_material.albedo_color = _base_color.lerp(CHARGE_COLOR, tint_amount)
+
+# Visual-only sphere (its own material, no outline/physics) for the inventory preview.
+func get_preview_visual() -> Node3D:
+	var preview := MeshInstance3D.new()
+	preview.mesh = ball_mesh.mesh
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = _base_color
+	preview.material_override = mat
+	return preview
