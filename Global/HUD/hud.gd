@@ -1,8 +1,9 @@
 extends CanvasLayer
 
 # Reads mirrored MatchManager state plus the lobby podium each frame; never writes.
-# The bottom bar holds lives (left) and ability/item slots (right). Slots are empty
-# placeholders for now; fill them via set_slot().
+# The bottom bar holds lives (left) and the 3 inventory slots (right). Each slot
+# mirrors the local player's held ball for that slot, and the active slot (picked
+# with the 1/2/3 keys) is highlighted.
 
 const TEAM_NAMES := ["Red", "Blue"]
 const BANNER_HOLD := 2.5
@@ -11,6 +12,7 @@ const RAMP_MAX := 0.25
 const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 const HEART_EMPTY := preload("res://Assets/Textures/UI/heart_empty.svg")
 const HEART_SIZE := Vector2(28, 28)
+const BALL_ICON := preload("res://Assets/Textures/UI/dodgeball.svg")
 
 @onready var bottom_bar: HBoxContainer = %BottomBar
 @onready var lives_box: HBoxContainer = %Lives
@@ -30,6 +32,16 @@ var _banner_age := 0.0
 var _last_lives := -1
 var _pulse := 0.0
 
+# Slot panel styles: the active slot gets a brighter border so it reads as selected.
+var _slot_normal: StyleBoxFlat
+var _slot_active: StyleBoxFlat
+
+func _ready() -> void:
+	_slot_normal = slots_box.get_child(0).get_theme_stylebox("panel")
+	_slot_active = _slot_normal.duplicate()
+	_slot_active.border_color = Color(1, 1, 1, 0.9)
+	_slot_active.bg_color = Color(0, 0, 0, 0.65)
+
 func _process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer():
 		visible = false
@@ -47,6 +59,7 @@ func _update_bar(id: int) -> void:
 	if not playing:
 		return
 	_update_lives(MatchManager.lives[id])
+	_update_slots(id)
 
 func _update_lives(n: int) -> void:
 	if n <= 0:
@@ -73,13 +86,24 @@ func _ensure_hearts(count: int) -> void:
 	while lives_box.get_child_count() > count:
 		lives_box.get_child(lives_box.get_child_count() - 1).free()
 
-# Fill or clear a slot for a future item/ability. Pass null to empty it.
-func set_slot(index: int, texture: Texture2D) -> void:
-	if index < 0 or index >= slots_box.get_child_count():
-		return
-	var icon := slots_box.get_child(index).get_node("Icon") as TextureRect
-	icon.texture = texture
-	icon.visible = texture != null
+# Mirror the local player's inventory: show a ball icon in each occupied slot and
+# highlight the active one. Held balls carry the holder's peer id and slot index.
+func _update_slots(id: int) -> void:
+	var player := get_tree().current_scene.get_node_or_null(str(id)) as Player
+	var active: int = player.active_slot if player else 0
+	for i in slots_box.get_child_count():
+		var slot := slots_box.get_child(i) as Panel
+		var icon := slot.get_node("Icon") as TextureRect
+		var filled := _ball_in_slot(id, i)
+		icon.texture = BALL_ICON if filled else null
+		icon.visible = filled
+		slot.add_theme_stylebox_override("panel", _slot_active if i == active else _slot_normal)
+
+func _ball_in_slot(peer_id: int, slot: int) -> bool:
+	for b in get_tree().get_nodes_in_group("grabbable"):
+		if b.held_by == peer_id and b.held_slot == slot:
+			return true
+	return false
 
 func _update_hurt(delta: float, id: int) -> void:
 	var n: int = MatchManager.lives.get(id, -1)
