@@ -30,6 +30,9 @@ func _physics_process(_delta: float) -> void:
 	# play reports is_server() == true, so this runs there too.)
 	if not multiplayer.is_server() or _locked:
 		return
+	# Captures only count in Capture the Flag; in other modes the flag is just a prop.
+	if MatchManager.game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG:
+		return
 	if flag == null or flag.held_by == 0:
 		return
 	var holder := get_tree().current_scene.get_node_or_null(str(flag.held_by)) as Player

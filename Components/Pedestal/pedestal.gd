@@ -1,9 +1,21 @@
+@tool
 extends Node3D
 class_name Pedestal
 
 # Lobby start pedestal: step into range and interact to start the match. Like a
 # grabbable, the orb highlights and a 3D prompt fades in while you're near; the
 # prompt text says whether a match can start yet.
+#
+# Each pedestal starts a specific game mode (set game_mode in the inspector). The orb
+# shape signals the mode: a sphere for Team, a cube for Capture the Flag. @tool so the
+# orb swaps in the editor the moment you change the mode.
+
+enum GameMode { TEAM, CAPTURE_THE_FLAG }
+
+const MODE_NAMES := {
+	GameMode.TEAM: "Team Battle",
+	GameMode.CAPTURE_THE_FLAG: "Capture the Flag",
+}
 
 # Orb highlight: faint when idle, solid when the local player is in range.
 const IDLE_ALPHA := 0.15
@@ -17,15 +29,26 @@ const PROMPT_LERP := 16.0
 const BOB_AMPLITUDE := 0.09
 const BOB_SPEED := 1.6
 
-@onready var orb: CSGSphere3D = $CSGCylinder3D/CSGSphere3D
+@export var game_mode: GameMode = GameMode.TEAM:
+	set(value):
+		game_mode = value
+		_apply_mode_visuals()
+
+@onready var sphere_orb: CSGSphere3D = $CSGCylinder3D/SphereOrb
+@onready var cube_orb: CSGBox3D = $CSGCylinder3D/CubeOrb
 @onready var prompt: Label3D = $Prompt
 @onready var area: Area3D = $Area3D
 
+# The orb for the active mode; the other is hidden.
+var orb: CSGPrimitive3D
 var _mat: StandardMaterial3D
 var _orb_base_y := 0.0
 var _bob_time := 0.0
 
 func _ready() -> void:
+	_apply_mode_visuals()
+	if Engine.is_editor_hint():
+		return
 	add_to_group("pedestal")
 	_orb_base_y = orb.position.y
 	_mat = StandardMaterial3D.new()
@@ -35,7 +58,17 @@ func _ready() -> void:
 	prompt.modulate.a = 0.0
 	prompt.outline_modulate.a = 0.0
 
+# Show the orb that matches the mode and hide the other. Editor-safe.
+func _apply_mode_visuals() -> void:
+	if not is_node_ready():
+		return
+	orb = cube_orb if game_mode == GameMode.CAPTURE_THE_FLAG else sphere_orb
+	sphere_orb.visible = orb == sphere_orb
+	cube_orb.visible = orb == cube_orb
+
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	_bob_time += delta
 	orb.position.y = _orb_base_y + sin(_bob_time * BOB_SPEED) * BOB_AMPLITUDE
 
@@ -61,7 +94,7 @@ func prompt_text() -> String:
 	if MatchManager.state != MatchManager.State.WAITING or not _local_near():
 		return ""
 	if MatchManager.can_start():
-		return "Interact to Start the Game"
+		return "Interact to Start %s" % MODE_NAMES[game_mode]
 	return "Add more players to start the game"
 
 func _local_near() -> bool:
@@ -75,6 +108,6 @@ func _local_player() -> Node3D:
 
 func _start() -> void:
 	if multiplayer.is_server():
-		MatchManager.server_request_start()
+		MatchManager.server_request_start(game_mode)
 	else:
-		MatchManager.request_start.rpc_id(1)
+		MatchManager.request_start.rpc_id(1, game_mode)

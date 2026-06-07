@@ -5,9 +5,9 @@
 [ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="3_t6eea"]
 [ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="4_sxmp2"]
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="5_t6eea"]
-[ext_resource type="PackedScene" uid="uid://b8sp4wnp0ints1" path="res://Components/SpawnPoints/spawn_points.tscn" id="6_spawn"]
+[ext_resource type="PackedScene" uid="uid://b3scvo3pv7xw1" path="res://Components/SpawnPoints/spawn_points.tscn" id="6_spawn"]
 [ext_resource type="PackedScene" uid="uid://c60hxnsma28oh" path="res://Components/Pedestal/pedestal.tscn" id="7_albdk"]
-[ext_resource type="PackedScene" uid="uid://bctfscene00123a" path="res://Components/CaptureTheFlag/ctf_arena.tscn" id="8_ctf"]
+[ext_resource type="PackedScene" uid="uid://crtx1jc5p44ts" path="res://Components/CaptureTheFlag/ctf_arena.tscn" id="8_ctf"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1eq5a"]
 
@@ -24,6 +24,7 @@ glow_enabled = true
 
 [node name="Lobby" type="Node3D"]
 script = ExtResource("1_hp6t6")
+net_mode = 1
 player_scene = ExtResource("2_1eq5a")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -137,7 +138,12 @@ shadow_enabled = true
 transform = Transform3D(1, 0, 0, 0, 0.99097383, 0.13405538, 0, -0.13405538, 0.99097383, 0, 1.5856624, 0)
 
 [node name="Pedestal" parent="." instance=ExtResource("7_albdk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -11)
+game_mode = 0
+
+[node name="PedestalCTF" parent="." instance=ExtResource("7_albdk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, -11)
+game_mode = 1
 
 [node name="CaptureTheFlag" parent="." instance=ExtResource("8_ctf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7)

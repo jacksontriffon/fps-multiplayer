@@ -18,6 +18,9 @@ var team_scores := [0, 0]
 var lives := {}
 var round_num := 0
 var status_text := ""
+# Which mode the active match is running. Values are Pedestal.GameMode; the starting
+# pedestal picks it. Replicated so every peer (and the CTF arena) knows the mode.
+var game_mode: int = Pedestal.GameMode.TEAM
 
 # Server-authoritative match rules. Only the host reads these (it owns hit
 # detection and scoring), so they don't need replicating. Defaults mirror
@@ -39,13 +42,15 @@ func server_player_ready(id: int, team: int) -> void:
 	_broadcast()
 
 # Any player at the podium can ask the server to start; it validates and begins.
+# mode is a Pedestal.GameMode, chosen by the pedestal that was used.
 @rpc("any_peer", "reliable")
-func request_start() -> void:
-	server_request_start()
+func request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
+	server_request_start(mode)
 
-func server_request_start() -> void:
+func server_request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
 	if not multiplayer.is_server() or not can_start():
 		return
+	game_mode = mode
 	team_scores = [0, 0]
 	round_num = 0
 	_start_round()
@@ -199,13 +204,14 @@ func _schedule(cb: Callable, delay: float) -> void:
 func _broadcast() -> void:
 	if not multiplayer.is_server():
 		return
-	_sync.rpc(state, team_scores, lives, _team_of, round_num, status_text)
+	_sync.rpc(state, team_scores, lives, _team_of, round_num, status_text, game_mode)
 
 @rpc("authority", "call_remote", "reliable")
-func _sync(s: int, scores: Array, lv: Dictionary, teams: Dictionary, rnd: int, txt: String) -> void:
+func _sync(s: int, scores: Array, lv: Dictionary, teams: Dictionary, rnd: int, txt: String, mode: int) -> void:
 	state = s
 	team_scores = scores
 	lives = lv
 	_team_of = teams
 	round_num = rnd
 	status_text = txt
+	game_mode = mode
