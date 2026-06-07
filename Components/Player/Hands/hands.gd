@@ -13,7 +13,7 @@ class_name Hands
 const THROW_CHARGE_TIME := 0.9
 
 # When stamina runs out mid-wind-up the charge bleeds back down over this time.
-const THROW_DISCHARGE_TIME := 2.2
+const THROW_DISCHARGE_TIME := 4.0
 
 # Throw recoil, scaled by charge. The values below are the full-charge maximum;
 # RECOIL_MIN_SCALE keeps a light throw from being completely kickless. The camera
