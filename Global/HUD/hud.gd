@@ -1,8 +1,8 @@
 extends CanvasLayer
 
 # Reads mirrored MatchManager state plus the lobby podium each frame; never writes.
-# The bottom bar holds lives (left), ability/item slots (centre) and the carried-ball
-# count (right). Slots are empty placeholders for now; fill them via set_slot().
+# The bottom bar holds lives (left) and ability/item slots (right). Slots are empty
+# placeholders for now; fill them via set_slot().
 
 const TEAM_NAMES := ["Red", "Blue"]
 const BANNER_HOLD := 2.5
@@ -11,12 +11,10 @@ const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 const HEART_EMPTY := preload("res://Assets/Textures/UI/heart_empty.svg")
 const HEART_SIZE := Vector2(28, 28)
 
-@onready var bottom_bar: PanelContainer = $Root/BottomBar
-@onready var lives_box: HBoxContainer = $Root/BottomBar/Row/LivesSection/Lives
-@onready var lives_text: Label = $Root/BottomBar/Row/LivesSection/LivesText
-@onready var slots_box: HBoxContainer = $Root/BottomBar/Row/Slots
-@onready var ball_icon: TextureRect = $Root/BottomBar/Row/AmmoSection/BallIcon
-@onready var ammo_count: Label = $Root/BottomBar/Row/AmmoSection/AmmoCount
+@onready var bottom_bar: Control = $Root/BottomBar
+@onready var lives_box: HBoxContainer = $Root/BottomBar/LivesSection/Lives
+@onready var lives_text: Label = $Root/BottomBar/LivesSection/LivesText
+@onready var slots_box: HBoxContainer = $Root/BottomBar/Slots
 @onready var score_label: Label = $Root/Score
 @onready var banner_label: Label = $Root/Banner
 @onready var hurt_overlay: ColorRect = $Root/HurtOverlay
@@ -47,9 +45,7 @@ func _update_bar(id: int) -> void:
 	bottom_bar.visible = playing
 	if not playing:
 		return
-	var n: int = MatchManager.lives[id]
-	_update_lives(n)
-	_update_ammo(id, n > 0)
+	_update_lives(MatchManager.lives[id])
 
 func _update_lives(n: int) -> void:
 	if n <= 0:
@@ -76,17 +72,7 @@ func _ensure_hearts(count: int) -> void:
 	while lives_box.get_child_count() > count:
 		lives_box.get_child(lives_box.get_child_count() - 1).free()
 
-func _update_ammo(id: int, alive: bool) -> void:
-	var carried := 0
-	for b in get_tree().get_nodes_in_group("grabbable"):
-		if b is Grabbable and b.held_by == id:
-			carried += 1
-	ammo_count.text = "×%d" % carried
-	var dim := 0.4 if (carried == 0 or not alive) else 1.0
-	ball_icon.modulate = Color(1, 1, 1, dim)
-	ammo_count.modulate = Color(1, 1, 1, dim)
-
-# Fill or clear a centre slot for a future item/ability. Pass null to empty it.
+# Fill or clear a slot for a future item/ability. Pass null to empty it.
 func set_slot(index: int, texture: Texture2D) -> void:
 	if index < 0 or index >= slots_box.get_child_count():
 		return
