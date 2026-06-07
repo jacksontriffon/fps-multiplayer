@@ -22,7 +22,13 @@ var is_joining: bool = false
 
 func _ready() -> void:
 	if net_mode == NetMode.STEAM:
-		print("Steam initialised: ", Steam.steamInit(480, true))
+		var init := Steam.steamInitEx(480, true)
+		print("Steam init: ", init)
+		if init["status"] != Steam.STEAM_API_INIT_RESULT_OK:
+			push_error("Steam init failed (%d): %s" % [init["status"], init["verbal"]])
+			host_game_button.disabled = true
+			join_game_button.disabled = true
+			return
 		Steam.initRelayNetworkAccess()
 		Steam.lobby_created.connect(_on_lobby_created)
 		Steam.lobby_joined.connect(_on_lobby_joined)
