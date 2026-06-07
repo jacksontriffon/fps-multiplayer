@@ -19,6 +19,12 @@ var lives := {}
 var round_num := 0
 var status_text := ""
 
+# Server-authoritative match rules. Only the host reads these (it owns hit
+# detection and scoring), so they don't need replicating. Defaults mirror
+# real dodgeball: opponents' throws only.
+var friendly_fire := false  # when true, a teammate's throw can get you out
+var self_hit := false       # when true, your own thrown ball can get you out
+
 var _team_of := {}
 var _reset_token := 0
 
@@ -61,13 +67,25 @@ func server_on_hit(victim_id: int, thrower_id: int) -> void:
 		return
 	if not lives.has(victim_id) or lives[victim_id] <= 0:
 		return
-	if _team_of.get(victim_id, -1) == _team_of.get(thrower_id, -2):
+	if not can_hit(victim_id, thrower_id):
 		return
 	lives[victim_id] -= 1
 	if lives[victim_id] <= 0:
 		_set_spectator(victim_id, true)
 	_broadcast()
 	_check_round_end()
+
+# Whether thrower_id's ball is allowed to get victim_id out. Central source of
+# truth for the hit rules; the ball's detection and this scoring path both use it.
+func can_hit(victim_id: int, thrower_id: int) -> bool:
+	# Only a thrown ball is dangerous — bumping or jumping on a free ball is safe.
+	if thrower_id == 0:
+		return false
+	if victim_id == thrower_id:
+		return self_hit
+	if not friendly_fire and _team_of.get(victim_id, -1) == _team_of.get(thrower_id, -2):
+		return false
+	return true
 
 func _start_round() -> void:
 	if not _both_teams_present():
