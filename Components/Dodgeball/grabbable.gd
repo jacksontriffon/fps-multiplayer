@@ -42,6 +42,10 @@ const TINT_FALL = 7.0
 ## Replicated so every peer can tell which held ball is the holder's equipped one.
 @export var held_slot: int = -1
 
+## Optional flat icon for the inventory slot. When set, the slot shows this texture
+## instead of the default live 3D preview. Authored per item; left null until art exists.
+@export var item_ui: Texture2D
+
 # Server-only hit bookkeeping (the server is the only peer that detects hits).
 # thrower_id stays set until someone else throws the ball, so a ball can never
 # hit whoever last threw it — only opponents' balls get you out.
@@ -213,3 +217,8 @@ func toggle_highlight(_is_highlighted: bool) -> void:
 # Overridden by subclasses to tint the ball by charge (0..1).
 func set_charge_visual(_tint_amount: float) -> void:
 	pass
+
+# Returns a fresh, visual-only Node3D for the inventory's small 3D preview, or null
+# if the item has no previewable model. Subclasses override to supply their mesh.
+func get_preview_visual() -> Node3D:
+	return null
