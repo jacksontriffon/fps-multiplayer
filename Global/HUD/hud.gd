@@ -31,8 +31,8 @@ func _update_lives(id: int) -> void:
 		lives_label.text = "ELIMINATED — spectating"
 		lives_label.modulate = Color(1, 1, 1, 0.7)
 	else:
-		lives_label.text = "Lives  " + "● ".repeat(n).strip_edges()
-		lives_label.modulate = Color.WHITE
+		lives_label.text = "♥ ".repeat(n).strip_edges()
+		lives_label.modulate = Color(0.9, 0.2, 0.2)
 
 func _update_score() -> void:
 	if MatchManager.state == MatchManager.State.WAITING:
