@@ -11,14 +11,14 @@ const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 const HEART_EMPTY := preload("res://Assets/Textures/UI/heart_empty.svg")
 const HEART_SIZE := Vector2(28, 28)
 
-@onready var bottom_bar: Control = $Root/BottomBar
-@onready var lives_box: HBoxContainer = $Root/BottomBar/LivesSection/Lives
-@onready var lives_text: Label = $Root/BottomBar/LivesSection/LivesText
-@onready var slots_box: HBoxContainer = $Root/BottomBar/Slots
-@onready var score_label: Label = $Root/Score
-@onready var banner_label: Label = $Root/Banner
-@onready var hurt_overlay: ColorRect = $Root/HurtOverlay
-@onready var damage_indicator = $Root/DamageIndicator
+@onready var bottom_bar: HBoxContainer = %BottomBar
+@onready var lives_box: HBoxContainer = %Lives
+@onready var lives_text: Label = %LivesText
+@onready var slots_box: HBoxContainer = %Slots
+@onready var score_label: Label = %Score
+@onready var banner_label: Label = %Banner
+@onready var hurt_overlay: ColorRect = %HurtOverlay
+@onready var damage_indicator: Control = %DamageIndicator
 
 # world_dir points from the player toward where the hit came from.
 func hit_from(world_dir: Vector3) -> void:
