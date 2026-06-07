@@ -4,13 +4,17 @@ extends CanvasLayer
 
 const TEAM_NAMES := ["Red", "Blue"]
 const BANNER_HOLD := 2.5
+const PULSE_DECAY := 0.6
 
 @onready var lives_label: Label = $Root/Lives
 @onready var score_label: Label = $Root/Score
 @onready var banner_label: Label = $Root/Banner
+@onready var hurt_overlay: ColorRect = $Root/HurtOverlay
 
 var _last_banner_text := ""
 var _banner_age := 0.0
+var _last_lives := -1
+var _pulse := 0.0
 
 func _process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer():
@@ -19,6 +23,7 @@ func _process(delta: float) -> void:
 	visible = true
 	var id := multiplayer.get_unique_id()
 	_update_lives(id)
+	_update_hurt(delta, id)
 	_update_score()
 	_update_banner(delta)
 
@@ -33,6 +38,19 @@ func _update_lives(id: int) -> void:
 	else:
 		lives_label.text = "Lives  " + "● ".repeat(n).strip_edges()
 		lives_label.modulate = Color.WHITE
+
+func _update_hurt(delta: float, id: int) -> void:
+	var n: int = MatchManager.lives.get(id, -1)
+	if _last_lives >= 0 and n >= 0 and n < _last_lives:
+		_pulse = 1.0
+	_last_lives = n
+	_pulse = max(0.0, _pulse - delta / PULSE_DECAY)
+	var intensity := 0.0
+	if MatchManager.state != MatchManager.State.WAITING and n > 0:
+		var denom: int = max(1, MatchManager.STARTING_LIVES - 1)
+		intensity = clamp(float(MatchManager.STARTING_LIVES - n) / float(denom), 0.0, 1.0)
+	hurt_overlay.material.set_shader_parameter("intensity", intensity)
+	hurt_overlay.material.set_shader_parameter("pulse", _pulse)
 
 func _update_score() -> void:
 	if MatchManager.state == MatchManager.State.WAITING:
