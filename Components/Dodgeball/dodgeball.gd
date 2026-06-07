@@ -3,11 +3,15 @@ class_name Dodgeball
 
 const CHARGE_COLOR := Color(0.9, 0.1, 0.1)
 
+# Peak emission for a fully-lit live glow; low for a subtle tell.
+const LIVE_GLOW_ENERGY := 0.8
+
 @onready var outline_mesh = %OutlineMesh
 @onready var ball_mesh: MeshInstance3D = $CollisionShape3D/BallMesh
 
 var _ball_material: StandardMaterial3D
 var _base_color := Color.WHITE
+var _glow_color := Color.BLACK
 
 func _ready() -> void:
 	super()
@@ -32,3 +36,13 @@ func get_preview_visual() -> Node3D:
 	mat.albedo_color = _base_color
 	preview.material_override = mat
 	return preview
+
+# Emissive team glow while live; colour holds from the last live frame as it fades.
+func set_live_glow(team: int, amount: float) -> void:
+	if _ball_material == null:
+		return
+	if team >= 0 and team < Player.TEAM_COLORS.size():
+		_glow_color = Player.TEAM_COLORS[team]
+	_ball_material.emission_enabled = amount > 0.001
+	_ball_material.emission = _glow_color
+	_ball_material.emission_energy_multiplier = amount * LIVE_GLOW_ENERGY

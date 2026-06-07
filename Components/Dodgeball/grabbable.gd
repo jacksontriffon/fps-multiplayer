@@ -25,6 +25,10 @@ const HIT_COOLDOWN = 0.3        # min seconds between hits from the same ball
 const TINT_RISE = 5.0
 const TINT_FALL = 7.0
 
+# Live-glow fade in/out speed (visual only).
+const GLOW_RISE = 8.0
+const GLOW_FALL = 6.0
+
 ## Peer id of the holder, or 0 when free. Replicated; only the authority writes it.
 ## The setter runs on every peer (including clients, when the synchronizer applies the
 ## replicated value), so a held ball stops colliding everywhere. Without this, a client
@@ -46,16 +50,18 @@ const TINT_FALL = 7.0
 ## instead of the default live 3D preview. Authored per item; left null until art exists.
 @export var item_ui: Texture2D
 
-# Server-only hit bookkeeping (the server is the only peer that detects hits).
-# thrower_id is 0 for a free ball that's never been thrown (those can't hurt
-# anyone) and stays set to the last thrower otherwise; MatchManager.can_hit
-# turns it into the actual hit ruling.
+## Thrower's team while this ball is live (thrown + fast); -1 otherwise. Replicated for the glow.
+@export var live_team: int = -1
+
+# Server-only: the last thrower while the ball can still hit; cleared to 0 once it slows to a free ball.
 var thrower_id := 0
 var _hit_cooldown := 0.0
 
 var _spawn_transform := Transform3D.IDENTITY
 # Local smoothed redness (0..1) driven from charge; visual only, not replicated.
 var _tint := 0.0
+# Local smoothed glow (0..1) driven from live_team; visual only, not replicated.
+var _glow := 0.0
 
 func _ready() -> void:
 	add_to_group("grabbable")
@@ -68,8 +74,11 @@ func _ready() -> void:
 	continuous_cd = true
 
 func _physics_process(delta: float) -> void:
+	if is_multiplayer_authority():
+		_update_live_state()
 	_update_charge_tint(delta)
 	_update_carry_visibility()
+	_update_live_glow(delta)
 	if not is_multiplayer_authority():
 		# Clients don't simulate — freeze and let the synchronizer drive the transform.
 		# Done here (not _ready) so it also applies after a peer connects.
@@ -212,6 +221,21 @@ func _update_charge_tint(delta: float) -> void:
 	_tint = move_toward(_tint, charge, speed * delta)
 	set_charge_visual(_tint)
 
+# Server-only: clear the thrower when a free ball slows below hit speed, else flag its team.
+func _update_live_state() -> void:
+	var fast := linear_velocity.length() >= HIT_SPEED
+	if held_by == 0 and not fast:
+		thrower_id = 0
+	var dangerous := held_by == 0 and thrower_id != 0 and fast
+	live_team = MatchManager.team_of(thrower_id) if dangerous else -1
+
+# Ease the team glow in/out toward live_team; seen by every peer.
+func _update_live_glow(delta: float) -> void:
+	var target := 1.0 if live_team >= 0 else 0.0
+	var rate := GLOW_RISE if target > _glow else GLOW_FALL
+	_glow = move_toward(_glow, target, rate * delta)
+	set_live_glow(live_team, _glow)
+
 # Overridden by subclasses that have a highlight visual.
 func toggle_highlight(_is_highlighted: bool) -> void:
 	pass
@@ -224,3 +248,7 @@ func set_charge_visual(_tint_amount: float) -> void:
 # if the item has no previewable model. Subclasses override to supply their mesh.
 func get_preview_visual() -> Node3D:
 	return null
+
+# Overridden by subclasses to glow the ball its thrower's team colour while live.
+func set_live_glow(_team: int, _amount: float) -> void:
+	pass
