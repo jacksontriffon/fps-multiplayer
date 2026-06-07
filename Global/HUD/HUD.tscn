@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://b3hudmatch01a"]
+[gd_scene load_steps=8 format=3 uid="uid://b3hudmatch01a"]
 
 [ext_resource type="Script" uid="uid://c1oblsv1fyfqg" path="res://Global/HUD/hud.gd" id="1_hud"]
 [ext_resource type="Script" uid="uid://bpyg1482b2ose" path="res://Global/HUD/damage_indicator.gd" id="2_dmg"]
@@ -9,6 +9,20 @@ shader = ExtResource("2_hurt")
 shader_parameter/intensity = 0.0
 shader_parameter/pulse = 0.0
 shader_parameter/hurt_color = Color(0.55, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="stamina_bg"]
+bg_color = Color(0, 0, 0, 0.5)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="stamina_fill"]
+bg_color = Color(0.3, 0.85, 0.4, 0.9)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="slot_empty"]
 bg_color = Color(0, 0, 0, 0.5)
@@ -100,16 +114,17 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 160
 
-[node name="LivesSection" type="HBoxContainer" parent="Root/MarginContainer/BottomBar"]
+[node name="LivesSection" type="VBoxContainer" parent="Root/MarginContainer/BottomBar"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
+size_flags_vertical = 4
 mouse_filter = 2
+theme_override_constants/separation = 6
 
 [node name="Lives" type="HBoxContainer" parent="Root/MarginContainer/BottomBar/LivesSection"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 4
 mouse_filter = 2
 theme_override_constants/separation = 4
 
@@ -118,6 +133,16 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
+
+[node name="Stamina" type="ProgressBar" parent="Root/MarginContainer/BottomBar/LivesSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("stamina_bg")
+theme_override_styles/fill = SubResource("stamina_fill")
+max_value = 100.0
+value = 100.0
+show_percentage = false
 
 [node name="Slots" type="HBoxContainer" parent="Root/MarginContainer/BottomBar"]
 unique_name_in_owner = true

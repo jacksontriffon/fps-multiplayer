@@ -15,6 +15,7 @@ const HEART_SIZE := Vector2(28, 28)
 @onready var bottom_bar: HBoxContainer = %BottomBar
 @onready var lives_box: HBoxContainer = %Lives
 @onready var lives_text: Label = %LivesText
+@onready var stamina_bar: ProgressBar = %Stamina
 @onready var slots_box: HBoxContainer = %Slots
 @onready var score_label: Label = %Score
 @onready var banner_label: Label = %Banner
@@ -47,6 +48,23 @@ func _update_bar(id: int) -> void:
 	if not playing:
 		return
 	_update_lives(MatchManager.lives[id])
+	_update_stamina()
+
+func _update_stamina() -> void:
+	var player := _local_player()
+	if player == null:
+		stamina_bar.visible = false
+		return
+	stamina_bar.visible = true
+	stamina_bar.value = player.stamina
+	var low := player.stamina <= Player.MAX_STAMINA * 0.3
+	stamina_bar.self_modulate = Color(1, 0.55, 0.25) if low else Color.WHITE
+
+func _local_player() -> Player:
+	for p in get_tree().get_nodes_in_group("players"):
+		if p is Player and p.is_multiplayer_authority():
+			return p
+	return null
 
 func _update_lives(n: int) -> void:
 	if n <= 0:

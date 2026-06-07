@@ -49,8 +49,14 @@ func _physics_process(delta: float) -> void:
 	update_highlight()
 	_handle_interaction_input()
 	# Wind up the throw while held, streaming charge to the ball so peers can redden it.
+	# Charging burns stamina; once it's empty the wind-up bleeds back down to zero.
 	if _charging:
-		_charge = minf(_charge + delta / THROW_CHARGE_TIME, 1.0)
+		var player := _get_player()
+		if player and player.has_stamina():
+			_charge = minf(_charge + delta / THROW_CHARGE_TIME, 1.0)
+			player.drain_stamina(Player.CHARGE_DRAIN * delta)
+		else:
+			_charge = maxf(_charge - delta / THROW_CHARGE_TIME, 0.0)
 		_push_charge(_charge)
 	# Spring the camera back toward its resting position.
 	_recoil_offset = _recoil_offset.lerp(Vector3.ZERO, delta * RECOIL_RECOVER)
