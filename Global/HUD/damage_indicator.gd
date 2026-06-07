@@ -1,21 +1,16 @@
 extends Control
 
-# COD-style directional damage arcs. A hit stores the world-space direction it came
-# from (player -> source); each frame that's re-projected against the local camera's
-# yaw into a screen angle, so the arc stays pinned to the source as you turn. Arcs
-# fade out over LIFETIME. Fed by HUD.hit_from(), called on the struck authority peer.
+# COD-style directional damage arcs, pinned to the hit's world direction as you turn.
 
 const LIFETIME := 1.2
 const RADIUS := 130.0
 const THICKNESS := 6.0
 const SPAN := deg_to_rad(55.0)
 const SEGMENTS := 14
-const COLOR := Color(1.0, 0.15, 0.15)
-# Small triangle on the arc's midpoint, pointing outward away from screen center.
-const TRI_HEIGHT := 12.0
-const TRI_HALF_WIDTH := 7.0
+const COLOR := Color(1.0, 0.285, 0.248, 1.0)
+const TRI_HEIGHT := 5.0
+const TRI_HALF_WIDTH := 11.0
 
-# Each hit: { dir: Vector3 (horizontal, normalized), age: float, angle: float }.
 var _hits: Array = []
 
 func register_hit(world_dir: Vector3) -> void:
@@ -59,7 +54,6 @@ func _draw() -> void:
 			var a: float = lerpf(a1, a0, float(i) / SEGMENTS)
 			pts.append(center + Vector2(sin(a), -cos(a)) * RADIUS)
 		draw_colored_polygon(pts, col)
-		# Triangle on the arc midpoint, tip aimed outward away from the screen center.
 		var out := Vector2(sin(hit.angle), -cos(hit.angle))
 		var tan := Vector2(cos(hit.angle), sin(hit.angle))
 		var base := RADIUS + THICKNESS
@@ -81,14 +75,12 @@ func _local_camera() -> Camera3D:
 		return null
 	return p.get_node_or_null("Head/Camera3D") as Camera3D
 
-# Signed angle (radians) of dir relative to where the camera faces: 0 = source dead
-# ahead (top of screen), +ve clockwise toward the right, ±PI = directly behind.
+# Signed angle of dir vs camera facing: 0 = dead ahead, +ve clockwise, ±PI = behind.
 func _screen_angle(cam: Camera3D, dir: Vector3) -> float:
 	var b := cam.global_transform.basis
 	var fwd := -b.z
 	fwd.y = 0.0
 	if fwd.length() < 0.001:
-		# Looking near-vertically: fall back to the head's facing.
 		fwd = -b.y
 		fwd.y = 0.0
 	var right := b.x

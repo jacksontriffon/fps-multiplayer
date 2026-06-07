@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://b3hudmatch01a"]
 
-[ext_resource type="Script" path="res://Global/HUD/hud.gd" id="1_hud"]
-[ext_resource type="Script" path="res://Global/HUD/damage_indicator.gd" id="2_dmg"]
+[ext_resource type="Script" uid="uid://c1oblsv1fyfqg" path="res://Global/HUD/hud.gd" id="1_hud"]
+[ext_resource type="Script" uid="uid://bpyg1482b2ose" path="res://Global/HUD/damage_indicator.gd" id="2_dmg"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -21,19 +21,16 @@ offset_left = 16.0
 offset_top = 12.0
 offset_right = 360.0
 offset_bottom = 40.0
-mouse_filter = 2
 theme_override_font_sizes/font_size = 20
-text = ""
 
 [node name="Score" type="Label" parent="Root"]
 layout_mode = 1
+anchors_preset = 10
 anchor_right = 1.0
 offset_top = 12.0
 offset_bottom = 48.0
 grow_horizontal = 2
-mouse_filter = 2
 theme_override_font_sizes/font_size = 22
-text = ""
 horizontal_alignment = 1
 
 [node name="Banner" type="Label" parent="Root"]
@@ -43,9 +40,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_font_sizes/font_size = 40
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 

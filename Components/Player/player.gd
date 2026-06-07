@@ -53,8 +53,7 @@ func apply_knockback_remote(impulse: Vector3) -> void:
 	if multiplayer.get_remote_sender_id() != 1:
 		return
 	apply_knockback(impulse)
-	# Show a directional hit marker for the local player. The impulse shoves us away
-	# from the ball, so the hit came from the opposite direction.
+	# Impulse shoves us away from the ball, so the hit came from the opposite direction.
 	if is_multiplayer_authority():
 		HUD.hit_from(-impulse)
 
