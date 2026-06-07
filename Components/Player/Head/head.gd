@@ -12,6 +12,14 @@ const PITCH_LIMIT = deg_to_rad(60)
 # the user's sensitivity multipliers (Global.mouse_sensitivity / joypad_sensitivity).
 const JOYPAD_LOOK_SPEED = 3.0
 
+# Local-only hit shake. Trauma builds on a hit and decays each second; the actual
+# offset is trauma-squared so it falls off smoothly. Driven through h_offset/v_offset
+# (frustum shift) rather than rotation, which is replicated and owned by look.
+const TRAUMA_DECAY = 1.8
+const SHAKE_MAX_OFFSET = 0.12
+
+var _trauma := 0.0
+
 @onready var camera: Camera3D = $Camera3D
 @onready var crosshairs: CanvasLayer = %Crosshairs
 @onready var charge_bar: ProgressBar = %ChargeBar
@@ -39,6 +47,21 @@ func _process(delta: float) -> void:
 	charge_bar.visible = charging
 	if charging:
 		charge_bar.value = hands.get_charge()
+	_update_shake(delta)
+
+# Called on the local authority when a ball lands. Trauma stacks toward 1.0.
+func add_trauma(amount: float) -> void:
+	_trauma = clampf(_trauma + amount, 0.0, 1.0)
+
+func _update_shake(delta: float) -> void:
+	if _trauma <= 0.0:
+		camera.h_offset = 0.0
+		camera.v_offset = 0.0
+		return
+	var shake := _trauma * _trauma
+	camera.h_offset = SHAKE_MAX_OFFSET * shake * randf_range(-1.0, 1.0)
+	camera.v_offset = SHAKE_MAX_OFFSET * shake * randf_range(-1.0, 1.0)
+	_trauma = maxf(0.0, _trauma - TRAUMA_DECAY * delta)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():

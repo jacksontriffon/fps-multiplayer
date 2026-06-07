@@ -5,6 +5,7 @@ extends CanvasLayer
 const TEAM_NAMES := ["Red", "Blue"]
 const BANNER_HOLD := 2.5
 const PULSE_DECAY := 0.6
+const RAMP_MAX := 0.25
 const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 const HEART_EMPTY := preload("res://Assets/Textures/UI/heart_empty.svg")
 const HEART_SIZE := Vector2(28, 28)
@@ -74,7 +75,7 @@ func _update_hurt(delta: float, id: int) -> void:
 	var intensity := 0.0
 	if MatchManager.state != MatchManager.State.WAITING and n > 0:
 		var denom: int = max(1, MatchManager.STARTING_LIVES - 1)
-		intensity = clamp(float(MatchManager.STARTING_LIVES - n) / float(denom), 0.0, 1.0)
+		intensity = clamp(float(MatchManager.STARTING_LIVES - n) / float(denom), 0.0, 1.0) * RAMP_MAX
 	hurt_overlay.material.set_shader_parameter("intensity", intensity)
 	hurt_overlay.material.set_shader_parameter("pulse", _pulse)
 

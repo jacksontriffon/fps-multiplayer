@@ -21,6 +21,9 @@ const FOV_CHANGE = 1.2
 # layered on top of the input-driven velocity, which would otherwise clobber it.
 const KNOCKBACK_DECAY = 8.0
 
+# Camera shake trauma added each time a ball hits us (see Head.add_trauma).
+const HIT_TRAUMA = 0.6
+
 const FLY_SPEED = 10.0
 
 const TEAM_COLORS := [Color.RED, Color.BLUE]
@@ -56,6 +59,7 @@ func apply_knockback_remote(impulse: Vector3) -> void:
 	# Impulse shoves us away from the ball, so the hit came from the opposite direction.
 	if is_multiplayer_authority():
 		HUD.hit_from(-impulse)
+		head.add_trauma(HIT_TRAUMA)
 
 func _enter_tree() -> void:
 	set_multiplayer_authority(name.to_int())
