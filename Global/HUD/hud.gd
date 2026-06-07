@@ -18,6 +18,11 @@ const HEART_SIZE := Vector2(28, 28)
 @onready var ammo_count: Label = $Root/BottomBar/Row/AmmoSection/AmmoCount
 @onready var score_label: Label = $Root/Score
 @onready var banner_label: Label = $Root/Banner
+@onready var damage_indicator = $Root/DamageIndicator
+
+# world_dir points from the player toward where the hit came from.
+func hit_from(world_dir: Vector3) -> void:
+	damage_indicator.register_hit(world_dir)
 
 var _last_banner_text := ""
 var _banner_age := 0.0
