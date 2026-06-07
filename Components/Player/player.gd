@@ -150,10 +150,15 @@ func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 
-	_handle_slot_input()
+	# While the pause overlay is up the player ignores control input but keeps
+	# simulating (gravity, knockback, collisions) so the world stays live behind it.
+	var input_blocked: bool = PauseMenu.is_open()
+
+	if not input_blocked:
+		_handle_slot_input()
 
 	if not alive:
-		_spectate()
+		_spectate(input_blocked)
 		return
 
 	# Add the gravity.
@@ -161,15 +166,15 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 
 	# Handle jump.
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	if not input_blocked and Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
 	# Handle movement direction
-	var input_dir := Input.get_vector("left", "right", "up", "down")
+	var input_dir := Vector2.ZERO if input_blocked else Input.get_vector("left", "right", "up", "down")
 	var direction = (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	# Handle Sprint — burns stamina, and only while actually moving.
-	if Input.is_action_pressed("sprint") and direction and has_stamina():
+	if not input_blocked and Input.is_action_pressed("sprint") and direction and has_stamina():
 		speed = SPRINT_SPEED
 		drain_stamina(SPRINT_DRAIN * delta)
 	else:
@@ -213,12 +218,13 @@ func _handle_slot_input() -> void:
 	elif Input.is_action_just_pressed("slot_3"):
 		active_slot = 2
 
-func _spectate() -> void:
-	var input_dir := Input.get_vector("left", "right", "up", "down")
+func _spectate(input_blocked: bool) -> void:
+	var input_dir := Vector2.ZERO if input_blocked else Input.get_vector("left", "right", "up", "down")
 	var dir := camera.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)
-	if Input.is_action_pressed("jump"):
-		dir.y += 1.0
-	if Input.is_action_pressed("sprint"):
-		dir.y -= 1.0
+	if not input_blocked:
+		if Input.is_action_pressed("jump"):
+			dir.y += 1.0
+		if Input.is_action_pressed("sprint"):
+			dir.y -= 1.0
 	velocity = dir.normalized() * FLY_SPEED if dir.length() > 0.01 else Vector3.ZERO
 	move_and_slide()

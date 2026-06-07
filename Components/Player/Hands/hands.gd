@@ -50,7 +50,9 @@ func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 	update_highlight()
-	_handle_interaction_input()
+	# No grabbing or throwing while the pause overlay is up.
+	if not PauseMenu.is_open():
+		_handle_interaction_input()
 	# Wind up the throw while held, streaming charge to the ball so peers can redden it.
 	# Charging burns stamina; once it's empty the wind-up bleeds back down to zero.
 	if _charging:

@@ -9,6 +9,11 @@ extends CanvasLayer
 
 var _saved_mouse_mode: Input.MouseMode = Input.MOUSE_MODE_VISIBLE
 
+# True while the overlay is showing. Read by the local player's input handlers so
+# controls are ignored (but physics keeps running) while the menu is up.
+func is_open() -> bool:
+	return visible
+
 func _ready() -> void:
 	visible = false
 	continue_button.pressed.connect(close)
