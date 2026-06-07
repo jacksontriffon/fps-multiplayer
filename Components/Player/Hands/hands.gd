@@ -12,6 +12,9 @@ class_name Hands
 # throws. A quick click barely charges, so it throws light. Time to full charge:
 const THROW_CHARGE_TIME := 0.9
 
+# When stamina runs out mid-wind-up the charge bleeds back down over this time.
+const THROW_DISCHARGE_TIME := 2.2
+
 # Throw recoil, scaled by charge. The values below are the full-charge maximum;
 # RECOIL_MIN_SCALE keeps a light throw from being completely kickless. The camera
 # kick is a purely local positional offset (camera position isn't replicated, so
@@ -56,7 +59,7 @@ func _physics_process(delta: float) -> void:
 			_charge = minf(_charge + delta / THROW_CHARGE_TIME, 1.0)
 			player.drain_stamina(Player.CHARGE_DRAIN * delta)
 		else:
-			_charge = maxf(_charge - delta / THROW_CHARGE_TIME, 0.0)
+			_charge = maxf(_charge - delta / THROW_DISCHARGE_TIME, 0.0)
 		_push_charge(_charge)
 	# Spring the camera back toward its resting position.
 	_recoil_offset = _recoil_offset.lerp(Vector3.ZERO, delta * RECOIL_RECOVER)

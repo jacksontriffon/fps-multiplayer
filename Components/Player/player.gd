@@ -28,9 +28,9 @@ const FLY_SPEED = 10.0
 
 # Stamina. Sprinting and winding up a throw both burn it; it refills after a short
 # idle. CHARGE_DRAIN is read by Hands while charging.
-const MAX_STAMINA := 100.0
+const MAX_STAMINA := 150.0
 const SPRINT_DRAIN := 22.0
-const CHARGE_DRAIN := 40.0
+const CHARGE_DRAIN := 25.0
 const STAMINA_REGEN := 20.0
 const STAMINA_REGEN_DELAY := 0.6
 

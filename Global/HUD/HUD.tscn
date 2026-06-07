@@ -140,8 +140,8 @@ custom_minimum_size = Vector2(150, 8)
 layout_mode = 2
 theme_override_styles/background = SubResource("stamina_bg")
 theme_override_styles/fill = SubResource("stamina_fill")
-max_value = 100.0
-value = 100.0
+max_value = 150.0
+value = 150.0
 show_percentage = false
 
 [node name="Slots" type="HBoxContainer" parent="Root/MarginContainer/BottomBar"]
