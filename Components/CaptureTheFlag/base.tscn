@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://bbasescene012a"]
+
+[ext_resource type="Script" uid="uid://cbasescript012a" path="res://Components/CaptureTheFlag/base.gd" id="1_base"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_base"]
+size = Vector3(4, 2, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_base"]
+size = Vector3(4, 0.1, 4)
+
+[node name="Base" type="Area3D"]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1_base")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_base")
+
+[node name="Pad" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("BoxMesh_base")
+
+[node name="Label" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+billboard = 1
+text = "BASE"
+font_size = 64
+outline_size = 16

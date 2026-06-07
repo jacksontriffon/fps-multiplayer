@@ -1,0 +1,60 @@
+[gd_scene load_steps=9 format=3 uid="uid://bflagscene012a"]
+
+[ext_resource type="Script" uid="uid://cflagscript01a" path="res://Components/Flag/flag.gd" id="1_flag"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_flag"]
+friction = 0.6
+bounce = 0.3
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_flag"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_flag"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flag"]
+albedo_color = Color(1, 0.85, 0.15, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_outline"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_outline"]
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 1)
+cull_mode = 1
+grow = true
+grow_amount = 0.04
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_flag"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:held_by")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+properties/3/path = NodePath(".:charge")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+
+[node name="Flag" type="RigidBody3D"]
+physics_material_override = SubResource("PhysicsMaterial_flag")
+script = ExtResource("1_flag")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_flag")
+
+[node name="FlagMesh" type="MeshInstance3D" parent="CollisionShape3D"]
+mesh = SubResource("BoxMesh_flag")
+material_override = SubResource("StandardMaterial3D_flag")
+
+[node name="OutlineMesh" type="MeshInstance3D" parent="CollisionShape3D/FlagMesh"]
+unique_name_in_owner = true
+visible = false
+mesh = SubResource("BoxMesh_outline")
+material_override = SubResource("StandardMaterial3D_outline")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_flag")
