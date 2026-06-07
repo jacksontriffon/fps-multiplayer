@@ -46,6 +46,10 @@ const TEAM_COLORS := [Color.RED, Color.BLUE]
 		team = value
 		_apply_team_color()
 
+# Which of the 3 inventory slots is selected (0..2). Set by the controlling peer
+# via the number keys and replicated, so the server knows which held ball to equip.
+@export var active_slot: int = 0
+
 var speed = WALK_SPEED
 var knockback := Vector3.ZERO
 var stamina := MAX_STAMINA
@@ -146,6 +150,8 @@ func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 
+	_handle_slot_input()
+
 	if not alive:
 		_spectate()
 		return
@@ -197,6 +203,15 @@ func _physics_process(delta: float) -> void:
 		stamina = minf(stamina + STAMINA_REGEN * delta, MAX_STAMINA)
 
 	move_and_slide()
+
+# Number keys 1/2/3 pick the active inventory slot, equipping that slot's held ball.
+func _handle_slot_input() -> void:
+	if Input.is_action_just_pressed("slot_1"):
+		active_slot = 0
+	elif Input.is_action_just_pressed("slot_2"):
+		active_slot = 1
+	elif Input.is_action_just_pressed("slot_3"):
+		active_slot = 2
 
 func _spectate() -> void:
 	var input_dir := Input.get_vector("left", "right", "up", "down")

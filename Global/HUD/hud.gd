@@ -1,8 +1,9 @@
 extends CanvasLayer
 
 # Reads mirrored MatchManager state plus the lobby podium each frame; never writes.
-# The bottom bar holds lives (left) and ability/item slots (right). Slots are empty
-# placeholders for now; fill them via set_slot().
+# The bottom bar holds lives (left) and the 3 inventory slots (right). Each slot
+# mirrors the local player's held ball for that slot, and the active slot (picked
+# with the 1/2/3 keys) is highlighted.
 
 const TEAM_NAMES := ["Red", "Blue"]
 const BANNER_HOLD := 2.5
@@ -11,6 +12,9 @@ const RAMP_MAX := 0.25
 const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 const HEART_EMPTY := preload("res://Assets/Textures/UI/heart_empty.svg")
 const HEART_SIZE := Vector2(28, 28)
+const BALL_ICON := preload("res://Assets/Textures/UI/dodgeball.svg")
+const PREVIEW_SIZE := Vector2i(96, 96)
+const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
 
 @onready var bottom_bar: HBoxContainer = %BottomBar
 @onready var lives_box: HBoxContainer = %Lives
@@ -31,6 +35,25 @@ var _banner_age := 0.0
 var _last_lives := -1
 var _pulse := 0.0
 
+# Slot panel styles: the active slot gets a brighter border so it reads as selected.
+var _slot_normal: StyleBoxFlat
+var _slot_active: StyleBoxFlat
+
+# One isolated 3D preview rig per slot (see _build_previews). _slot_keys tracks what
+# each slot currently shows so the 3D model is only rebuilt when the item changes.
+var _preview_viewports: Array[SubViewport] = []
+var _preview_pivots: Array[Node3D] = []
+var _preview_cams: Array[Camera3D] = []
+var _preview_active: Array[bool] = []
+var _slot_keys: Array[String] = []
+
+func _ready() -> void:
+	_slot_normal = slots_box.get_child(0).get_theme_stylebox("panel")
+	_slot_active = _slot_normal.duplicate()
+	_slot_active.border_color = Color(1, 1, 1, 0.9)
+	_slot_active.bg_color = Color(0, 0, 0, 0.65)
+	_build_previews()
+
 func _process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer():
 		visible = false
@@ -41,14 +64,21 @@ func _process(delta: float) -> void:
 	_update_hurt(delta, id)
 	_update_score()
 	_update_banner(delta)
+	# Slowly turn the live item previews so they read as 3D.
+	for i in _preview_active.size():
+		if _preview_active[i]:
+			_preview_pivots[i].rotate_y(delta * PREVIEW_SPIN)
 
 func _update_bar(id: int) -> void:
 	var playing := MatchManager.state != MatchManager.State.WAITING and MatchManager.lives.has(id)
 	bottom_bar.visible = playing
 	if not playing:
+		for i in _preview_viewports.size():
+			_disable_preview(i)
 		return
 	_update_lives(MatchManager.lives[id])
 	_update_stamina()
+	_update_slots(id)
 
 func _update_stamina() -> void:
 	var player := _local_player()
@@ -91,13 +121,107 @@ func _ensure_hearts(count: int) -> void:
 	while lives_box.get_child_count() > count:
 		lives_box.get_child(lives_box.get_child_count() - 1).free()
 
-# Fill or clear a slot for a future item/ability. Pass null to empty it.
-func set_slot(index: int, texture: Texture2D) -> void:
-	if index < 0 or index >= slots_box.get_child_count():
-		return
-	var icon := slots_box.get_child(index).get_node("Icon") as TextureRect
-	icon.texture = texture
-	icon.visible = texture != null
+# Mirror the local player's inventory: each occupied slot shows its item (a live 3D
+# preview by default, or the item's flat item_ui texture when it has one) and the
+# active slot is highlighted. Held balls carry the holder's peer id and slot index.
+func _update_slots(id: int) -> void:
+	var player := get_tree().current_scene.get_node_or_null(str(id)) as Player
+	var active: int = player.active_slot if player else 0
+	for i in slots_box.get_child_count():
+		var slot := slots_box.get_child(i) as Panel
+		var icon := slot.get_node("Icon") as TextureRect
+		var ball := _ball_in_slot(id, i)
+		if ball == null:
+			_show_empty(i, icon)
+		elif ball.item_ui != null:
+			_show_flat(i, icon, ball.item_ui)
+		else:
+			_show_preview(i, icon, ball)
+		slot.add_theme_stylebox_override("panel", _slot_active if i == active else _slot_normal)
+
+func _ball_in_slot(peer_id: int, slot: int) -> Grabbable:
+	for b in get_tree().get_nodes_in_group("grabbable"):
+		if b is Grabbable and b.held_by == peer_id and b.held_slot == slot:
+			return b
+	return null
+
+func _show_empty(i: int, icon: TextureRect) -> void:
+	icon.visible = false
+	icon.texture = null
+	_disable_preview(i)
+	_slot_keys[i] = ""
+
+func _show_flat(i: int, icon: TextureRect, tex: Texture2D) -> void:
+	icon.texture = tex
+	icon.visible = true
+	_disable_preview(i)
+	_slot_keys[i] = "flat"
+
+# Renders the item's 3D model live in the slot's viewport. The model is rebuilt only
+# when the item type changes, so the turntable keeps spinning between frames.
+func _show_preview(i: int, icon: TextureRect, ball: Grabbable) -> void:
+	var key := ball.scene_file_path
+	if _slot_keys[i] != key:
+		var visual := ball.get_preview_visual()
+		if visual == null:
+			_show_flat(i, icon, BALL_ICON)  # item has no model — fall back to a flat icon
+			return
+		_mount_preview(i, visual)
+		_slot_keys[i] = key
+	icon.texture = _preview_viewports[i].get_texture()
+	icon.visible = true
+	_preview_active[i] = true
+	_preview_viewports[i].render_target_update_mode = SubViewport.UPDATE_ALWAYS
+
+# Builds one off-screen 3D viewport per slot: own world, a framing camera, key+fill
+# lights, and a pivot the item mounts under. The viewport's texture feeds the slot Icon.
+func _build_previews() -> void:
+	for _i in slots_box.get_child_count():
+		var sv := SubViewport.new()
+		sv.size = PREVIEW_SIZE
+		sv.transparent_bg = true
+		sv.own_world_3d = true
+		sv.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		var cam := Camera3D.new()
+		cam.fov = 35.0
+		cam.current = true
+		sv.add_child(cam)
+		var key_light := DirectionalLight3D.new()
+		key_light.rotation_degrees = Vector3(-40, -30, 0)
+		key_light.light_energy = 1.2
+		sv.add_child(key_light)
+		var fill_light := DirectionalLight3D.new()
+		fill_light.rotation_degrees = Vector3(-10, 140, 0)
+		fill_light.light_energy = 0.5
+		sv.add_child(fill_light)
+		var pivot := Node3D.new()
+		sv.add_child(pivot)
+		add_child(sv)
+		_preview_viewports.append(sv)
+		_preview_cams.append(cam)
+		_preview_pivots.append(pivot)
+		_preview_active.append(false)
+		_slot_keys.append("")
+
+# Centers the item under the pivot and pulls the camera back to frame its bounds.
+func _mount_preview(i: int, visual: Node3D) -> void:
+	var pivot := _preview_pivots[i]
+	for child in pivot.get_children():
+		child.queue_free()
+	pivot.add_child(visual)
+	var bounds := AABB(Vector3(-0.5, -0.5, -0.5), Vector3.ONE)
+	if visual is VisualInstance3D:
+		bounds = (visual as VisualInstance3D).get_aabb()
+	visual.position = -bounds.get_center()
+	var radius: float = maxf(bounds.size.length() * 0.5, 0.1)
+	var cam := _preview_cams[i]
+	var dist: float = radius / sin(deg_to_rad(cam.fov * 0.5)) * 1.05
+	cam.position = Vector3(0, radius * 0.4, dist)
+	cam.look_at(Vector3.ZERO, Vector3.UP)
+
+func _disable_preview(i: int) -> void:
+	_preview_active[i] = false
+	_preview_viewports[i].render_target_update_mode = SubViewport.UPDATE_DISABLED
 
 func _update_hurt(delta: float, id: int) -> void:
 	var n: int = MatchManager.lives.get(id, -1)

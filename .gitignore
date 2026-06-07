@@ -2,6 +2,3 @@
 .godot/
 .claude/
 /android/
-
-# godot-git-plugin runtime temp copies of its DLL
-addons/godot-git-plugin/win64/~*

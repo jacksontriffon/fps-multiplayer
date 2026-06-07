@@ -72,14 +72,14 @@ func _handle_interaction_input() -> void:
 	var me := _get_player()
 	if me and not me.alive:
 		return
-	# Grab happens immediately on press, and only with empty hands.
+	# Grab happens immediately on press, and only when the active slot is empty.
 	var grabbed_this_frame := false
-	if Input.is_action_just_pressed("interaction") and not _held_ball_of(get_multiplayer_authority()):
+	if Input.is_action_just_pressed("interaction") and _equipped_ball_of(_get_player()) == null:
 		_send_interact(0.0)
 		grabbed_this_frame = true
-	# Throw: hold to wind up power, release to let go — only while holding a ball.
-	# Skip the press that just grabbed so a shared grab/throw key can't do both.
-	if not grabbed_this_frame and Input.is_action_just_pressed("throw") and _held_ball_of(get_multiplayer_authority()):
+	# Throw: hold to wind up power, release to let go — only while the active slot
+	# holds a ball. Skip the press that just grabbed so a shared grab/throw key can't do both.
+	if not grabbed_this_frame and Input.is_action_just_pressed("throw") and _equipped_ball_of(_get_player()):
 		_charging = true
 		_charge = 0.0
 	elif Input.is_action_just_released("throw") and _charging:
@@ -134,7 +134,7 @@ func _get_player() -> Player:
 
 # Push charge to the held ball; host writes it, clients ask the server (it replicates).
 func _push_charge(value: float) -> void:
-	var held := _held_ball_of(get_multiplayer_authority())
+	var held := _equipped_ball_of(_get_player())
 	if held == null:
 		return
 	if multiplayer.is_server():
@@ -164,9 +164,10 @@ func _request_interact(target_path: NodePath, aim: Vector3, power: float) -> voi
 # the requested target.
 func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: float) -> void:
 	var actor := get_tree().current_scene.get_node_or_null(str(peer_id)) as Player
-	if actor and not actor.alive:
+	if actor == null or not actor.alive:
 		return
-	var held := _held_ball_of(peer_id)
+	# Holding a ball in the active slot => throw it; otherwise grab into that slot.
+	var held := _equipped_ball_of(actor)
 	if held:
 		held.throw(aim, power)
 		return
@@ -174,7 +175,7 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 		return
 	var ball := get_node_or_null(target_path) as Grabbable
 	if ball:
-		ball.grab(peer_id)
+		ball.grab(peer_id, actor.active_slot)
 
 # --- Detection -------------------------------------------------------------
 func _on_grabbable_area_body_entered(body: Node3D) -> void:
@@ -193,9 +194,9 @@ func _on_grabbable_area_area_exited(_area: Area3D) -> void:
 
 # --- Highlight (local visual for the controlling peer) ---------------------
 func update_highlight() -> void:
-	# Nothing to highlight while we're already holding a ball.
+	# Nothing to highlight while the active slot already holds a ball.
 	var nearest: Grabbable = null
-	if not _held_ball_of(get_multiplayer_authority()):
+	if _equipped_ball_of(_get_player()) == null:
 		nearest = get_nearest_grabbable_object()
 	if nearest == highlighted:
 		return
@@ -217,8 +218,14 @@ func get_nearest_grabbable_object() -> Grabbable:
 			nearest = object
 	return nearest
 
-func _held_ball_of(peer_id: int) -> Grabbable:
+# The ball occupying the player's currently active slot, or null if it's empty.
+func _equipped_ball_of(player: Player) -> Grabbable:
+	if player == null:
+		return null
+	return _ball_in_slot(player.name.to_int(), player.active_slot)
+
+func _ball_in_slot(peer_id: int, slot: int) -> Grabbable:
 	for b in get_tree().get_nodes_in_group("grabbable"):
-		if b is Grabbable and b.held_by == peer_id:
+		if b is Grabbable and b.held_by == peer_id and b.held_slot == slot:
 			return b
 	return null
