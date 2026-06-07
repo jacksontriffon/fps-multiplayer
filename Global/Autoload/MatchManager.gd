@@ -87,6 +87,10 @@ func can_hit(victim_id: int, thrower_id: int) -> bool:
 		return false
 	return true
 
+# Team index for a peer, or -1 if unknown.
+func team_of(id: int) -> int:
+	return _team_of.get(id, -1)
+
 func _start_round() -> void:
 	if not _both_teams_present():
 		state = State.WAITING
