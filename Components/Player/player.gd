@@ -75,7 +75,7 @@ func set_alive_remote(value: bool) -> void:
 		velocity = Vector3.ZERO
 		knockback = Vector3.ZERO
 
-@rpc("any_peer", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func respawn_remote(pos: Vector3, yaw: float) -> void:
 	if not (multiplayer.get_remote_sender_id() in [0, 1]):
 		return
@@ -107,7 +107,7 @@ func _request_spawn() -> void:
 	_apply_spawn.rpc_id(peer_id, spawn["position"], spawn["yaw"], spawn["team"])
 	MatchManager.server_player_ready(peer_id, spawn["team"])
 
-@rpc("any_peer", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func _apply_spawn(pos: Vector3, yaw: float, t: int) -> void:
 	if not (multiplayer.get_remote_sender_id() in [0, 1]):
 		return
