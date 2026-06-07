@@ -9,6 +9,11 @@ const WALK_SPEED = 5.0
 const SPRINT_SPEED = 7.0
 const JUMP_VELOCITY = 4.5
 
+# Keep jumps reliable when sprinting flickers is_on_floor() off between floor
+# seams: buffer a press briefly and allow a short post-ledge coyote window.
+const JUMP_BUFFER := 0.12
+const COYOTE_TIME := 0.1
+
 # Friction
 const AIR_FRICTION = 5.0
 const GROUND_FRICTION = 10.0
@@ -51,6 +56,8 @@ const TEAM_COLORS := [Color.RED, Color.BLUE]
 @export var active_slot: int = 0
 
 var speed = WALK_SPEED
+var _jump_buffer := 0.0
+var _coyote := 0.0
 var knockback := Vector3.ZERO
 var stamina := MAX_STAMINA
 var _regen_delay := 0.0
@@ -160,9 +167,17 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
-	# Handle jump.
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	# Handle jump. Buffer the press and track a coyote window so a jump isn't
+	# dropped on a frame where is_on_floor() flickers off mid-sprint.
+	_coyote = COYOTE_TIME if is_on_floor() else maxf(_coyote - delta, 0.0)
+	if Input.is_action_just_pressed("jump"):
+		_jump_buffer = JUMP_BUFFER
+	else:
+		_jump_buffer = maxf(_jump_buffer - delta, 0.0)
+	if _jump_buffer > 0.0 and _coyote > 0.0:
 		velocity.y = JUMP_VELOCITY
+		_jump_buffer = 0.0
+		_coyote = 0.0
 
 	# Handle movement direction
 	var input_dir := Input.get_vector("left", "right", "up", "down")
