@@ -1,33 +1,41 @@
-[gd_scene load_steps=5 format=3 uid="uid://c60hxnsma28oh"]
+[gd_scene load_steps=6 format=3 uid="uid://c60hxnsma28oh"]
 
 [ext_resource type="Script" uid="uid://dt76gtgvtw2if" path="res://Components/Pedestal/pedestal.gd" id="1_wxhbb"]
+[ext_resource type="PackedScene" uid="uid://dkheqqal4up8p" path="res://Components/Flag/flag_mesh.tscn" id="2_pgqco"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e888g"]
+albedo_color = Color(0.45, 0.75, 1, 1)
+emission_enabled = true
+emission = Color(0.2, 0.45, 0.8, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cube"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pgqco"]
+albedo_color = Color(1, 0.57254905, 0.34901962, 1)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_wxhbb"]
 height = 1.7393188
 radius = 2.0361328
 
-[node name="Pedestal" type="Node3D"]
+[node name="Pedestal" type="Node3D" node_paths=PackedStringArray("team_object", "ctf_object")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0, 0)
 script = ExtResource("1_wxhbb")
+team_object = NodePath("TeamObject")
+ctf_object = NodePath("FlagMesh")
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 use_collision = true
 height = 1.0
 
-[node name="SphereOrb" type="CSGSphere3D" parent="CSGCylinder3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8865266, 0)
+[node name="TeamObject" type="CSGSphere3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3865266, 0)
 radius = 0.25268716
 material = SubResource("StandardMaterial3D_e888g")
 
-[node name="CubeOrb" type="CSGBox3D" parent="CSGCylinder3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8865266, 0)
+[node name="FlagMesh" parent="." instance=ExtResource("2_pgqco")]
+transform = Transform3D(0.9999998, 0, 0, 0, 0.9999998, 0, 0, 0, 0.9999998, -0.14108834, 1.3578296, 0)
 visible = false
-size = Vector3(0.42, 0.42, 0.42)
-material = SubResource("StandardMaterial3D_cube")
+material_override = SubResource("StandardMaterial3D_pgqco")
+skeleton = NodePath("../TeamObject")
 
 [node name="Area3D" type="Area3D" parent="."]
 
@@ -37,9 +45,8 @@ shape = SubResource("CylinderShape3D_wxhbb")
 
 [node name="Prompt" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, 0)
+pixel_size = 0.0007
 billboard = 1
 fixed_size = true
-pixel_size = 0.0007
 font_size = 96
 outline_size = 28
-text = ""

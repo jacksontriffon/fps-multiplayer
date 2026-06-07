@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://c4r4yl77barqb"]
+[gd_scene load_steps=14 format=3 uid="uid://c4r4yl77barqb"]
 
 [ext_resource type="Script" uid="uid://bejfknjei1g6j" path="res://Screens/Lobby/lobby.gd" id="1_hp6t6"]
 [ext_resource type="PackedScene" uid="uid://dn5gm2e014upj" path="res://Components/Player/player.tscn" id="2_1eq5a"]
@@ -7,7 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="5_t6eea"]
 [ext_resource type="PackedScene" uid="uid://b3scvo3pv7xw1" path="res://Components/SpawnPoints/spawn_points.tscn" id="6_spawn"]
 [ext_resource type="PackedScene" uid="uid://c60hxnsma28oh" path="res://Components/Pedestal/pedestal.tscn" id="7_albdk"]
-[ext_resource type="PackedScene" uid="uid://crtx1jc5p44ts" path="res://Components/CaptureTheFlag/ctf_arena.tscn" id="8_ctf"]
+[ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="8_base"]
+[ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="9_flag"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1eq5a"]
 
@@ -139,14 +140,25 @@ transform = Transform3D(1, 0, 0, 0, 0.99097383, 0.13405538, 0, -0.13405538, 0.99
 
 [node name="Pedestal" parent="." instance=ExtResource("7_albdk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -11)
-game_mode = 0
 
 [node name="PedestalCTF" parent="." instance=ExtResource("7_albdk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, -11)
 game_mode = 1
 
-[node name="CaptureTheFlag" parent="." instance=ExtResource("8_ctf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7)
+[node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("8_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.184462, 0, -15.477325)
+flag = NodePath("../RedFlag")
+
+[node name="BlueBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("8_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.288837, 0, 1.2467635)
+team = 1
+flag = NodePath("../BlueFlag")
+
+[node name="RedFlag" parent="." instance=ExtResource("9_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.184462, 1, -15.477325)
+
+[node name="BlueFlag" parent="." instance=ExtResource("9_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.288837, 1, 1.2170744)
 
 [connection signal="pressed" from="CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/HostGameButton" to="." method="_on_host_game_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/CenterContainer/VBoxContainer/VBoxContainer/JoinGameButton" to="." method="_on_join_game_button_pressed"]

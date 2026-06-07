@@ -7,6 +7,7 @@ enum State { WAITING, PLAYING, ROUND_OVER, MATCH_OVER }
 
 const STARTING_LIVES := 3
 const WIN_SCORE := 5
+const CTF_CAPTURE_LIMIT := 3
 const TEAM_COUNT := 2
 const MIN_PER_TEAM := 1
 const ROUND_RESET_DELAY := 3.0
@@ -53,7 +54,12 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
 	game_mode = mode
 	team_scores = [0, 0]
 	round_num = 0
-	_start_round()
+	# The two modes are mutually exclusive: Team runs the rounds/elimination loop and is
+	# won by round wins; CTF has no elimination and is won by flag captures.
+	if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
+		_start_ctf()
+	else:
+		_start_round()
 
 func can_start() -> bool:
 	return state == State.WAITING and _both_teams_present()
@@ -69,6 +75,9 @@ func server_player_left(id: int) -> void:
 
 func server_on_hit(victim_id: int, thrower_id: int) -> void:
 	if not multiplayer.is_server() or state != State.PLAYING:
+		return
+	# CTF has no elimination — hits still shove players (that's physics), but cost no lives.
+	if game_mode != Pedestal.GameMode.TEAM:
 		return
 	if not lives.has(victim_id) or lives[victim_id] <= 0:
 		return
@@ -113,7 +122,45 @@ func _start_round() -> void:
 		_respawn(id)
 	_broadcast()
 
+# CTF has a single continuous round: spawn everyone, reset objects, play until a team
+# reaches CTF_CAPTURE_LIMIT captures. lives are set so players count as alive, but nothing
+# decrements them (server_on_hit is a no-op here).
+func _start_ctf() -> void:
+	if not _both_teams_present():
+		state = State.WAITING
+		status_text = ""
+		_broadcast()
+		return
+	state = State.PLAYING
+	status_text = "Capture the Flag — first to %d" % CTF_CAPTURE_LIMIT
+	for ball in get_tree().get_nodes_in_group("grabbable"):
+		if ball.has_method("server_reset"):
+			ball.server_reset()
+	for id in _team_of:
+		lives[id] = STARTING_LIVES
+		_respawn(id)
+	_broadcast()
+
+# Reported by the CaptureTheFlag arena when a carrier delivers the flag. Owns CTF scoring
+# so the HUD (which reads team_scores) shows it.
+func server_on_flag_capture(scoring_team: int) -> void:
+	if not multiplayer.is_server() or state != State.PLAYING:
+		return
+	if game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG:
+		return
+	if scoring_team < 0 or scoring_team >= TEAM_COUNT:
+		return
+	team_scores[scoring_team] += 1
+	if team_scores[scoring_team] >= CTF_CAPTURE_LIMIT:
+		_end_match(scoring_team)
+	else:
+		status_text = "%s captured the flag!" % TEAM_NAMES[scoring_team]
+		_broadcast()
+
 func _check_round_end() -> void:
+	# Last-team-standing only ends rounds in Team mode; CTF ends on captures.
+	if game_mode != Pedestal.GameMode.TEAM:
+		return
 	if state != State.PLAYING:
 		return
 	var counts := _living_counts()

@@ -76,7 +76,13 @@ func _update_bar(id: int) -> void:
 		for i in _preview_viewports.size():
 			_disable_preview(i)
 		return
-	_update_lives(MatchManager.lives[id])
+	# Lives/hearts are a Team-mode concept; CTF has no elimination, so hide them there —
+	# but stamina and the item slots still apply (you throw in CTF too).
+	if MatchManager.game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
+		lives_box.visible = false
+		lives_text.visible = false
+	else:
+		_update_lives(MatchManager.lives[id])
 	_update_stamina()
 	_update_slots(id)
 

@@ -2,10 +2,11 @@
 extends Area3D
 class_name CTFBase
 
-# A team's capture zone. Reusable across maps: drop it in, set `team` in the inspector,
-# move it where you want. The Area detects bodies on every peer, but only the server
-# acts on it — the CaptureTheFlag controller polls get_overlapping_bodies(). @tool so the
-# pad/label recolor to the team in the editor as soon as you change `team`.
+# A team's home base. Reusable across maps: drop it in, set `team`, and point `flag` at
+# this team's flag node (place the flag separately so bases and flags move independently).
+# The base owns its team's colour: the pad, label and the linked flag all take it. The Area
+# detects bodies on every peer, but only the host acts on it — the CTFManager autoload polls
+# get_overlapping_bodies(). @tool so everything recolors in the editor as you change `team`.
 
 const TEAM_COLORS := [Color.RED, Color.BLUE]
 const TEAM_NAMES := ["Red", "Blue"]
@@ -15,11 +16,20 @@ const TEAM_NAMES := ["Red", "Blue"]
 		team = value
 		_apply_visuals()
 
+## This base's flag (a Flag node placed in the map). Carry the enemy's flag here to score.
+@export var flag: Flag:
+	set(value):
+		flag = value
+		_apply_visuals()
+
 @onready var pad: MeshInstance3D = $Pad
 @onready var label: Label3D = $Label
 
 func _ready() -> void:
 	_apply_visuals()
+	if Engine.is_editor_hint():
+		return
+	add_to_group("ctf_base")
 
 func _apply_visuals() -> void:
 	if not is_node_ready():
@@ -31,3 +41,9 @@ func _apply_visuals() -> void:
 	pad.material_override = mat
 	label.text = "%s BASE" % TEAM_NAMES[team % TEAM_NAMES.size()]
 	label.modulate = color
+	# Drive the linked flag's colour. Reach its mesh directly (a @tool node): flag.gd isn't
+	# @tool, so it's a placeholder in the editor and its methods can't be called there.
+	if flag:
+		var mesh := flag.get_node_or_null("CollisionShape3D/FlagMesh") as FlagMesh
+		if mesh:
+			mesh.color = color
