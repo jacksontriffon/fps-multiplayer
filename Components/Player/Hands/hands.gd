@@ -47,6 +47,8 @@ func _ready() -> void:
 	_cam_base_pos = camera.position
 
 func _physics_process(delta: float) -> void:
+	if not multiplayer.has_multiplayer_peer():
+		return
 	if not is_multiplayer_authority():
 		return
 	update_highlight()
