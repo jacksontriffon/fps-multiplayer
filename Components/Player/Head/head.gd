@@ -37,11 +37,13 @@ func _process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 	# Right-stick look. get_vector applies the actions' deadzone; mouse look is
-	# handled separately in _unhandled_input. Both feed _apply_look.
-	var look := Input.get_vector("look_left", "look_right", "look_up", "look_down")
-	if look != Vector2.ZERO:
-		var speed := JOYPAD_LOOK_SPEED * Global.joypad_sensitivity * delta
-		_apply_look(-look.x * speed, -look.y * speed)
+	# handled separately in _unhandled_input. Both feed _apply_look. Skipped while the
+	# pause overlay is up so the stick can't steer the camera (mouse look is gated there).
+	if not Global.is_input_blocked():
+		var look := Input.get_vector("look_left", "look_right", "look_up", "look_down")
+		if look != Vector2.ZERO:
+			var speed := JOYPAD_LOOK_SPEED * Global.joypad_sensitivity * delta
+			_apply_look(-look.x * speed, -look.y * speed)
 	# Local-only charge bar for the player winding up a throw.
 	var charging := hands.is_charging()
 	charge_bar.visible = charging
@@ -65,6 +67,9 @@ func _update_shake(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():
+		return
+	# Ignore mouse look while the cursor is free (e.g. the pause overlay is open).
+	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		return
 	if event is InputEventMouseMotion:
 		var s := SENSITIVITY * Global.mouse_sensitivity

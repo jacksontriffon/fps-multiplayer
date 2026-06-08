@@ -1,0 +1,56 @@
+[gd_scene load_steps=11 format=3 uid="uid://dkheqqal4up8p"]
+
+[ext_resource type="Texture2D" uid="uid://dyefmxkoi3tqj" path="res://Assets/Textures/Prototype/Light/texture_07.png" id="1_h80nm"]
+[ext_resource type="Texture2D" uid="uid://bmut35caashiv" path="res://Assets/Textures/Prototype/Light/texture_06.png" id="2_ckv7v"]
+[ext_resource type="Script" uid="uid://cflagmesh0001a" path="res://Components/Flag/flag_mesh.gd" id="3_fmscript"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a71vd"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_55ge0"]
+top_radius = 0.02
+bottom_radius = 0.02
+height = 0.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_18n30"]
+albedo_texture = ExtResource("1_h80nm")
+
+[sub_resource type="RibbonTrailMesh" id="RibbonTrailMesh_1icq5"]
+material = SubResource("StandardMaterial3D_18n30")
+shape = 0
+size = 0.3
+section_length = 0.04
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5higa"]
+albedo_texture = ExtResource("1_h80nm")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_55ge0"]
+albedo_texture = ExtResource("2_ckv7v")
+
+[sub_resource type="BoxMesh" id="BoxMesh_18n30"]
+material = SubResource("StandardMaterial3D_55ge0")
+size = Vector3(0.27, 0.18, 0.005)
+
+[node name="FlagMesh" type="MeshInstance3D"]
+material_override = SubResource("StandardMaterial3D_a71vd")
+mesh = SubResource("CylinderMesh_55ge0")
+script = ExtResource("3_fmscript")
+
+[node name="FlagMaterial" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16498154, 0.08697677, 0)
+visible = false
+mesh = SubResource("RibbonTrailMesh_1icq5")
+
+[node name="FlagMaterial2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.16498154, 0.08697677, 0)
+visible = false
+mesh = SubResource("RibbonTrailMesh_1icq5")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1656189, 0.09020996, -0.0010715425)
+visible = false
+size = Vector3(0.28997803, 0.18920898, 0.001)
+material = SubResource("StandardMaterial3D_5higa")
+
+[node name="FlagFabric" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15833215, 0.089550436, 0)
+mesh = SubResource("BoxMesh_18n30")

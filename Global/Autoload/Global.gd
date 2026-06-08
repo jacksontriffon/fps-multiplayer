@@ -55,6 +55,12 @@ func play() -> void:
 	paused = false
 	play_game.emit()
 
+# True when gameplay control input should be ignored — currently just while the
+# pause overlay is up. The local player's input handlers check this rather than
+# any one UI's state, so future blockers (scoreboard, chat, …) plug in here.
+func is_input_blocked() -> bool:
+	return PauseMenu.is_open()
+
 func restart_game() -> void:
 	TimeSystem.reset()
 	restart.emit()
@@ -76,9 +82,3 @@ func set_look_sensitivity(mouse: float, joypad: float) -> void:
 
 
 # --- HANDLE SIGNALS ---
-
-func _input(event):
-	# Dedicated quit action (not ui_cancel) so menu-back / gameplay buttons that
-	# share ui_cancel don't close the whole game.
-	if event.is_action_pressed("quit_game"):
-		get_tree().quit()
