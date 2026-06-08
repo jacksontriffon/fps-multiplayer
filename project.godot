@@ -27,6 +27,7 @@ TimeSystem="*uid://cr2fe0ndrp7o2"
 MatchManager="*res://Global/Autoload/MatchManager.gd"
 CTFManager="*res://Global/Autoload/CTFManager.gd"
 HUD="*res://Global/HUD/HUD.tscn"
+PauseMenu="*res://Global/UI/PauseMenu.tscn"
 
 [editor]
 
