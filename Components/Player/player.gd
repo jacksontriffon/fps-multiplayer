@@ -152,7 +152,7 @@ func _physics_process(delta: float) -> void:
 
 	# While the pause overlay is up the player ignores control input but keeps
 	# simulating (gravity, knockback, collisions) so the world stays live behind it.
-	var input_blocked: bool = PauseMenu.is_open()
+	var input_blocked: bool = Global.is_input_blocked()
 
 	if not input_blocked:
 		_handle_slot_input()

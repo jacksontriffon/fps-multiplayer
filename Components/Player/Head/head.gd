@@ -39,7 +39,7 @@ func _process(delta: float) -> void:
 	# Right-stick look. get_vector applies the actions' deadzone; mouse look is
 	# handled separately in _unhandled_input. Both feed _apply_look. Skipped while the
 	# pause overlay is up so the stick can't steer the camera (mouse look is gated there).
-	if not PauseMenu.is_open():
+	if not Global.is_input_blocked():
 		var look := Input.get_vector("look_left", "look_right", "look_up", "look_down")
 		if look != Vector2.ZERO:
 			var speed := JOYPAD_LOOK_SPEED * Global.joypad_sensitivity * delta

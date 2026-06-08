@@ -55,6 +55,12 @@ func play() -> void:
 	paused = false
 	play_game.emit()
 
+# True when gameplay control input should be ignored — currently just while the
+# pause overlay is up. The local player's input handlers check this rather than
+# any one UI's state, so future blockers (scoreboard, chat, …) plug in here.
+func is_input_blocked() -> bool:
+	return PauseMenu.is_open()
+
 func restart_game() -> void:
 	TimeSystem.reset()
 	restart.emit()
