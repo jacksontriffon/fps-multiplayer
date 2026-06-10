@@ -112,9 +112,10 @@ func set_alive_remote(value: bool) -> void:
 		knockback = Vector3.ZERO
 
 @rpc("any_peer", "call_local", "reliable")
-func respawn_remote(pos: Vector3, yaw: float) -> void:
+func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
 	if not (multiplayer.get_remote_sender_id() in [0, 1]):
 		return
+	team = t
 	velocity = Vector3.ZERO
 	knockback = Vector3.ZERO
 	stamina = MAX_STAMINA
@@ -125,7 +126,8 @@ func _apply_team_color() -> void:
 	if not is_node_ready():
 		return
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = TEAM_COLORS[team % TEAM_COLORS.size()]
+	# team < 0 means teamless (in the lobby, before a match assigns sides) — show neutral grey.
+	mat.albedo_color = Color(0.8, 0.8, 0.8) if team < 0 else TEAM_COLORS[team % TEAM_COLORS.size()]
 	mesh.material_override = mat
 
 # call_local so the host's own rpc_id(1) runs on the server too — a self-RPC is
@@ -140,9 +142,10 @@ func _request_spawn() -> void:
 	var spawner := get_tree().get_first_node_in_group("spawn_points")
 	if spawner == null:
 		return
-	var spawn: Dictionary = spawner.reserve(peer_id)
+	# Lobby join: any free spot, no team yet (teams are assigned when a match starts).
+	var spawn: Dictionary = spawner.reserve_any(peer_id)
 	_apply_spawn.rpc_id(peer_id, spawn["position"], spawn["yaw"], spawn["team"])
-	MatchManager.server_player_ready(peer_id, spawn["team"])
+	MatchManager.server_player_ready(peer_id)
 
 @rpc("any_peer", "call_local", "reliable")
 func _apply_spawn(pos: Vector3, yaw: float, t: int) -> void:
