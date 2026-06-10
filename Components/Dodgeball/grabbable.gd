@@ -74,6 +74,10 @@ func _ready() -> void:
 	continuous_cd = true
 
 func _physics_process(delta: float) -> void:
+	# is_multiplayer_authority() reads multiplayer.get_unique_id(), which errors when
+	# no peer is active (pre-connect, post-disconnect, or scene run standalone).
+	if not multiplayer.has_multiplayer_peer():
+		return
 	if is_multiplayer_authority():
 		_update_live_state()
 	_update_charge_tint(delta)

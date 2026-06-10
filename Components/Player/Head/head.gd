@@ -27,6 +27,8 @@ var _trauma := 0.0
 
 
 func _ready() -> void:
+	if not multiplayer.has_multiplayer_peer():
+		return
 	if not is_multiplayer_authority():
 		return
 	camera.make_current()
@@ -34,6 +36,8 @@ func _ready() -> void:
 	crosshairs.visible = true
 
 func _process(delta: float) -> void:
+	if not multiplayer.has_multiplayer_peer():
+		return
 	if not is_multiplayer_authority():
 		return
 	# Right-stick look. get_vector applies the actions' deadzone; mouse look is
@@ -66,6 +70,8 @@ func _update_shake(delta: float) -> void:
 	_trauma = maxf(0.0, _trauma - TRAUMA_DECAY * delta)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not multiplayer.has_multiplayer_peer():
+		return
 	if not is_multiplayer_authority():
 		return
 	# Ignore mouse look while the cursor is free (e.g. the pause overlay is open).

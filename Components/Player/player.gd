@@ -157,6 +157,8 @@ func _apply_spawn(pos: Vector3, yaw: float, t: int) -> void:
 	head.rotation.y = yaw
 
 func _physics_process(delta: float) -> void:
+	if not multiplayer.has_multiplayer_peer():
+		return
 	if not is_multiplayer_authority():
 		return
 
