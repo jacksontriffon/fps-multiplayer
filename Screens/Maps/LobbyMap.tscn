@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://blg2uymfm5m1u"]
+[gd_scene load_steps=12 format=3 uid="uid://blg2uymfm5m1u"]
 
 [ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
 [ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="4_spawn"]
 [ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="5_sp"]
 [ext_resource type="PackedScene" uid="uid://c60hxnsma28oh" path="res://Components/Pedestal/pedestal.tscn" id="6_ped"]
+[ext_resource type="Script" path="res://Components/InfiniteHeartZone/infinite_heart_zone.gd" id="7_infzone"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lm"]
 
@@ -17,6 +18,9 @@ background_mode = 2
 sky = SubResource("Sky_lm")
 tonemap_mode = 2
 glow_enabled = true
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_infzone"]
+size = Vector3(31, 8, 23.5)
 
 [node name="LobbyMap" type="Node3D"]
 
@@ -107,3 +111,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -11)
 [node name="PedestalCTF" parent="." instance=ExtResource("6_ped")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, -11)
 game_mode = 1
+
+[node name="InfiniteHeartZone" type="Area3D" parent="."]
+script = ExtResource("7_infzone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InfiniteHeartZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -7.7)
+shape = SubResource("BoxShape3D_infzone")

@@ -124,7 +124,10 @@ func can_hit(victim_id: int, thrower_id: int) -> bool:
 		return false
 	if victim_id == thrower_id:
 		return self_hit
-	if not friendly_fire and _team_of.get(victim_id, -1) == _team_of.get(thrower_id, -2):
+	# The lobby (teamless WAITING) is a free-for-all so players can shove each other
+	# around; matches use the configured friendly_fire rule (off = real dodgeball).
+	var ff := friendly_fire or state == State.WAITING
+	if not ff and _team_of.get(victim_id, -1) == _team_of.get(thrower_id, -2):
 		return false
 	return true
 

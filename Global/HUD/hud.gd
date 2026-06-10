@@ -35,6 +35,9 @@ var _banner_age := 0.0
 var _last_lives := -1
 var _pulse := 0.0
 
+# Kept as the last child of the Lives box; shown only for the infinite-hearts effect.
+var _infinity_label: Label
+
 # Slot panel styles: the active slot gets a brighter border so it reads as selected.
 var _slot_normal: StyleBoxFlat
 var _slot_active: StyleBoxFlat
@@ -52,6 +55,12 @@ func _ready() -> void:
 	_slot_active = _slot_normal.duplicate()
 	_slot_active.border_color = Color(1, 1, 1, 0.9)
 	_slot_active.bg_color = Color(0, 0, 0, 0.65)
+	_infinity_label = Label.new()
+	_infinity_label.text = "∞"
+	_infinity_label.add_theme_font_size_override("font_size", 26)
+	_infinity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_infinity_label.visible = false
+	lives_box.add_child(_infinity_label)
 	_build_previews()
 
 func _process(delta: float) -> void:
@@ -70,15 +79,22 @@ func _process(delta: float) -> void:
 			_preview_pivots[i].rotate_y(delta * PREVIEW_SPIN)
 
 func _update_bar(id: int) -> void:
+	var player := _local_player()
+	var infinite := player != null and player.has_effect(Player.INFINITE_HEARTS)
+	# Show the bar during a match, or whenever the local player carries the
+	# infinite-hearts effect (e.g. standing in the lobby zone).
 	var playing := MatchManager.state != MatchManager.State.WAITING and MatchManager.lives.has(id)
-	bottom_bar.visible = playing
-	if not playing:
+	var show := playing or infinite
+	bottom_bar.visible = show
+	if not show:
 		for i in _preview_viewports.size():
 			_disable_preview(i)
 		return
+	if infinite:
+		_update_lives_infinite()
 	# Lives/hearts are a Team-mode concept; CTF has no elimination, so hide them there —
 	# but stamina and the item slots still apply (you throw in CTF too).
-	if MatchManager.game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
+	elif MatchManager.game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
 		lives_box.visible = false
 		lives_text.visible = false
 	else:
@@ -111,21 +127,42 @@ func _update_lives(n: int) -> void:
 		return
 	lives_text.visible = false
 	lives_box.visible = true
+	_infinity_label.visible = false
 	var total: int = max(MatchManager.STARTING_LIVES, n)
 	_ensure_hearts(total)
-	for i in lives_box.get_child_count():
-		var heart: TextureRect = lives_box.get_child(i)
-		heart.texture = HEART_FULL if i < n else HEART_EMPTY
+	var hearts := _heart_rects()
+	for i in hearts.size():
+		hearts[i].texture = HEART_FULL if i < n else HEART_EMPTY
+
+# A single full heart followed by an ∞ sign — the infinite-hearts effect.
+func _update_lives_infinite() -> void:
+	lives_text.visible = false
+	lives_box.visible = true
+	_ensure_hearts(1)
+	_heart_rects()[0].texture = HEART_FULL
+	_infinity_label.visible = true
+
+# Heart icons are the TextureRect children of the Lives box; the ∞ label also lives
+# there but is excluded so it never gets treated as (or freed like) a heart.
+func _heart_rects() -> Array:
+	var hearts := []
+	for child in lives_box.get_children():
+		if child is TextureRect:
+			hearts.append(child)
+	return hearts
 
 func _ensure_hearts(count: int) -> void:
-	while lives_box.get_child_count() < count:
+	var hearts := _heart_rects()
+	while hearts.size() < count:
 		var heart := TextureRect.new()
 		heart.custom_minimum_size = HEART_SIZE
 		heart.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		heart.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		lives_box.add_child(heart)
-	while lives_box.get_child_count() > count:
-		lives_box.get_child(lives_box.get_child_count() - 1).free()
+		lives_box.move_child(heart, hearts.size())  # keep hearts ahead of the ∞ label
+		hearts.append(heart)
+	while hearts.size() > count:
+		hearts.pop_back().free()
 
 # Mirror the local player's inventory: each occupied slot shows its item (a live 3D
 # preview by default, or the item's flat item_ui texture when it has one) and the

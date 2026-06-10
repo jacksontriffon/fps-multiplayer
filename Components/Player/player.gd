@@ -64,6 +64,27 @@ var _regen_delay := 0.0
 
 var alive := true
 
+# Generic gameplay effects: effect id -> set of grantor sources. Tracking sources lets
+# several grantors stack the same effect without clobbering each other, so the same
+# effect can later move from the lobby zone onto a consumable item or ability. The HUD
+# reads has_effect(INFINITE_HEARTS) to swap the heart row for a single heart + ∞.
+const INFINITE_HEARTS := &"infinite_hearts"
+
+var _effects := {}
+
+func has_effect(id: StringName) -> bool:
+	return _effects.has(id)
+
+func set_effect(id: StringName, active: bool, source: StringName = &"default") -> void:
+	var sources: Dictionary = _effects.get(id, {})
+	if active:
+		sources[source] = true
+		_effects[id] = sources
+	else:
+		sources.erase(source)
+		if sources.is_empty():
+			_effects.erase(id)
+
 # Stamina is spent by sprinting (here) and by charging a throw (Hands calls these).
 func has_stamina() -> bool:
 	return stamina > 0.0
