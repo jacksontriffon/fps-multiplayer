@@ -10,9 +10,21 @@ const WIN_SCORE := 5
 const CTF_CAPTURE_LIMIT := 3
 const TEAM_COUNT := 2
 const MIN_PER_TEAM := 1
+# Teams aren't decided in the lobby — players gather teamless and are split into teams only
+# when a match starts (see _assign_teams). So starting just needs enough bodies present.
+const MIN_PLAYERS := 2
 const ROUND_RESET_DELAY := 3.0
 const MATCH_RESET_DELAY := 6.0
 const TEAM_NAMES := ["Red", "Blue"]
+
+# Where each mode is played, and where everyone waits between matches. The starting pedestal
+# picks the mode; this is the single source of truth mapping mode -> map. The persistent root
+# (group "game_root") loads these on every peer.
+const LOBBY_MAP := "res://Screens/Maps/LobbyMap.tscn"
+const MAP_OF := {
+	Pedestal.GameMode.TEAM: "res://Screens/Maps/TeamArena.tscn",
+	Pedestal.GameMode.CAPTURE_THE_FLAG: "res://Screens/Maps/CTFArena.tscn",
+}
 
 var state: int = State.WAITING
 var team_scores := [0, 0]
@@ -32,10 +44,13 @@ var self_hit := false       # when true, your own thrown ball can get you out
 var _team_of := {}
 var _reset_token := 0
 
-func server_player_ready(id: int, team: int) -> void:
+# A player joins teamless (team -1); _team_of doubles as the roster of present players.
+# Their real team is assigned at match start.
+func server_player_ready(id: int) -> void:
 	if not multiplayer.is_server():
 		return
-	_team_of[id] = team
+	if not _team_of.has(id):
+		_team_of[id] = -1
 	if not lives.has(id):
 		lives[id] = 0
 	if state != State.WAITING:
@@ -54,6 +69,18 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
 	game_mode = mode
 	team_scores = [0, 0]
 	round_num = 0
+	# Split the teamless lobby roster into teams now, as the match begins.
+	_assign_teams()
+	# Swap every peer into this mode's map first, then wait a frame so the new map's
+	# SpawnPoints and balls are in the tree before we reset and spawn players into them.
+	await _load_map_for(MAP_OF[mode])
+	# A player may have left during the swap; bail back to the lobby if we can't start anymore.
+	if not _both_teams_present():
+		await _to_lobby()
+		state = State.WAITING
+		status_text = ""
+		_broadcast()
+		return
 	# The two modes are mutually exclusive: Team runs the rounds/elimination loop and is
 	# won by round wins; CTF has no elimination and is won by flag captures.
 	if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
@@ -62,7 +89,7 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
 		_start_round()
 
 func can_start() -> bool:
-	return state == State.WAITING and _both_teams_present()
+	return state == State.WAITING and _team_of.size() >= MIN_PLAYERS
 
 func server_player_left(id: int) -> void:
 	if not multiplayer.is_server():
@@ -197,7 +224,27 @@ func _reset_to_waiting() -> void:
 	round_num = 0
 	state = State.WAITING
 	status_text = ""
+	await _to_lobby()
 	_broadcast()
+
+# Return to the lobby map and drop teams: everyone is teamless again until the next match.
+func _to_lobby() -> void:
+	await _load_map_for(LOBBY_MAP)
+	_clear_teams()
+	for id in _team_of:
+		_respawn_neutral(id)
+
+# Split the current roster into teams. This is the seam where player-chosen teams will plug
+# in later; for now it auto-balances by a stable order (1st player Red, 2nd Blue, ...).
+func _assign_teams() -> void:
+	var ids := _team_of.keys()
+	ids.sort()
+	for i in range(ids.size()):
+		_team_of[ids[i]] = i % TEAM_COUNT
+
+func _clear_teams() -> void:
+	for id in _team_of:
+		_team_of[id] = -1
 
 func _both_teams_present() -> bool:
 	var counts := _team_player_counts()
@@ -235,11 +282,34 @@ func _respawn(id: int) -> void:
 	var spawner := get_tree().get_first_node_in_group("spawn_points")
 	p.set_alive_remote.rpc(true)
 	if spawner:
-		var spawn: Dictionary = spawner.reserve(id)
-		p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"])
+		# Keep the player's existing team so a fresh map's empty spawner can't flip it.
+		var spawn: Dictionary = spawner.reserve(id, team_of(id))
+		p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"], spawn["team"])
+
+# Lobby respawn: any free spot, no team (the player turns neutral).
+func _respawn_neutral(id: int) -> void:
+	var p := _player(id)
+	if p == null:
+		return
+	var spawner := get_tree().get_first_node_in_group("spawn_points")
+	p.set_alive_remote.rpc(true)
+	if spawner:
+		var spawn: Dictionary = spawner.reserve_any(id)
+		p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"], spawn["team"])
 
 func _player(id: int) -> Node:
 	return get_tree().current_scene.get_node_or_null(str(id))
+
+func _game_root() -> Node:
+	return get_tree().get_first_node_in_group("game_root")
+
+# Swap every peer to `path` and wait a frame so the new map (and its SpawnPoints/balls) is in
+# the tree before callers reset or respawn into it.
+func _load_map_for(path: String) -> void:
+	var root := _game_root()
+	if root:
+		root.load_map.rpc(path)
+	await get_tree().process_frame
 
 func _schedule(cb: Callable, delay: float) -> void:
 	_reset_token += 1

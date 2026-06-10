@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://dspwnpt0point1"]
+
+[ext_resource type="Script" path="res://Components/SpawnPoints/spawn_point.gd" id="1_sp"]
+
+[node name="SpawnPoint" type="Marker3D"]
+script = ExtResource("1_sp")
+
+[node name="TeamLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+billboard = 1
+text = "Red spawn"
+font_size = 48
+outline_size = 12

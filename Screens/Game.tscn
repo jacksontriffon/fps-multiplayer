@@ -1,0 +1,63 @@
+[gd_scene load_steps=4 format=3 uid="uid://tuuso7v36emi"]
+
+[ext_resource type="Script" uid="uid://8pmim180cpqj" path="res://Screens/game.gd" id="1_game"]
+[ext_resource type="PackedScene" uid="uid://dn5gm2e014upj" path="res://Components/Player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://dlobbymap00001" path="res://Screens/Maps/LobbyMap.tscn" id="3_lobby"]
+
+[node name="Game" type="Node3D"]
+script = ExtResource("1_game")
+net_mode = 1
+player_scene = ExtResource("2_player")
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="CenterContainer" type="CenterContainer" parent="UILayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UILayer/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UILayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HostGameButton" type="Button" parent="UILayer/CenterContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+text = "Host Game"
+
+[node name="JoinGameButton" type="Button" parent="UILayer/CenterContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+disabled = true
+text = "Join Game"
+
+[node name="LineEdit" type="LineEdit" parent="UILayer/CenterContainer/VBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+placeholder_text = "Type lobby id..."
+caret_blink = true
+
+[node name="Quit" type="Button" parent="UILayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Quit"
+
+[node name="MapContainer" type="Node3D" parent="."]
+
+[node name="Map" parent="MapContainer" instance=ExtResource("3_lobby")]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://dn5gm2e014upj")
+spawn_path = NodePath("..")
+
+[node name="MenuCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.99097383, 0.13405538, 0, -0.13405538, 0.99097383, 0, 1.5856624, 0)
+
+[connection signal="pressed" from="UILayer/CenterContainer/VBoxContainer/VBoxContainer/HostGameButton" to="." method="_on_host_game_button_pressed"]
+[connection signal="pressed" from="UILayer/CenterContainer/VBoxContainer/VBoxContainer/JoinGameButton" to="." method="_on_join_game_button_pressed"]
+[connection signal="text_changed" from="UILayer/CenterContainer/VBoxContainer/VBoxContainer/LineEdit" to="." method="_on_line_edit_text_changed"]
+[connection signal="pressed" from="UILayer/CenterContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]

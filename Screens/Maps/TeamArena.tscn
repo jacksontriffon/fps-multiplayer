@@ -1,0 +1,111 @@
+[gd_scene load_steps=9 format=3 uid="uid://dteamarena0001"]
+
+[ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
+[ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
+[ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="3_ball"]
+[ext_resource type="Script" path="res://Components/SpawnPoints/spawn_points.gd" id="4_spawn"]
+[ext_resource type="PackedScene" uid="uid://dspwnpt0point1" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="5_sp"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ta"]
+
+[sub_resource type="Sky" id="Sky_ta"]
+sky_material = SubResource("ProceduralSkyMaterial_ta")
+
+[sub_resource type="Environment" id="Environment_ta"]
+background_mode = 2
+sky = SubResource("Sky_ta")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="TeamArena" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ta")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 12, 0)
+shadow_enabled = true
+
+[node name="Arena" type="Node3D" parent="."]
+
+[node name="Floor" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(40, 1, 24)
+material = ExtResource("1_grid")
+
+[node name="WallWest" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 2, 0)
+use_collision = true
+size = Vector3(1, 4, 24)
+material = ExtResource("2_grid2")
+
+[node name="WallEast" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 2, 0)
+use_collision = true
+size = Vector3(1, 4, 24)
+material = ExtResource("2_grid2")
+
+[node name="WallNorth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -12)
+use_collision = true
+size = Vector3(40, 4, 1)
+material = ExtResource("2_grid2")
+
+[node name="WallSouth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 12)
+use_collision = true
+size = Vector3(40, 4, 1)
+material = ExtResource("2_grid2")
+
+[node name="CenterLine" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+use_collision = true
+size = Vector3(0.5, 0.3, 24)
+material = ExtResource("2_grid2")
+
+[node name="Dodgeball" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -8)
+
+[node name="Dodgeball2" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -4)
+
+[node name="Dodgeball3" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+
+[node name="Dodgeball4" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 4)
+
+[node name="Dodgeball5" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 8)
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+script = ExtResource("4_spawn")
+
+[node name="Red1" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -16, 0.1, -6)
+
+[node name="Red2" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -16, 0.1, -2)
+
+[node name="Red3" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -16, 0.1, 2)
+
+[node name="Red4" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -16, 0.1, 6)
+
+[node name="Blue1" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 16, 0.1, -6)
+team = 1
+
+[node name="Blue2" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 16, 0.1, -2)
+team = 1
+
+[node name="Blue3" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 16, 0.1, 2)
+team = 1
+
+[node name="Blue4" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 16, 0.1, 6)
+team = 1
