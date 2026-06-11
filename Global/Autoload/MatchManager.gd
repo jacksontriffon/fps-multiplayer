@@ -21,9 +21,11 @@ const TEAM_NAMES := ["Red", "Blue"]
 # picks the mode; this is the single source of truth mapping mode -> map. The persistent root
 # (group "game_root") loads these on every peer.
 const LOBBY_MAP := "res://Screens/Maps/LobbyMap.tscn"
+# Both modes currently point at the Colosseum sandbox for testing; the original
+# arenas are TeamArena.tscn and CTFArena.tscn.
 const MAP_OF := {
-	Pedestal.GameMode.TEAM: "res://Screens/Maps/TeamArena.tscn",
-	Pedestal.GameMode.CAPTURE_THE_FLAG: "res://Screens/Maps/CTFArena.tscn",
+	Pedestal.GameMode.TEAM: "res://Screens/Maps/ColosseumMap.tscn",
+	Pedestal.GameMode.CAPTURE_THE_FLAG: "res://Screens/Maps/ColosseumMap.tscn",
 }
 
 var state: int = State.WAITING

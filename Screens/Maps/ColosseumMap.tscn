@@ -1,0 +1,646 @@
+[gd_scene load_steps=13 format=3 uid="uid://bcolosseum0001"]
+
+[ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
+[ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
+[ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="3_ball"]
+[ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="4_spawn"]
+[ext_resource type="PackedScene" uid="uid://dspwnpt0point1" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="5_sp"]
+[ext_resource type="PackedScene" uid="uid://bbasescene012a" path="res://Components/CaptureTheFlag/base.tscn" id="6_base"]
+[ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="7_flag"]
+[ext_resource type="Script" path="res://Components/ChamberDoor/chamber_door.gd" id="8_door"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_col"]
+
+[sub_resource type="Sky" id="Sky_col"]
+sky_material = SubResource("ProceduralSkyMaterial_col")
+
+[sub_resource type="Environment" id="Environment_col"]
+background_mode = 2
+sky = SubResource("Sky_col")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="PedestalMat_col"]
+albedo_color = Color(0.9, 0.8, 0.5, 1)
+emission_enabled = true
+emission = Color(1, 0.8, 0.4, 1)
+emission_energy_multiplier = 1.5
+
+[node name="ColosseumMap" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_col")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 12, 0)
+shadow_enabled = true
+
+[node name="Arena" type="Node3D" parent="."]
+
+[node name="Floor" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(74, 1, 74)
+material = ExtResource("1_grid")
+
+[node name="WallNorth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -28)
+use_collision = true
+size = Vector3(57, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="WallSouth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 28)
+use_collision = true
+size = Vector3(57, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="WallWestA" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, -20.75)
+use_collision = true
+size = Vector3(1, 8, 14.5)
+material = ExtResource("2_grid2")
+
+[node name="WallWestB" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, -8)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("2_grid2")
+
+[node name="WallWestC" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, 0)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("2_grid2")
+
+[node name="WallWestD" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, 8)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("2_grid2")
+
+[node name="WallWestE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, 20.75)
+use_collision = true
+size = Vector3(1, 8, 14.5)
+material = ExtResource("2_grid2")
+
+[node name="WallEastA" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, -20.75)
+use_collision = true
+size = Vector3(1, 8, 14.5)
+material = ExtResource("2_grid2")
+
+[node name="WallEastB" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, -8)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("2_grid2")
+
+[node name="WallEastC" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, 0)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("2_grid2")
+
+[node name="WallEastD" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, 8)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("2_grid2")
+
+[node name="WallEastE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, 20.75)
+use_collision = true
+size = Vector3(1, 8, 14.5)
+material = ExtResource("2_grid2")
+
+[node name="CornerNW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -23, 4, -23)
+use_collision = true
+size = Vector3(16, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="CornerSE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 23, 4, 23)
+use_collision = true
+size = Vector3(16, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="CornerNE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 23, 4, -23)
+use_collision = true
+size = Vector3(16, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="CornerSW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -23, 4, 23)
+use_collision = true
+size = Vector3(16, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="PillarNW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.5, -8)
+use_collision = true
+size = Vector3(2, 5, 2)
+material = ExtResource("2_grid2")
+
+[node name="PillarNE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.5, -8)
+use_collision = true
+size = Vector3(2, 5, 2)
+material = ExtResource("2_grid2")
+
+[node name="PillarSW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.5, 8)
+use_collision = true
+size = Vector3(2, 5, 2)
+material = ExtResource("2_grid2")
+
+[node name="PillarSE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.5, 8)
+use_collision = true
+size = Vector3(2, 5, 2)
+material = ExtResource("2_grid2")
+
+[node name="CoverNorth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -14)
+use_collision = true
+size = Vector3(6, 1.5, 1.5)
+material = ExtResource("2_grid2")
+
+[node name="CoverSouth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 14)
+use_collision = true
+size = Vector3(6, 1.5, 1.5)
+material = ExtResource("2_grid2")
+
+[node name="DiamondWest" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -16, 1, 0)
+use_collision = true
+size = Vector3(4, 2, 4)
+material = ExtResource("2_grid2")
+
+[node name="DiamondEast" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 16, 1, 0)
+use_collision = true
+size = Vector3(4, 2, 4)
+material = ExtResource("2_grid2")
+
+[node name="CenterStage" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+use_collision = true
+size = Vector3(6, 0.5, 6)
+material = ExtResource("1_grid")
+
+[node name="CenterBall1" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.8, 0)
+
+[node name="CenterBall2" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.8, 0)
+
+[node name="CenterBall3" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -2)
+
+[node name="CenterBall4" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 2)
+
+[node name="Chambers" type="Node3D" parent="."]
+
+[node name="RedChamber1" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 4, -12)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, -15.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, -8.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6, -12)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.55, -12)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/RedChamber1" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.4, -12)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.8, -12)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+omni_range = 5.0
+
+[node name="Door" type="CSGBox3D" parent="Chambers/RedChamber1" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2, -12)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="RedChamber2" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 4, -4)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, -7.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, -0.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6, -4)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.55, -4)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/RedChamber2" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.4, -4)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.8, -4)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+omni_range = 5.0
+
+[node name="Door" type="CSGBox3D" parent="Chambers/RedChamber2" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2, -4)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="RedChamber3" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 4, 4)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, 0.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, 7.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6, 4)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.55, 4)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/RedChamber3" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.4, 4)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.8, 4)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+omni_range = 5.0
+
+[node name="Door" type="CSGBox3D" parent="Chambers/RedChamber3" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2, 4)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="RedChamber4" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 4, 12)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, 8.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, 15.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6, 12)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.55, 12)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/RedChamber4" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.4, 12)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.8, 12)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+omni_range = 5.0
+
+[node name="Door" type="CSGBox3D" parent="Chambers/RedChamber4" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2, 12)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="BlueChamber1" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 4, -12)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, -15.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, -8.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6, -12)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.55, -12)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/BlueChamber1" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.4, -12)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.8, -12)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+omni_range = 5.0
+
+[node name="Door" type="CSGBox3D" parent="Chambers/BlueChamber1" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2, -12)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="BlueChamber2" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 4, -4)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, -7.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, -0.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6, -4)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.55, -4)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/BlueChamber2" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.4, -4)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.8, -4)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+omni_range = 5.0
+
+[node name="Door" type="CSGBox3D" parent="Chambers/BlueChamber2" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2, -4)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="BlueChamber3" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 4, 4)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, 0.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, 7.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6, 4)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.55, 4)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/BlueChamber3" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.4, 4)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.8, 4)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+omni_range = 5.0
+
+[node name="Door" type="CSGBox3D" parent="Chambers/BlueChamber3" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2, 4)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="BlueChamber4" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 4, 12)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, 8.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, 15.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6, 12)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.55, 12)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/BlueChamber4" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.4, 12)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.8, 12)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+omni_range = 5.0
+
+[node name="Door" type="CSGBox3D" parent="Chambers/BlueChamber4" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2, 12)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("6_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 0, 0)
+flag = NodePath("../RedFlag")
+
+[node name="BlueBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("6_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 0, 0)
+team = 1
+flag = NodePath("../BlueFlag")
+
+[node name="RedFlag" parent="." instance=ExtResource("7_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 1, 0)
+
+[node name="BlueFlag" parent="." instance=ExtResource("7_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 1, 0)
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+script = ExtResource("4_spawn")
+
+[node name="Red1" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -33.5, 0.1, -12)
+
+[node name="Red2" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -33.5, 0.1, -4)
+
+[node name="Red3" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -33.5, 0.1, 4)
+
+[node name="Red4" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -33.5, 0.1, 12)
+
+[node name="Blue1" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 33.5, 0.1, -12)
+team = 1
+
+[node name="Blue2" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 33.5, 0.1, -4)
+team = 1
+
+[node name="Blue3" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 33.5, 0.1, 4)
+team = 1
+
+[node name="Blue4" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 33.5, 0.1, 12)
+team = 1
