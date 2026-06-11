@@ -1,0 +1,327 @@
+[gd_scene load_steps=14 format=3 uid="uid://dpirateship0001"]
+
+[ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="1_grid2"]
+[ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="2_ball"]
+[ext_resource type="Script" path="res://Components/SpawnPoints/spawn_points.gd" id="3_spawn"]
+[ext_resource type="PackedScene" uid="uid://dspwnpt0point1" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="4_sp"]
+[ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="5_base"]
+[ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="6_flag"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_pirate"]
+
+[sub_resource type="Sky" id="Sky_pirate"]
+sky_material = SubResource("ProceduralSkyMaterial_pirate")
+
+[sub_resource type="Environment" id="Environment_pirate"]
+background_mode = 2
+sky = SubResource("Sky_pirate")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="Material_water"]
+albedo_color = Color(0.13, 0.32, 0.46, 1)
+metallic = 0.1
+roughness = 0.15
+
+[sub_resource type="StandardMaterial3D" id="Material_deck"]
+albedo_color = Color(0.55, 0.4, 0.24, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Material_darkwood"]
+albedo_color = Color(0.3, 0.2, 0.12, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Material_sail"]
+albedo_color = Color(0.92, 0.9, 0.84, 1)
+roughness = 1.0
+
+[node name="PirateShipSandbox" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_pirate")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 12, 0)
+shadow_enabled = true
+
+[node name="Arena" type="Node3D" parent="."]
+
+[node name="Water" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(64, 1, 40)
+material = SubResource("Material_water")
+
+[node name="WallNorth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -20.5)
+use_collision = true
+size = Vector3(66, 4, 1)
+material = ExtResource("1_grid2")
+
+[node name="WallSouth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 20.5)
+use_collision = true
+size = Vector3(66, 4, 1)
+material = ExtResource("1_grid2")
+
+[node name="WallWest" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 1.5, 0)
+use_collision = true
+size = Vector3(1, 4, 42)
+material = ExtResource("1_grid2")
+
+[node name="WallEast" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.5, 1.5, 0)
+use_collision = true
+size = Vector3(1, 4, 42)
+material = ExtResource("1_grid2")
+
+[node name="RedShip" type="Node3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 0)
+
+[node name="Hull" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+use_collision = true
+size = Vector3(16, 2, 8)
+material = SubResource("Material_deck")
+
+[node name="Prow" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 9, 1, 0)
+use_collision = true
+size = Vector3(6, 2, 6)
+material = SubResource("Material_deck")
+
+[node name="QuarterDeck" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.5, 0)
+use_collision = true
+size = Vector3(4, 1, 8)
+material = SubResource("Material_deck")
+
+[node name="QuarterStairs" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(0.942809, 0.333333, 0, -0.333333, 0.942809, 0, 0, 0, 1, -2.6, 2.45, 0)
+use_collision = true
+size = Vector3(3, 0.2, 2)
+material = SubResource("Material_darkwood")
+
+[node name="Mast" type="CSGCylinder3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+use_collision = true
+radius = 0.25
+height = 9.0
+material = SubResource("Material_darkwood")
+
+[node name="Yard" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.2, 0)
+size = Vector3(0.3, 0.3, 7)
+material = SubResource("Material_darkwood")
+
+[node name="Sail" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, 0)
+size = Vector3(0.15, 3.5, 6.5)
+material = SubResource("Material_sail")
+
+[node name="BulwarkPort" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -3.85)
+use_collision = true
+size = Vector3(16, 1, 0.3)
+material = SubResource("Material_darkwood")
+
+[node name="BulwarkStarboardAft" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.625, 2.5, 3.85)
+use_collision = true
+size = Vector3(6.75, 1, 0.3)
+material = SubResource("Material_darkwood")
+
+[node name="BulwarkStarboardFore" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.625, 2.5, 3.85)
+use_collision = true
+size = Vector3(6.75, 1, 0.3)
+material = SubResource("Material_darkwood")
+
+[node name="SternRail" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.85, 3.5, 0)
+use_collision = true
+size = Vector3(0.3, 1, 8)
+material = SubResource("Material_darkwood")
+
+[node name="BoardingRamp" type="CSGBox3D" parent="Arena/RedShip"]
+transform = Transform3D(1, 0, 0, 0, 0.928477, -0.371391, 0, 0.371391, 0.928477, 0, 1, 6.5)
+use_collision = true
+size = Vector3(1.6, 0.2, 5.4)
+material = SubResource("Material_deck")
+
+[node name="BlueShip" type="Node3D" parent="Arena"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 14, 0, 0)
+
+[node name="Hull" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+use_collision = true
+size = Vector3(16, 2, 8)
+material = SubResource("Material_deck")
+
+[node name="Prow" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 9, 1, 0)
+use_collision = true
+size = Vector3(6, 2, 6)
+material = SubResource("Material_deck")
+
+[node name="QuarterDeck" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.5, 0)
+use_collision = true
+size = Vector3(4, 1, 8)
+material = SubResource("Material_deck")
+
+[node name="QuarterStairs" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(0.942809, 0.333333, 0, -0.333333, 0.942809, 0, 0, 0, 1, -2.6, 2.45, 0)
+use_collision = true
+size = Vector3(3, 0.2, 2)
+material = SubResource("Material_darkwood")
+
+[node name="Mast" type="CSGCylinder3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
+use_collision = true
+radius = 0.25
+height = 9.0
+material = SubResource("Material_darkwood")
+
+[node name="Yard" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.2, 0)
+size = Vector3(0.3, 0.3, 7)
+material = SubResource("Material_darkwood")
+
+[node name="Sail" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, 0)
+size = Vector3(0.15, 3.5, 6.5)
+material = SubResource("Material_sail")
+
+[node name="BulwarkPort" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -3.85)
+use_collision = true
+size = Vector3(16, 1, 0.3)
+material = SubResource("Material_darkwood")
+
+[node name="BulwarkStarboardAft" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.625, 2.5, 3.85)
+use_collision = true
+size = Vector3(6.75, 1, 0.3)
+material = SubResource("Material_darkwood")
+
+[node name="BulwarkStarboardFore" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.625, 2.5, 3.85)
+use_collision = true
+size = Vector3(6.75, 1, 0.3)
+material = SubResource("Material_darkwood")
+
+[node name="SternRail" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.85, 3.5, 0)
+use_collision = true
+size = Vector3(0.3, 1, 8)
+material = SubResource("Material_darkwood")
+
+[node name="BoardingRamp" type="CSGBox3D" parent="Arena/BlueShip"]
+transform = Transform3D(1, 0, 0, 0, 0.928477, -0.371391, 0, 0.371391, 0.928477, 0, 1, 6.5)
+use_collision = true
+size = Vector3(1.6, 0.2, 5.4)
+material = SubResource("Material_deck")
+
+[node name="PlankPort" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.925, -2.5)
+use_collision = true
+size = Vector3(14, 0.15, 1.2)
+material = SubResource("Material_darkwood")
+
+[node name="PlankStarboard" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.925, 2.5)
+use_collision = true
+size = Vector3(14, 0.15, 1.2)
+material = SubResource("Material_darkwood")
+
+[node name="CrateNorth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -6)
+use_collision = true
+size = Vector3(1.6, 1.6, 1.6)
+material = SubResource("Material_darkwood")
+
+[node name="CrateSouth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 6)
+use_collision = true
+size = Vector3(1.6, 1.6, 1.6)
+material = SubResource("Material_darkwood")
+
+[node name="BarrelNorth" type="CSGCylinder3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.75, -6)
+use_collision = true
+radius = 0.6
+height = 1.5
+material = SubResource("Material_darkwood")
+
+[node name="BarrelSouth" type="CSGCylinder3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.75, 6)
+use_collision = true
+radius = 0.6
+height = 1.5
+material = SubResource("Material_darkwood")
+
+[node name="Dodgeball" parent="Arena" instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, -2.5)
+
+[node name="Dodgeball2" parent="Arena" instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, 2.5)
+
+[node name="Dodgeball3" parent="Arena" instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2.3, 0)
+
+[node name="Dodgeball4" parent="Arena" instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 2.3, 0)
+
+[node name="Dodgeball5" parent="Arena" instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -4.2)
+
+[node name="Dodgeball6" parent="Arena" instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 4.2)
+
+[node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("5_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 3, 0)
+flag = NodePath("../RedFlag")
+
+[node name="BlueBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("5_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 3, 0)
+team = 1
+flag = NodePath("../BlueFlag")
+
+[node name="RedFlag" parent="." instance=ExtResource("6_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 4, 0)
+
+[node name="BlueFlag" parent="." instance=ExtResource("6_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 4, 0)
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+script = ExtResource("3_spawn")
+
+[node name="Red1" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 2.1, -3)
+
+[node name="Red2" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 2.1, -1)
+
+[node name="Red3" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 2.1, 1)
+
+[node name="Red4" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 2.1, 3)
+
+[node name="Blue1" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 2.1, -3)
+team = 1
+
+[node name="Blue2" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 2.1, -1)
+team = 1
+
+[node name="Blue3" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 2.1, 1)
+team = 1
+
+[node name="Blue4" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 2.1, 3)
+team = 1
