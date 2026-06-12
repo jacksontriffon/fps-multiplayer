@@ -27,6 +27,9 @@ const MAP_OF := {
 	Pedestal.GameMode.TEAM: "res://Screens/Maps/ColosseumMap.tscn",
 	Pedestal.GameMode.CAPTURE_THE_FLAG: "res://Screens/Maps/ColosseumMap.tscn",
 }
+# Sandbox override for map testing: when true, every mode plays on SANDBOX_MAP instead.
+const SANDBOX_MAP := "res://Screens/Maps/PirateShipSandbox.tscn"
+const USE_SANDBOX_MAP := true
 
 var state: int = State.WAITING
 var team_scores := [0, 0]
@@ -75,7 +78,7 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
 	_assign_teams()
 	# Swap every peer into this mode's map first, then wait a frame so the new map's
 	# SpawnPoints and balls are in the tree before we reset and spawn players into them.
-	await _load_map_for(MAP_OF[mode])
+	await _load_map_for(SANDBOX_MAP if USE_SANDBOX_MAP else MAP_OF[mode])
 	# A player may have left during the swap; bail back to the lobby if we can't start anymore.
 	if not _both_teams_present():
 		await _to_lobby()
