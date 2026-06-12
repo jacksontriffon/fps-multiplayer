@@ -1,0 +1,865 @@
+[gd_scene load_steps=15 format=3 uid="uid://bvwuia4lj6465"]
+
+[ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
+[ext_resource type="Texture2D" uid="uid://s7evshqmach4" path="res://Assets/Textures/Prototype/Light/texture_08.png" id="2_dvrjq"]
+[ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
+[ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="3_ball"]
+[ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="4_spawn"]
+[ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="5_sp"]
+[ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="6_base"]
+[ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="7_flag"]
+[ext_resource type="Script" uid="uid://cga0msbwy7ig1" path="res://Components/ChamberDoor/chamber_door.gd" id="8_door"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_col"]
+
+[sub_resource type="Sky" id="Sky_col"]
+sky_material = SubResource("ProceduralSkyMaterial_col")
+
+[sub_resource type="Environment" id="Environment_col"]
+background_mode = 2
+sky = SubResource("Sky_col")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c8yvg"]
+albedo_texture = ExtResource("2_dvrjq")
+uv1_triplanar = true
+uv1_world_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="PedestalMat_col"]
+albedo_color = Color(0.9, 0.8, 0.5, 1)
+emission_enabled = true
+emission = Color(1, 0.8, 0.4, 1)
+emission_energy_multiplier = 1.5
+
+[node name="ColosseumMap" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_col")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 12, 0)
+shadow_enabled = true
+
+[node name="Arena" type="Node3D" parent="."]
+
+[node name="Floor" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(74, 1, 74)
+material = ExtResource("1_grid")
+
+[node name="WallNorth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5646667, -28)
+use_collision = true
+size = Vector3(57, 5.1293335, 1)
+material = ExtResource("1_grid")
+
+[node name="WallSouth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 28)
+use_collision = true
+size = Vector3(57, 8, 1)
+material = ExtResource("1_grid")
+
+[node name="WallWestA" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, -20.75)
+use_collision = true
+size = Vector3(1, 8, 14.5)
+material = ExtResource("1_grid")
+
+[node name="WallWestB" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, -8)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("1_grid")
+
+[node name="WallWestC" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, 0)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("1_grid")
+
+[node name="WallWestD" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, 8)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("1_grid")
+
+[node name="WallWestE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4, 20.75)
+use_collision = true
+size = Vector3(1, 8, 14.5)
+material = ExtResource("1_grid")
+
+[node name="WallEastA" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, -20.75)
+use_collision = true
+size = Vector3(1, 8, 14.5)
+material = ExtResource("1_grid")
+
+[node name="WallEastB" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, -8)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("1_grid")
+
+[node name="WallEastC" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, 0)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("1_grid")
+
+[node name="WallEastD" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, 8)
+use_collision = true
+size = Vector3(1, 8, 5)
+material = ExtResource("1_grid")
+
+[node name="WallEastE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, 20.75)
+use_collision = true
+size = Vector3(1, 8, 14.5)
+material = ExtResource("1_grid")
+
+[node name="CornerNW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -23, 4, -23)
+use_collision = true
+size = Vector3(16, 8, 1)
+material = ExtResource("1_grid")
+
+[node name="CornerSE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 23, 4, 23)
+use_collision = true
+size = Vector3(16, 8, 1)
+material = ExtResource("1_grid")
+
+[node name="CornerNE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 23, 4, -23)
+use_collision = true
+size = Vector3(16, 8, 1)
+material = ExtResource("1_grid")
+
+[node name="CornerSW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -23, 4, 23)
+use_collision = true
+size = Vector3(16, 8, 1)
+material = ExtResource("1_grid")
+
+[node name="PillarNW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.5, -8)
+use_collision = true
+size = Vector3(2, 5, 2)
+material = ExtResource("1_grid")
+
+[node name="PillarNE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.5, -8)
+use_collision = true
+size = Vector3(2, 5, 2)
+material = ExtResource("1_grid")
+
+[node name="PillarSW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.5, 8)
+use_collision = true
+size = Vector3(2, 5, 2)
+material = ExtResource("1_grid")
+
+[node name="PillarSE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.5, 8)
+use_collision = true
+size = Vector3(2, 5, 2)
+material = ExtResource("1_grid")
+
+[node name="CoverNorth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -14)
+use_collision = true
+size = Vector3(6, 1.5, 1.5)
+material = ExtResource("1_grid")
+
+[node name="CoverSouth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 14)
+use_collision = true
+size = Vector3(6, 1.5, 1.5)
+material = ExtResource("1_grid")
+
+[node name="DiamondWest" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -16, 1, 0)
+use_collision = true
+size = Vector3(4, 2, 4)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9989793, -0.018967487, -0.04100429, 0.026804462, 0.9794357, 0.19996881, 0.036368098, -0.20086366, 0.9789441, 22.876957, 0.4278543, 24.064957)
+use_collision = true
+size = Vector3(14.196167, 2, 14.32019)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast23" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9989793, -0.018967487, -0.04100429, -0.0013289228, 0.8948714, -0.44632232, 0.04515918, 0.44592103, 0.8939325, 1.4542829, 1.086828, -24.552366)
+use_collision = true
+size = Vector3(14.196167, 0.5272217, 14.32019)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast25" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9998165, -0.014157366, 0.012926106, 0.015947811, 0.9884091, -0.15097466, -0.010638901, 0.15115298, 0.98845315, -1.4358096, 6.3094373, -36.23236)
+use_collision = true
+size = Vector3(46.88655, 0.5272217, 16.354233)
+material = SubResource("StandardMaterial3D_c8yvg")
+
+[node name="DiamondEast26" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9998165, -0.014157367, 0.012926106, 0.017328756, 0.3790205, -0.9252261, 0.008199578, 0.9252801, 0.37919608, -1.4358096, 6.731508, -42.98991)
+use_collision = true
+size = Vector3(46.88655, 0.5272217, 16.354233)
+material = SubResource("StandardMaterial3D_c8yvg")
+
+[node name="DiamondEast27" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9998165, -0.014157367, 0.012926106, 0.010616899, -0.15251562, -0.98824394, 0.015962465, 0.9881997, -0.1523374, -1.391663, 5.4337163, -44.05233)
+use_collision = true
+size = Vector3(46.88655, 5.5780945, 11.592155)
+material = SubResource("StandardMaterial3D_c8yvg")
+
+[node name="DiamondEast28" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9998165, -0.014157367, 0.012926106, 0.010616899, -0.15251562, -0.98824394, 0.015962465, 0.9881997, -0.1523374, -1.391663, 4.23788, -41.56427)
+use_collision = true
+size = Vector3(46.88655, 5.5780945, 11.592155)
+material = SubResource("StandardMaterial3D_c8yvg")
+
+[node name="DiamondEast29" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9998165, -0.014157367, 0.012926106, 0.010616899, -0.15251562, -0.98824394, 0.015962465, 0.9881997, -0.1523374, -1.391663, 3.2197893, -39.508297)
+use_collision = true
+size = Vector3(46.88655, 5.5780945, 11.592155)
+material = SubResource("StandardMaterial3D_c8yvg")
+
+[node name="DiamondEast30" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9998165, -0.014157367, 0.012926106, 0.010616899, -0.15251562, -0.98824394, 0.015962465, 0.9881997, -0.1523374, -1.391663, 2.2572122, -37.460457)
+use_collision = true
+size = Vector3(46.88655, 5.5780945, 11.592155)
+material = SubResource("StandardMaterial3D_c8yvg")
+
+[node name="DiamondEast31" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9998165, -0.014157367, 0.012926106, 0.010616899, -0.15251562, -0.98824394, 0.015962465, 0.9881997, -0.1523374, -1.391663, 1.5029705, -35.437344)
+use_collision = true
+size = Vector3(46.88655, 5.5780945, 11.592155)
+material = SubResource("StandardMaterial3D_c8yvg")
+
+[node name="DiamondEast32" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9998165, -0.014157367, 0.012926106, 0.010616899, -0.15251562, -0.98824394, 0.015962465, 0.9881997, -0.1523374, -1.391663, 0.4260478, -32.691788)
+use_collision = true
+size = Vector3(46.88655, 5.5780945, 11.592155)
+material = SubResource("StandardMaterial3D_c8yvg")
+
+[node name="DiamondEast24" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9989792, -0.018967481, -0.04100428, -0.031149039, 0.36823007, -0.9292129, 0.03272392, 0.9295413, 0.3672633, 1.4777901, 3.654891, -27.143234)
+use_collision = true
+size = Vector3(14.196167, 0.5272217, 2.961235)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast2" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9989793, -0.018967487, -0.04100429, 0.021893023, 0.9971561, 0.07211527, 0.039519787, -0.07293928, 0.99655324, 12.404953, 0.35761976, 25.850885)
+use_collision = true
+size = Vector3(5.06781, 4.008301, 10.22699)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast3" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9989793, -0.018967487, -0.04100429, 0.021893023, 0.9971561, 0.07211527, 0.039519787, -0.07293928, 0.99655324, 6.2528496, 0.3671618, 23.292284)
+use_collision = true
+size = Vector3(5.06781, 4.008301, 3.9355316)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast4" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9989793, -0.018967487, -0.04100429, 0.021893023, 0.9971561, 0.07211527, 0.039519787, -0.07293928, 0.99655324, 3.1447692, 0.8169766, 21.875992)
+use_collision = true
+size = Vector3(5.06781, 4.841919, 2.987297)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast5" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9989792, -0.018967485, -0.04100428, -0.026461907, 0.4899727, -0.8713362, 0.036618106, 0.8715315, 0.48897058, -2.1467068, 4.69579, 25.913631)
+use_collision = true
+size = Vector3(5.2867126, 4.841919, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast6" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.99897915, -0.018967485, -0.041004274, -0.04516812, -0.39962804, -0.9155641, 0.0009795949, 0.91648114, -0.40007663, -7.577987, 4.278295, 22.32402)
+use_collision = true
+size = Vector3(5.2867126, 2.7525024, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast15" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.99503016, 0.09577185, 0.027260095, 0.054681167, -0.29674706, -0.9533895, -0.083218545, 0.95014167, -0.30050898, -15.554573, 3.9302652, 2.1324944)
+use_collision = true
+size = Vector3(8.880661, 4.001251, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast16" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.99503016, 0.09577184, 0.027260093, 0.008271821, 0.19331491, -0.981102, -0.09923172, 0.9764514, 0.19156209, -10.714069, 4.19751, 5.7618694)
+use_collision = true
+size = Vector3(6.6623898, 6.3595123, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast19" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(-0.60048515, 0.78549635, 0.14971034, 0.008271824, 0.19331488, -0.98110193, -0.7995933, -0.5878988, -0.12258036, 1.5515481, 4.604829, 2.7075076)
+use_collision = true
+size = Vector3(1.567523, 2.363472, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast20" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(-0.60048515, 0.78549635, 0.14971034, 0.008271824, 0.19331488, -0.98110193, -0.7995933, -0.5878988, -0.12258036, 3.41255, 4.963461, 6.589584)
+use_collision = true
+size = Vector3(1.567523, 2.363472, 1.1468496)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast21" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(-0.60048515, 0.78549635, 0.14971034, 0.008271824, 0.19331488, -0.98110193, -0.7995933, -0.5878988, -0.12258036, 3.41255, 5.398743, 10.655916)
+use_collision = true
+size = Vector3(1.567523, 2.363472, 1.1468496)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast22" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(-0.60048515, 0.78549635, 0.14971036, -0.49712652, -0.51335984, 0.69951934, 0.6263254, 0.3456263, 0.6987561, -0.66906476, 5.706015, 10.000615)
+use_collision = true
+size = Vector3(1.567523, 2.363472, 0.41339064)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast17" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.44911137, -0.8913148, 0.062103875, -0.23273714, -0.18381259, -0.95501125, 0.8626312, 0.41445246, -0.28999427, -8.566076, 5.050346, -6.786377)
+use_collision = true
+size = Vector3(6.6623898, 6.3595123, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast18" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(-0.5324015, -0.7976851, 0.28327835, -0.25834122, -0.16556884, -0.9517598, 0.80610704, -0.579901, -0.11792599, 4.5994987, 6.509623, 0.32170153)
+use_collision = true
+size = Vector3(1.2063689, 15.32917, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast7" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.541687, -0.7545788, -0.37038642, 0.31596473, 0.5910997, -0.74213713, 0.7789363, 0.2849771, 0.5586112, -16.759718, 3.7522936, 22.32402)
+use_collision = true
+size = Vector3(5.2867126, 2.7525024, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast8" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.95523787, 0.021761207, -0.29503793, 0.052125107, 0.9693086, 0.24025777, 0.29121107, -0.24488196, 0.9247859, -16.745123, 1.4891204, 13.320925)
+use_collision = true
+size = Vector3(5.2867126, 4.0939026, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast9" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.9552378, 0.021761173, -0.29503793, -0.24274205, 0.62772304, -0.7396214, 0.16910712, 0.7781324, 0.6049074, -16.713667, 1.5774119, 10.201116)
+use_collision = true
+size = Vector3(5.2867126, 6.9849396, 0.41576958)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast10" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.99965954, 0.009279688, 0.024389237, 0.023992449, 0.040704153, -0.99888325, -0.010262016, 0.9991281, 0.040467918, -16.681797, 0.272169, -17.022972)
+use_collision = true
+size = Vector3(5.2867126, 6.9849396, 3.0291739)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast11" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.99965954, 0.009279688, 0.024389237, 0.023992449, 0.040704153, -0.99888325, -0.010262016, 0.9991281, 0.040467918, -10.677809, 0.18634267, -24.220707)
+use_collision = true
+size = Vector3(5.2867126, 2.7678604, 3.0291739)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast12" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.99965954, 0.009279688, 0.024389237, 0.023992449, 0.040704153, -0.99888325, -0.010262016, 0.9991281, 0.040467918, -10.692386, 0.7833622, -17.405005)
+use_collision = true
+size = Vector3(5.2867126, 2.7678604, 4.224548)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast13" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.99965954, 0.009279688, 0.024389237, 0.023992449, 0.040704153, -0.99888325, -0.010262016, 0.9991281, 0.040467918, -9.982684, 2.1001577, -17.402376)
+use_collision = true
+size = Vector3(3.878708, 2.7678604, 3.7375336)
+material = ExtResource("1_grid")
+
+[node name="DiamondEast14" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(0.99965954, 0.009279688, 0.024389237, 0.023992449, 0.040704153, -0.99888325, -0.010262016, 0.9991281, 0.040467918, -17.171158, -1.6316118, -24.057964)
+use_collision = true
+size = Vector3(3.878708, 2.7678604, 4.224548)
+material = ExtResource("1_grid")
+
+[node name="CSGTorus3D" type="CSGTorus3D" parent="Arena"]
+transform = Transform3D(0.10575549, 0.81404936, -0.57108617, -0.9916667, 0.12883027, 0, 0.07357319, 0.5663271, 0.8208901, 14.984929, 0.25, -22.221233)
+use_collision = true
+inner_radius = 4.6897087
+outer_radius = 3.3981075
+material = ExtResource("1_grid")
+
+[node name="CSGTorus3D2" type="CSGTorus3D" parent="Arena"]
+transform = Transform3D(0.10575549, 0.81404936, -0.57108617, -0.9916667, 0.12883027, 0, 0.07357319, 0.5663271, 0.8208901, 15.587513, 0.25, -20.411283)
+use_collision = true
+inner_radius = 3.6713693
+outer_radius = 2.8090553
+material = ExtResource("1_grid")
+
+[node name="CSGTorus3D3" type="CSGTorus3D" parent="Arena"]
+transform = Transform3D(0.10575549, 0.81404936, -0.57108617, -0.9916667, 0.12883027, 0, 0.07357319, 0.5663271, 0.8208901, 13.212672, 0.25, -22.68194)
+use_collision = true
+inner_radius = 3.6713693
+outer_radius = 2.8090553
+material = ExtResource("1_grid")
+
+[node name="CSGTorus3D4" type="CSGTorus3D" parent="Arena"]
+transform = Transform3D(0.10575549, 0.81404936, -0.57108617, -0.9916667, 0.12883027, 0, 0.07357319, 0.5663271, 0.8208901, 11.745537, 0.25, -22.68194)
+use_collision = true
+inner_radius = 3.94923
+outer_radius = 2.9666848
+material = ExtResource("1_grid")
+
+[node name="CSGTorus3D5" type="CSGTorus3D" parent="Arena"]
+transform = Transform3D(0.10575549, 0.81404936, -0.57108617, -0.9916667, 0.12883027, 0, 0.07357319, 0.5663271, 0.8208901, 17.003922, 0.25, -19.38792)
+use_collision = true
+inner_radius = 3.94923
+outer_radius = 2.9666848
+material = ExtResource("1_grid")
+
+[node name="CenterStage" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+use_collision = true
+size = Vector3(6, 0.5, 6)
+material = ExtResource("1_grid")
+
+[node name="CenterBall1" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.8, 0)
+
+[node name="CenterBall2" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.8, 0)
+
+[node name="CenterBall3" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -2)
+
+[node name="CenterBall4" parent="Arena" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 2)
+
+[node name="Chambers" type="Node3D" parent="."]
+
+[node name="RedChamber1" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 4, -12)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, -15.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, -8.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6, -12)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.55, -12)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/RedChamber1" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.4, -12)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/RedChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.8, -12)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+
+[node name="Door" type="CSGBox3D" parent="Chambers/RedChamber1" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2, -12)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="RedChamber2" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 4, -4)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, -7.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, -0.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6, -4)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.55, -4)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/RedChamber2" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.4, -4)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/RedChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.8, -4)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+
+[node name="Door" type="CSGBox3D" parent="Chambers/RedChamber2" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2, -4)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="RedChamber3" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 4, 4)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, 0.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, 7.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6, 4)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.55, 4)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/RedChamber3" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.4, 4)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/RedChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.8, 4)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+
+[node name="Door" type="CSGBox3D" parent="Chambers/RedChamber3" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2, 4)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="RedChamber4" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 4, 12)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, 8.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 4, 15.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6, 12)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.55, 12)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/RedChamber4" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.4, 12)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/RedChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 1.8, 12)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+
+[node name="Door" type="CSGBox3D" parent="Chambers/RedChamber4" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2, 12)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="BlueChamber1" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 4, -12)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, -15.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, -8.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6, -12)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.55, -12)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/BlueChamber1" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.4, -12)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/BlueChamber1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.8, -12)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+
+[node name="Door" type="CSGBox3D" parent="Chambers/BlueChamber1" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2, -12)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="BlueChamber2" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 4, -4)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, -7.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, -0.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6, -4)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.55, -4)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/BlueChamber2" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.4, -4)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/BlueChamber2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.8, -4)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+
+[node name="Door" type="CSGBox3D" parent="Chambers/BlueChamber2" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2, -4)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="BlueChamber3" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 4, 4)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, 0.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, 7.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6, 4)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.55, 4)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/BlueChamber3" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.4, 4)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/BlueChamber3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.8, 4)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+
+[node name="Door" type="CSGBox3D" parent="Chambers/BlueChamber3" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2, 4)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="BlueChamber4" type="Node3D" parent="Chambers"]
+
+[node name="Back" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 4, 12)
+use_collision = true
+size = Vector3(1, 8, 8)
+material = ExtResource("2_grid2")
+
+[node name="SideNorth" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, 8.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="SideSouth" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 4, 15.5)
+use_collision = true
+size = Vector3(7, 8, 1)
+material = ExtResource("2_grid2")
+
+[node name="Lintel" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6, 12)
+use_collision = true
+size = Vector3(1, 4, 3)
+material = ExtResource("2_grid2")
+
+[node name="Pedestal" type="CSGBox3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.55, 12)
+use_collision = true
+size = Vector3(0.7, 1.1, 0.7)
+material = SubResource("PedestalMat_col")
+
+[node name="Ball" parent="Chambers/BlueChamber4" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.4, 12)
+
+[node name="Glow" type="OmniLight3D" parent="Chambers/BlueChamber4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 1.8, 12)
+light_color = Color(1, 0.85, 0.45, 1)
+light_energy = 2.5
+
+[node name="Door" type="CSGBox3D" parent="Chambers/BlueChamber4" node_paths=PackedStringArray("ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2, 12)
+use_collision = true
+size = Vector3(0.8, 4, 3)
+material = ExtResource("2_grid2")
+script = ExtResource("8_door")
+ball = NodePath("../Ball")
+
+[node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("6_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 0, 0)
+flag = NodePath("../RedFlag")
+
+[node name="BlueBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("6_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 0, 0)
+team = 1
+flag = NodePath("../BlueFlag")
+
+[node name="RedFlag" parent="." instance=ExtResource("7_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 1, 0)
+
+[node name="BlueFlag" parent="." instance=ExtResource("7_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 1, 0)
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+script = ExtResource("4_spawn")
+
+[node name="Red1" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -33.5, 0.1, -12)
+
+[node name="Red2" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -33.5, 0.1, -4)
+
+[node name="Red3" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -33.5, 0.1, 4)
+
+[node name="Red4" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -33.5, 0.1, 12)
+
+[node name="Blue1" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 33.5, 0.1, -12)
+team = 1
+
+[node name="Blue2" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 33.5, 0.1, -4)
+team = 1
+
+[node name="Blue3" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 33.5, 0.1, 4)
+team = 1
+
+[node name="Blue4" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 33.5, 0.1, 12)
+team = 1
