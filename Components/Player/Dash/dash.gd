@@ -2,11 +2,11 @@ extends Node
 class_name Dash
 
 # A quick burst of speed on the controlling peer, paid from the player's stamina
-# pool. Applied as self-knockback (Player.apply_knockback) so it layers on top of
-# input velocity and decays like other impulses, and replicates via the existing
-# position sync with no extra RPCs.
+# pool. Pushed through Player.apply_dash, which layers it on top of input velocity
+# with a slower decay than knockback so it reads as a lunge even while moving, and
+# replicates via the existing position sync with no extra RPCs.
 
-const DASH_IMPULSE := 4.0
+const DASH_IMPULSE := 9.0
 const DASH_COST := 40.0
 const DASH_COOLDOWN := 1.2
 
@@ -28,6 +28,6 @@ func _physics_process(delta: float) -> void:
 		if dir == Vector3.ZERO:
 			dir = head.transform.basis * Vector3.FORWARD
 		dir.y = 0.0
-		player.apply_knockback(dir.normalized() * DASH_IMPULSE)
+		player.apply_dash(dir.normalized() * DASH_IMPULSE)
 		player.drain_stamina(DASH_COST)
 		_cooldown = DASH_COOLDOWN

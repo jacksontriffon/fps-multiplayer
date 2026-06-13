@@ -26,6 +26,11 @@ const FOV_CHANGE = 1.2
 # layered on top of the input-driven velocity, which would otherwise clobber it.
 const KNOCKBACK_DECAY = 8.0
 
+# Dash impulse channel (set by the Dash component). Same idea as knockback, but a
+# slower decay so a dash reads as a sustained lunge instead of a quick shove that
+# the walk speed swallows. Kept separate so it doesn't change how hits feel.
+const DASH_DECAY = 4.0
+
 # Camera shake trauma added each time a ball hits us (see Head.add_trauma).
 const HIT_TRAUMA = 0.6
 
@@ -59,6 +64,7 @@ var speed = WALK_SPEED
 var _jump_buffer := 0.0
 var _coyote := 0.0
 var knockback := Vector3.ZERO
+var dash_impulse := Vector3.ZERO
 var stamina := MAX_STAMINA
 var _regen_delay := 0.0
 
@@ -99,6 +105,11 @@ func drain_stamina(amount: float) -> void:
 func apply_knockback(impulse: Vector3) -> void:
 	knockback += impulse
 
+# A dash burst from the Dash component. Set (not added) so re-dashing refreshes the
+# lunge rather than stacking; integrated alongside knockback in _physics_process.
+func apply_dash(impulse: Vector3) -> void:
+	dash_impulse = impulse
+
 # The server owns ball physics and detects hits, then calls this on the struck
 # player's authority peer. Guarded so only the server (peer 1) can shove players.
 @rpc("any_peer", "call_local", "reliable")
@@ -131,6 +142,7 @@ func set_alive_remote(value: bool) -> void:
 	if not value:
 		velocity = Vector3.ZERO
 		knockback = Vector3.ZERO
+		dash_impulse = Vector3.ZERO
 
 @rpc("any_peer", "call_local", "reliable")
 func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
@@ -139,6 +151,7 @@ func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
 	team = t
 	velocity = Vector3.ZERO
 	knockback = Vector3.ZERO
+	dash_impulse = Vector3.ZERO
 	stamina = MAX_STAMINA
 	position = pos
 	head.rotation.y = yaw
@@ -237,6 +250,8 @@ func _physics_process(delta: float) -> void:
 	# overwrite x/z outright, so knockback has to be added after them), then decay.
 	velocity += knockback
 	knockback = knockback.lerp(Vector3.ZERO, delta * KNOCKBACK_DECAY)
+	velocity += dash_impulse
+	dash_impulse = dash_impulse.lerp(Vector3.ZERO, delta * DASH_DECAY)
 
 	# FOV
 	var velocity_clamped = clamp(velocity.length(), 0.5, SPRINT_SPEED * 2)
