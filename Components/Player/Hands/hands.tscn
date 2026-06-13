@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://cuspmr1u1lg6o" path="res://Components/Player/Hands/hands.gd" id="1_1ivw5"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1vjd0"]
-radius = 0.7470703
-height = 2.2822266
+radius = 0.75
+height = 3.6
 
 [sub_resource type="TorusMesh" id="TorusMesh_1vjd0"]
 
@@ -14,7 +14,7 @@ script = ExtResource("1_1ivw5")
 [node name="GrabbableArea" type="Area3D" parent="." unique_id=671999518]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GrabbableArea" unique_id=1073914537]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.017211914, -0.89054793)
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -1.6)
 shape = SubResource("CapsuleShape3D_1vjd0")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=877224008]
