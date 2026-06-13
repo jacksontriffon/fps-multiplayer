@@ -59,7 +59,7 @@ func play() -> void:
 # pause overlay is up. The local player's input handlers check this rather than
 # any one UI's state, so future blockers (scoreboard, chat, …) plug in here.
 func is_input_blocked() -> bool:
-	return PauseMenu.is_open()
+	return PauseMenu.is_open() or MapSelect.is_open()
 
 func restart_game() -> void:
 	TimeSystem.reset()
