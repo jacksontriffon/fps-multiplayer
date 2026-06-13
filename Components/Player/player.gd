@@ -39,20 +39,8 @@ const HIT_TRAUMA = 0.6
 
 const FLY_SPEED = 10.0
 
-# Stamina is a fixed pool (TOTAL_STAMINA) that other systems carve into: each "reservation"
-# takes a slice, shrinking the usable max. Hearts are the first source — every heart reserves
-# STAMINA_PER_HEART — so a player with fewer hearts has a larger stamina pool. Sprinting and
-# winding up a throw burn the remaining stamina; it refills after a short idle. CHARGE_DRAIN
-# is read by Hands while charging.
-const TOTAL_STAMINA := 150.0
-const STAMINA_PER_HEART := 24.0
+# Stamina cost of sprinting (per second). The pool itself lives on the Stamina node.
 const SPRINT_DRAIN := 22.0
-const CHARGE_DRAIN := 25.0
-const STAMINA_REGEN := 20.0
-const STAMINA_REGEN_DELAY := 0.6
-
-# Reservation source ids. Add more (debuffs, abilities) and they shrink the pool the same way.
-const STAMINA_RES_HEARTS := &"hearts"
 
 const TEAM_COLORS := [Color.RED, Color.BLUE]
 
@@ -60,6 +48,7 @@ const TEAM_COLORS := [Color.RED, Color.BLUE]
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var mesh: MeshInstance3D = $MeshInstance3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
+@onready var stamina: Stamina = $Stamina
 
 @export var team: int = 0:
 	set(value):
@@ -81,13 +70,6 @@ var knockback := Vector3.ZERO
 var dash_impulse := Vector3.ZERO
 var dash_vel := Vector3.ZERO
 var _dash_last := Vector3.ZERO
-var stamina := TOTAL_STAMINA
-var _regen_delay := 0.0
-
-# Stamina reservations: source id -> amount of the pool it claims. Keyed by source so
-# several can stack without clobbering each other. The usable max is TOTAL_STAMINA minus
-# the sum of these. The HUD reads stamina_capacity() to size the bar.
-var _stamina_reservations := {}
 
 var alive := true
 
@@ -111,40 +93,6 @@ func set_effect(id: StringName, active: bool, source: StringName = &"default") -
 		sources.erase(source)
 		if sources.is_empty():
 			_effects.erase(id)
-
-# Stamina is spent by sprinting (here) and by charging a throw (Hands calls these).
-func has_stamina() -> bool:
-	return stamina > 0.0
-
-func drain_stamina(amount: float) -> void:
-	stamina = maxf(stamina - amount, 0.0)
-	_regen_delay = STAMINA_REGEN_DELAY
-
-# Claim part of the stamina pool for a source (0 or less clears it).
-func reserve_stamina(source: StringName, amount: float) -> void:
-	if amount > 0.0:
-		_stamina_reservations[source] = amount
-	else:
-		_stamina_reservations.erase(source)
-
-# Usable stamina max: the pool minus everything reserved (never below zero).
-func stamina_capacity() -> float:
-	var reserved := 0.0
-	for amount in _stamina_reservations.values():
-		reserved += amount
-	return maxf(TOTAL_STAMINA - reserved, 0.0)
-
-# Hearts (and, later, other debuffs) each carve a slice out of the pool, so the usable max
-# grows as a player loses hearts. Recomputed each frame from match state: no reservation in
-# the lobby (no lives yet), and one heart while the infinite-hearts effect is up. Every mode
-# with lives — including CTF — feeds in here so the bar matches the hearts the HUD shows.
-func _refresh_stamina_reservations() -> void:
-	var hearts := 0
-	if has_effect(INFINITE_HEARTS):
-		hearts = 1
-	elif MatchManager.state != MatchManager.State.WAITING:
-		hearts = maxi(MatchManager.lives.get(name.to_int(), 0), 0)
-	reserve_stamina(STAMINA_RES_HEARTS, float(hearts) * STAMINA_PER_HEART)
 
 # Push this body around. Movement is simulated on this player's own authority peer,
 # so knockback must be applied there: the local throw recoil calls this directly,
@@ -203,8 +151,7 @@ func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
 	dash_impulse = Vector3.ZERO
 	dash_vel = Vector3.ZERO
 	_dash_last = Vector3.ZERO
-	_refresh_stamina_reservations()
-	stamina = stamina_capacity()
+	stamina.refill()
 	position = pos
 	head.rotation.y = yaw
 
@@ -286,9 +233,9 @@ func _physics_process(delta: float) -> void:
 	var direction = (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	# Handle Sprint — burns stamina, and only while actually moving.
-	if not input_blocked and Input.is_action_pressed("sprint") and direction and has_stamina():
+	if not input_blocked and Input.is_action_pressed("sprint") and direction and stamina.has_stamina():
 		speed = SPRINT_SPEED
-		drain_stamina(SPRINT_DRAIN * delta)
+		stamina.drain(SPRINT_DRAIN * delta)
 	else:
 		speed = WALK_SPEED
 	if is_on_floor():
@@ -321,15 +268,6 @@ func _physics_process(delta: float) -> void:
 	var velocity_clamped = clamp(velocity.length(), 0.5, SPRINT_SPEED * 2)
 	var target_fov = BASE_FOV + FOV_CHANGE * velocity_clamped
 	camera.fov = lerp(camera.fov, target_fov, delta * 8.0)
-
-	# Hearts/debuffs may have changed the pool — clamp to the current max, then refill once
-	# we've stopped spending it for a moment.
-	_refresh_stamina_reservations()
-	var cap := stamina_capacity()
-	stamina = minf(stamina, cap)
-	_regen_delay = maxf(_regen_delay - delta, 0.0)
-	if _regen_delay == 0.0 and stamina < cap:
-		stamina = minf(stamina + STAMINA_REGEN * delta, cap)
 
 	move_and_slide()
 

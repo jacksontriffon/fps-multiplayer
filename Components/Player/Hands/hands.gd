@@ -15,6 +15,9 @@ const THROW_CHARGE_TIME := 0.9
 # When stamina runs out mid-wind-up the charge bleeds back down over this time.
 const THROW_DISCHARGE_TIME := 4.0
 
+# Stamina cost of winding up a throw (per second).
+const CHARGE_DRAIN := 25.0
+
 # Throw recoil, scaled by charge. The values below are the full-charge maximum;
 # RECOIL_MIN_SCALE keeps a light throw from being completely kickless. The camera
 # kick is a purely local positional offset (camera position isn't replicated, so
@@ -71,9 +74,9 @@ func _physics_process(delta: float) -> void:
 			_charging = false
 			_charge = 0.0
 		else:
-			if player.has_stamina():
+			if player.stamina.has_stamina():
 				_charge = minf(_charge + delta / THROW_CHARGE_TIME, 1.0)
-				player.drain_stamina(Player.CHARGE_DRAIN * delta)
+				player.stamina.drain(CHARGE_DRAIN * delta)
 			else:
 				_charge = maxf(_charge - delta / THROW_DISCHARGE_TIME, 0.0)
 			_push_charge(_charge)

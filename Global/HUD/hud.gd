@@ -14,7 +14,7 @@ const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 # and each heart cell use the same scale, so a heart cell is exactly as wide as the stamina it
 # reserves and the fill lines up flush with the hearts.
 const STAMINA_PX_PER_UNIT := 2.0
-const HEART_WIDTH := Player.STAMINA_PER_HEART * STAMINA_PX_PER_UNIT
+const HEART_WIDTH := Stamina.PER_HEART * STAMINA_PX_PER_UNIT
 const BALL_ICON := preload("res://Assets/Textures/UI/dodgeball.svg")
 const PREVIEW_SIZE := Vector2i(96, 96)
 const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
@@ -65,7 +65,7 @@ func _ready() -> void:
 	_infinity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_infinity_label.visible = false
 	lives_box.add_child(_infinity_label)
-	stamina_panel.custom_minimum_size.x = Player.TOTAL_STAMINA * STAMINA_PX_PER_UNIT
+	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
 	_build_previews()
 
 func _process(delta: float) -> void:
@@ -123,10 +123,10 @@ func _update_stamina() -> void:
 	stamina_bar.visible = true
 	# The bar's max is the usable pool left after hearts/debuffs take their slice, so its
 	# pixel width (it expands to fill what the heart cells don't) maps 1:1 to stamina.
-	var cap := player.stamina_capacity()
+	var cap := player.stamina.capacity()
 	stamina_bar.max_value = maxf(cap, 1.0)
-	stamina_bar.value = player.stamina
-	var low := cap > 0.0 and player.stamina <= cap * 0.3
+	stamina_bar.value = player.stamina.amount
+	var low := cap > 0.0 and player.stamina.amount <= cap * 0.3
 	stamina_bar.self_modulate = Color(1, 0.55, 0.25) if low else Color.WHITE
 
 func _local_player() -> Player:
