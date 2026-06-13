@@ -332,11 +332,11 @@ func _spectate(input_blocked: bool) -> void:
 	velocity = dir.normalized() * FLY_SPEED if dir.length() > 0.01 else Vector3.ZERO
 	move_and_slide()
 
-# Called by a Climbable's Area3D on enter/exit (runs on every peer; only the authority
-# acts on it in _update_climb). Leaving the rope we're on drops us off it.
 func is_climbing() -> bool:
 	return _climbing
 
+# Called by a Climbable's Area3D on enter/exit (runs on every peer; only the authority
+# acts on it). Leaving the rope we're on drops us off it.
 func set_climb_zone(zone: Climbable, inside: bool) -> void:
 	if inside:
 		_climb_zone = zone
@@ -344,23 +344,25 @@ func set_climb_zone(zone: Climbable, inside: bool) -> void:
 		_climb_zone = null
 		_climbing = false
 
+# A rope is in reach and we're not already on one; Hands' click handler gates on this.
+func can_grab_climb() -> bool:
+	return _climb_zone != null and not _climbing and _climb_regrab_lock <= 0.0
+
+# Latch onto the rope we're standing in. From here up/down climbs and jump leaps off.
+func grab_climb() -> void:
+	if can_grab_climb():
+		_climbing = true
+
 # Returns true while actively climbing, so _physics_process skips normal movement/gravity.
+# Climbing only begins via grab_climb() (a click) — never automatically from movement input.
 func _update_climb(delta: float, input_blocked: bool) -> bool:
 	_climb_regrab_lock = maxf(_climb_regrab_lock - delta, 0.0)
-	if _climb_zone == null:
-		_climbing = false
-		return false
-	# A solid hit shakes you loose from the rope.
-	if knockback.length() > 1.0:
-		_climbing = false
-		return false
-	var climb_input := 0.0 if input_blocked else Input.get_axis("down", "up")
-	# Grab on once you push up or down against the rope; stay on until you leave or leap.
-	# The regrab lock keeps a fresh jump-off from re-attaching while you're still in range.
 	if not _climbing:
-		if _climb_regrab_lock > 0.0 or absf(climb_input) < 0.1:
-			return false
-		_climbing = true
+		return false
+	# Dropped out of range, or a solid hit shook us loose.
+	if _climb_zone == null or knockback.length() > 1.0:
+		_climbing = false
+		return false
 	# Jump leaps off the rope, out the way you're facing.
 	if not input_blocked and Input.is_action_just_pressed("jump"):
 		_climbing = false
@@ -369,6 +371,7 @@ func _update_climb(delta: float, input_blocked: bool) -> bool:
 		velocity.y = JUMP_VELOCITY
 		return true
 	# Cling to the rope: ease onto its centre line and drive straight up or down.
+	var climb_input := 0.0 if input_blocked else Input.get_axis("down", "up")
 	var anchor := _climb_zone.global_position
 	velocity.x = (anchor.x - global_position.x) * CLIMB_SNAP
 	velocity.z = (anchor.z - global_position.z) * CLIMB_SNAP

@@ -26,3 +26,12 @@ mesh = SubResource("CylinderMesh_rope")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_climb")
+
+[node name="Prompt" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, 0)
+pixel_size = 0.0007
+billboard = 1
+fixed_size = true
+text = "Climb rope"
+font_size = 96
+outline_size = 28

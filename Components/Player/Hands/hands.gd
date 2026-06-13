@@ -15,6 +15,10 @@ const THROW_CHARGE_TIME := 0.9
 # When stamina runs out mid-wind-up the charge bleeds back down over this time.
 const THROW_DISCHARGE_TIME := 4.0
 
+# A release below this charge counts as a quick tap, not a throw: it fires an available
+# interaction (e.g. grabbing a rope) instead, so a ball only leaves your hand once wound up.
+const THROW_MIN_CHARGE := 0.2
+
 # Throw recoil, scaled by charge. The values below are the full-charge maximum;
 # RECOIL_MIN_SCALE keeps a light throw from being completely kickless. The camera
 # kick is a purely local positional offset (camera position isn't replicated, so
@@ -86,24 +90,41 @@ func _physics_process(delta: float) -> void:
 # Input.is_action_just_* edge-detects correctly for both buttons and axes.
 func _handle_interaction_input() -> void:
 	var me := _get_player()
-	if me and not me.alive:
+	if me == null or not me.alive:
 		return
-	# Grab happens immediately on press, and only when the active slot is empty.
-	var grabbed_this_frame := false
-	if Input.is_action_just_pressed("interaction") and _equipped_ball_of(_get_player()) == null:
-		_send_interact(0.0)
-		grabbed_this_frame = true
-	# Throw: hold to wind up power, release to let go — only while the active slot
-	# holds a ball. Skip the press that just grabbed so a shared grab/throw key can't do both.
-	if not grabbed_this_frame and Input.is_action_just_pressed("throw") and _equipped_ball_of(_get_player()):
+	# Empty hand: a click is a straight interaction (grab a ball you're aiming at, or
+	# grab the rope you're standing in) — there's nothing to charge.
+	if _equipped_ball_of(me) == null:
+		if Input.is_action_just_pressed("interaction"):
+			_try_interact(me)
+		return
+	# Holding a ball: hold to wind up a throw. A quick tap won't throw — it fires an
+	# available interaction instead (e.g. grabbing the rope), so a ball is never lobbed
+	# by accident and the rope stays clickable with a ball in hand.
+	if Input.is_action_just_pressed("throw"):
 		_charging = true
 		_charge = 0.0
 	elif Input.is_action_just_released("throw") and _charging:
 		_charging = false
-		var aim := _aim_dir()
-		var power := _charge
-		_send_interact(power)
-		_apply_throw_recoil(aim, power)
+		if _charge >= THROW_MIN_CHARGE:
+			var aim := _aim_dir()
+			_send_interact(_charge)
+			_apply_throw_recoil(aim, _charge)
+		else:
+			_try_interact(me)
+		_charge = 0.0
+
+# Fire the highest-priority instant interaction in reach. Returns true if one ran.
+func _try_interact(me: Player) -> bool:
+	# Grab a free ball only when our hand is empty and one is on the crosshair.
+	if _equipped_ball_of(me) == null and highlighted != null:
+		_send_interact(0.0)
+		return true
+	# Climbing a rope works whether or not we're holding a ball.
+	if me.can_grab_climb():
+		me.grab_climb()
+		return true
+	return false
 
 # Routes a grab/throw to the server: the host (peer 1) runs it directly; clients
 # ask it to. power is the 0..1 throw charge (ignored by the server for grabs).
