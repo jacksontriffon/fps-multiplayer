@@ -139,7 +139,8 @@ func _apply_throw_recoil(aim: Vector3, power: float) -> void:
 	var scale := lerpf(RECOIL_MIN_SCALE, 1.0, clampf(power, 0.0, 1.0))
 	_recoil_offset += RECOIL_KICK * scale
 	var player := _get_player()
-	if player:
+	# Skip the backward shove while climbing so a throw can't knock you off the rope.
+	if player and not player.is_climbing():
 		player.apply_knockback(-aim * RECOIL_SHOVE * scale)
 
 func _get_player() -> Player:

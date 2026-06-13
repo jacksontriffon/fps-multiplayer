@@ -35,6 +35,9 @@ const FLY_SPEED = 10.0
 # movement actions drives the body straight up or down it; jump leaps off.
 const CLIMB_SNAP := 12.0
 const CLIMB_DISMOUNT_PUSH := 3.0
+# After leaping off, ignore the rope briefly so holding a direction into it doesn't
+# instantly re-grab.
+const CLIMB_REGRAB_LOCK := 0.35
 
 # Stamina. Sprinting and winding up a throw both burn it; it refills after a short
 # idle. CHARGE_DRAIN is read by Hands while charging.
@@ -73,6 +76,7 @@ var alive := true
 # authority peer acts on it; position then replicates the climb like any other movement.
 var _climb_zone: Climbable = null
 var _climbing := false
+var _climb_regrab_lock := 0.0
 
 # Generic gameplay effects: effect id -> set of grantor sources. Tracking sources lets
 # several grantors stack the same effect without clobbering each other, so the same
@@ -205,7 +209,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	# Climbing a rope overrides normal locomotion and gravity while it's active.
-	if _update_climb(input_blocked):
+	if _update_climb(delta, input_blocked):
 		move_and_slide()
 		return
 
@@ -287,6 +291,9 @@ func _spectate(input_blocked: bool) -> void:
 
 # Called by a Climbable's Area3D on enter/exit (runs on every peer; only the authority
 # acts on it in _update_climb). Leaving the rope we're on drops us off it.
+func is_climbing() -> bool:
+	return _climbing
+
 func set_climb_zone(zone: Climbable, inside: bool) -> void:
 	if inside:
 		_climb_zone = zone
@@ -295,7 +302,8 @@ func set_climb_zone(zone: Climbable, inside: bool) -> void:
 		_climbing = false
 
 # Returns true while actively climbing, so _physics_process skips normal movement/gravity.
-func _update_climb(input_blocked: bool) -> bool:
+func _update_climb(delta: float, input_blocked: bool) -> bool:
+	_climb_regrab_lock = maxf(_climb_regrab_lock - delta, 0.0)
 	if _climb_zone == null:
 		_climbing = false
 		return false
@@ -305,13 +313,15 @@ func _update_climb(input_blocked: bool) -> bool:
 		return false
 	var climb_input := 0.0 if input_blocked else Input.get_axis("down", "up")
 	# Grab on once you push up or down against the rope; stay on until you leave or leap.
+	# The regrab lock keeps a fresh jump-off from re-attaching while you're still in range.
 	if not _climbing:
-		if absf(climb_input) < 0.1:
+		if _climb_regrab_lock > 0.0 or absf(climb_input) < 0.1:
 			return false
 		_climbing = true
 	# Jump leaps off the rope, out the way you're facing.
 	if not input_blocked and Input.is_action_just_pressed("jump"):
 		_climbing = false
+		_climb_regrab_lock = CLIMB_REGRAB_LOCK
 		velocity = -head.global_transform.basis.z * CLIMB_DISMOUNT_PUSH
 		velocity.y = JUMP_VELOCITY
 		return true
