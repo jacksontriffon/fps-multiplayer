@@ -6,7 +6,7 @@ class_name PlayerHead
 # player's MultiplayerSynchronizer, so remote players visibly look around.
 
 const SENSITIVITY = 0.003
-const PITCH_LIMIT = deg_to_rad(60)
+const PITCH_LIMIT = deg_to_rad(45)
 # Mouse look is per-pixel (already frame-rate independent); stick look is a held
 # axis, so it scales by delta. Radians/sec at full deflection. Both are scaled by
 # the user's sensitivity multipliers (Global.mouse_sensitivity / joypad_sensitivity).
