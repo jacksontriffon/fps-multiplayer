@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://b3hudmatch01a"]
+[gd_scene load_steps=9 format=3 uid="uid://b3hudmatch01a"]
 
 [ext_resource type="Script" uid="uid://c1oblsv1fyfqg" path="res://Global/HUD/hud.gd" id="1_hud"]
 [ext_resource type="Script" uid="uid://bpyg1482b2ose" path="res://Global/HUD/damage_indicator.gd" id="2_dmg"]
@@ -23,6 +23,8 @@ corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxEmpty" id="stamina_clear"]
 
 [sub_resource type="StyleBoxFlat" id="slot_empty"]
 bg_color = Color(0, 0, 0, 0.5)
@@ -134,33 +136,46 @@ theme_override_constants/separation = 160
 
 [node name="LivesSection" type="VBoxContainer" parent="Root/MarginContainer/BottomBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 0)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="Lives" type="HBoxContainer" parent="Root/MarginContainer/BottomBar/LivesSection"]
+[node name="StaminaBar" type="Panel" parent="Root/MarginContainer/BottomBar/LivesSection"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 26)
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 4
+theme_override_styles/panel = SubResource("stamina_bg")
+
+[node name="Lives" type="HBoxContainer" parent="Root/MarginContainer/BottomBar/LivesSection/StaminaBar"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Stamina" type="ProgressBar" parent="Root/MarginContainer/BottomBar/LivesSection/StaminaBar/Lives"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_styles/background = SubResource("stamina_clear")
+theme_override_styles/fill = SubResource("stamina_fill")
+max_value = 150.0
+value = 150.0
+show_percentage = false
 
 [node name="LivesText" type="Label" parent="Root/MarginContainer/BottomBar/LivesSection"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-
-[node name="Stamina" type="ProgressBar" parent="Root/MarginContainer/BottomBar/LivesSection"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 8)
-layout_mode = 2
-theme_override_styles/background = SubResource("stamina_bg")
-theme_override_styles/fill = SubResource("stamina_fill")
-max_value = 150.0
-value = 150.0
-show_percentage = false
 
 [node name="Slots" type="HBoxContainer" parent="Root/MarginContainer/BottomBar"]
 unique_name_in_owner = true

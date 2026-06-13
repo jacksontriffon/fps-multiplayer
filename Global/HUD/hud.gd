@@ -10,13 +10,17 @@ const BANNER_HOLD := 2.5
 const PULSE_DECAY := 0.6
 const RAMP_MAX := 0.25
 const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
-const HEART_EMPTY := preload("res://Assets/Textures/UI/heart_empty.svg")
-const HEART_SIZE := Vector2(28, 28)
+# Bar pixels per stamina point (visual scale only — gameplay numbers are unchanged). The bar
+# and each heart cell use the same scale, so a heart cell is exactly as wide as the stamina it
+# reserves and the fill lines up flush with the hearts.
+const STAMINA_PX_PER_UNIT := 2.0
+const HEART_WIDTH := Stamina.PER_HEART * STAMINA_PX_PER_UNIT
 const BALL_ICON := preload("res://Assets/Textures/UI/dodgeball.svg")
 const PREVIEW_SIZE := Vector2i(96, 96)
 const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
 
 @onready var bottom_bar: HBoxContainer = %BottomBar
+@onready var stamina_panel: Panel = %StaminaBar
 @onready var lives_box: HBoxContainer = %Lives
 @onready var lives_text: Label = %LivesText
 @onready var stamina_bar: ProgressBar = %Stamina
@@ -62,6 +66,7 @@ func _ready() -> void:
 	_infinity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_infinity_label.visible = false
 	lives_box.add_child(_infinity_label)
+	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
 	_build_previews()
 
 func _process(delta: float) -> void:
@@ -92,6 +97,19 @@ func _update_bar(id: int) -> void:
 		for i in _preview_viewports.size():
 			_disable_preview(i)
 		return
+	# Eliminated (elimination modes only): swap the whole bar for the ELIMINATED label.
+	var eliminated: bool = not infinite \
+		and MatchManager.game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG \
+		and int(MatchManager.lives.get(id, 0)) <= 0
+	if eliminated:
+		stamina_panel.visible = false
+		lives_text.visible = true
+		lives_text.text = "ELIMINATED"
+		lives_text.modulate = Color(1, 1, 1, 0.7)
+		_update_slots(id)
+		return
+	stamina_panel.visible = true
+	lives_text.visible = false
 	if infinite:
 		_update_lives_infinite()
 	else:
@@ -105,8 +123,12 @@ func _update_stamina() -> void:
 		stamina_bar.visible = false
 		return
 	stamina_bar.visible = true
+	# The bar's max is the usable pool left after hearts/debuffs take their slice, so its
+	# pixel width (it expands to fill what the heart cells don't) maps 1:1 to stamina.
+	var cap := player.stamina.capacity()
+	stamina_bar.max_value = maxf(cap, 1.0)
 	stamina_bar.value = player.stamina.amount
-	var low := player.stamina.amount <= Stamina.MAX * 0.3
+	var low := cap > 0.0 and player.stamina.amount <= cap * 0.3
 	stamina_bar.self_modulate = Color(1, 0.55, 0.25) if low else Color.WHITE
 
 func _local_player() -> Player:
@@ -116,27 +138,18 @@ func _local_player() -> Player:
 	return null
 
 func _update_lives(n: int) -> void:
-	if n <= 0:
-		lives_box.visible = false
-		lives_text.visible = true
-		lives_text.text = "ELIMINATED"
-		lives_text.modulate = Color(1, 1, 1, 0.7)
-		return
-	lives_text.visible = false
-	lives_box.visible = true
+	# Each heart cell is a current life and claims its slice of the bar; losing a heart drops
+	# its cell entirely, which is what widens the stamina region. No empty hearts here.
 	_infinity_label.visible = false
-	var total: int = max(MatchManager.STARTING_LIVES, n)
-	_ensure_hearts(total)
-	var hearts := _heart_rects()
-	for i in hearts.size():
-		hearts[i].texture = HEART_FULL if i < n else HEART_EMPTY
+	_ensure_hearts(n)
+	for heart in _heart_rects():
+		heart.texture = HEART_FULL
 
 # A single full heart followed by an ∞ sign — the infinite-hearts effect.
 func _update_lives_infinite() -> void:
-	lives_text.visible = false
-	lives_box.visible = true
 	_ensure_hearts(1)
 	_heart_rects()[0].texture = HEART_FULL
+	lives_box.move_child(_infinity_label, lives_box.get_child_count() - 1)  # keep ∞ at the far right
 	_infinity_label.visible = true
 
 # Heart icons are the TextureRect children of the Lives box; the ∞ label also lives
@@ -152,11 +165,12 @@ func _ensure_hearts(count: int) -> void:
 	var hearts := _heart_rects()
 	while hearts.size() < count:
 		var heart := TextureRect.new()
-		heart.custom_minimum_size = HEART_SIZE
+		heart.custom_minimum_size = Vector2(HEART_WIDTH, 0)
+		heart.size_flags_vertical = Control.SIZE_FILL
 		heart.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		heart.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		lives_box.add_child(heart)
-		lives_box.move_child(heart, hearts.size())  # keep hearts ahead of the ∞ label
+		lives_box.move_child(heart, lives_box.get_child_count() - 2)  # hearts sit right of the fill, before ∞
 		hearts.append(heart)
 	while hearts.size() > count:
 		hearts.pop_back().free()
