@@ -110,7 +110,7 @@ func _process(delta: float) -> void:
 	# Interacting opens the pre-match Map Select menu (mode, map pick, player list); the
 	# match itself starts from there. Open even without enough players so you can see who's
 	# waiting — the menu's Start button stays disabled until the lobby is full enough.
-	if near and not MapSelect.is_open() and Input.is_action_just_pressed("interaction"):
+	if near and not Global.is_input_blocked() and Input.is_action_just_pressed("interaction"):
 		MapSelect.open(game_mode)
 
 # Empty when the prompt shouldn't show; the billboard Label3D renders whatever this returns.
