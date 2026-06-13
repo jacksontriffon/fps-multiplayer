@@ -118,7 +118,7 @@ theme_override_constants/separation = 160
 
 [node name="LivesSection" type="VBoxContainer" parent="Root/MarginContainer/BottomBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 0)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -126,7 +126,7 @@ theme_override_constants/separation = 6
 
 [node name="StaminaBar" type="Panel" parent="Root/MarginContainer/BottomBar/LivesSection"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 26)
+custom_minimum_size = Vector2(300, 26)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("stamina_bg")

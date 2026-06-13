@@ -10,9 +10,11 @@ const BANNER_HOLD := 2.5
 const PULSE_DECAY := 0.6
 const RAMP_MAX := 0.25
 const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
-# Each heart cell is exactly as wide as the stamina it reserves, so the green fill lines up
-# flush with the hearts and the whole thing reads as one bar.
-const HEART_WIDTH := Player.STAMINA_PER_HEART
+# Bar pixels per stamina point (visual scale only — gameplay numbers are unchanged). The bar
+# and each heart cell use the same scale, so a heart cell is exactly as wide as the stamina it
+# reserves and the fill lines up flush with the hearts.
+const STAMINA_PX_PER_UNIT := 2.0
+const HEART_WIDTH := Player.STAMINA_PER_HEART * STAMINA_PX_PER_UNIT
 const BALL_ICON := preload("res://Assets/Textures/UI/dodgeball.svg")
 const PREVIEW_SIZE := Vector2i(96, 96)
 const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
@@ -63,6 +65,7 @@ func _ready() -> void:
 	_infinity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_infinity_label.visible = false
 	lives_box.add_child(_infinity_label)
+	stamina_panel.custom_minimum_size.x = Player.TOTAL_STAMINA * STAMINA_PX_PER_UNIT
 	_build_previews()
 
 func _process(delta: float) -> void:
@@ -149,7 +152,7 @@ func _update_lives(n: int) -> void:
 func _update_lives_infinite() -> void:
 	_ensure_hearts(1)
 	_heart_rects()[0].texture = HEART_FULL
-	lives_box.move_child(_infinity_label, 1)  # sit after the heart, before the stamina fill
+	lives_box.move_child(_infinity_label, lives_box.get_child_count() - 1)  # keep ∞ at the far right
 	_infinity_label.visible = true
 
 # Heart icons are the TextureRect children of the Lives box; the ∞ label also lives
@@ -170,7 +173,7 @@ func _ensure_hearts(count: int) -> void:
 		heart.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		heart.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		lives_box.add_child(heart)
-		lives_box.move_child(heart, hearts.size())  # keep hearts ahead of the stamina fill / ∞
+		lives_box.move_child(heart, lives_box.get_child_count() - 2)  # hearts sit right of the fill, before ∞
 		hearts.append(heart)
 	while hearts.size() > count:
 		hearts.pop_back().free()
