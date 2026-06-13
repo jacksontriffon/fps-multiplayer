@@ -8,6 +8,9 @@ enum State { WAITING, PLAYING, ROUND_OVER, MATCH_OVER }
 const STARTING_LIVES := 3
 const WIN_SCORE := 5
 const CTF_CAPTURE_LIMIT := 3
+# CTF isn't elimination-based, so a knocked-out player isn't gone for good: they sit out
+# briefly, then respawn at full hearts to keep the capture race going.
+const CTF_RESPAWN_DELAY := 3.0
 const TEAM_COUNT := 2
 const MIN_PER_TEAM := 1
 # Teams aren't decided in the lobby — players gather teamless and are split into teams only
@@ -117,6 +120,18 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String =
 func can_start() -> bool:
 	return state == State.WAITING and _team_of.size() >= MIN_PLAYERS
 
+# Any player can abandon the current match from the pause menu; the host drops everyone back
+# to the lobby. Returning to the lobby is inherently global — there's one shared map.
+@rpc("any_peer", "reliable")
+func request_to_lobby() -> void:
+	server_request_to_lobby()
+
+func server_request_to_lobby() -> void:
+	if not multiplayer.is_server() or state == State.WAITING:
+		return
+	_reset_token += 1  # cancel any pending round/match transition before resetting
+	_reset_to_waiting()
+
 # Peer ids of everyone present in the lobby, in a stable order. Read by the Map Select
 # menu to list the players waiting before a match starts.
 func roster() -> Array:
@@ -136,16 +151,18 @@ func server_player_left(id: int) -> void:
 func server_on_hit(victim_id: int, thrower_id: int) -> void:
 	if not multiplayer.is_server() or state != State.PLAYING:
 		return
-	# CTF has no elimination — hits still shove players (that's physics), but cost no lives.
-	if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
-		return
 	if not lives.has(victim_id) or lives[victim_id] <= 0:
 		return
 	if not can_hit(victim_id, thrower_id):
 		return
 	lives[victim_id] -= 1
 	if lives[victim_id] <= 0:
-		_set_spectator(victim_id, true)
+		# In CTF a knockout is temporary: drop what they carried and queue a respawn.
+		# Other modes eliminate (the spectator stays out until the round/match resets).
+		if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
+			_ctf_knockout(victim_id)
+		else:
+			_set_spectator(victim_id, true)
 	_broadcast()
 	_check_round_end()
 
@@ -187,8 +204,8 @@ func _start_round() -> void:
 	_broadcast()
 
 # CTF has a single continuous round: spawn everyone, reset objects, play until a team
-# reaches CTF_CAPTURE_LIMIT captures. lives are set so players count as alive, but nothing
-# decrements them (server_on_hit is a no-op here).
+# reaches CTF_CAPTURE_LIMIT captures. Hits cost hearts like any mode, but a knockout here
+# only benches the player for CTF_RESPAWN_DELAY before they respawn (see _ctf_knockout).
 func _start_ctf() -> void:
 	if not _both_teams_present():
 		state = State.WAITING
@@ -349,6 +366,32 @@ func _set_spectator(id: int, spectating: bool) -> void:
 	var p := _player(id)
 	if p:
 		p.set_alive_remote.rpc(not spectating)
+
+# CTF knockout: bench the player and free anything they held (a downed carrier must drop
+# the flag, not keep it glued to an invisible body), then queue their respawn.
+func _ctf_knockout(victim_id: int) -> void:
+	_set_spectator(victim_id, true)
+	_drop_held_items(victim_id)
+	_ctf_respawn_after(victim_id)
+
+func _ctf_respawn_after(victim_id: int) -> void:
+	await get_tree().create_timer(CTF_RESPAWN_DELAY).timeout
+	# The match may have ended or the player left while they were benched; only respawn if
+	# CTF is still being played and they're still on the roster.
+	if not multiplayer.is_server() or state != State.PLAYING:
+		return
+	if game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG or not lives.has(victim_id):
+		return
+	lives[victim_id] = STARTING_LIVES
+	_respawn(victim_id)
+	_broadcast()
+
+# Release every grabbable a player is carrying (the server owns ball authority, so it can
+# release directly; the held_by sync drops the ball on every peer).
+func _drop_held_items(id: int) -> void:
+	for g in get_tree().get_nodes_in_group("grabbable"):
+		if g.held_by == id and g.has_method("release"):
+			g.release()
 
 func _respawn(id: int) -> void:
 	var p := _player(id)
