@@ -6,11 +6,12 @@ class_name Dash
 # with a slower decay than knockback so it reads as a lunge even while moving, and
 # replicates via the existing position sync with no extra RPCs.
 
-# Air dashes get a weaker burst so you can't fling yourself across the map mid-jump.
-# These feed Player's dash_vel accumulator, so the effective lunge is several times
-# the raw number — tune there and in DASH_DECAY / DASH_BLEED for distance.
+# Ground and air dash at the same strength. These feed Player's dash_vel accumulator,
+# so the effective lunge is several times the raw number — tune there and in
+# DASH_DECAY / DASH_BLEED for distance. The air value stays separate so it can be
+# dialled back down if air dashes ever need reining in.
 const DASH_IMPULSE := 3.0
-const DASH_IMPULSE_AIR := 2.5
+const DASH_IMPULSE_AIR := 3.0
 const DASH_COST := 40.0
 const DASH_COOLDOWN := 1.2
 

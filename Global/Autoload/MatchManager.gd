@@ -8,6 +8,9 @@ enum State { WAITING, PLAYING, ROUND_OVER, MATCH_OVER }
 const STARTING_LIVES := 3
 const WIN_SCORE := 5
 const CTF_CAPTURE_LIMIT := 3
+# CTF isn't elimination-based, so a knocked-out player isn't gone for good: they sit out
+# briefly, then respawn at full hearts to keep the capture race going.
+const CTF_RESPAWN_DELAY := 3.0
 const TEAM_COUNT := 2
 const MIN_PER_TEAM := 1
 # Teams aren't decided in the lobby — players gather teamless and are split into teams only
@@ -133,17 +136,18 @@ func server_player_left(id: int) -> void:
 		_check_round_end()
 	_broadcast()
 
-# Single per-victim outcome for a ball hit. The fatal/non-fatal decision and the
-# victim-side effect (death ragdoll, knockdown stun, or soft shove) ship together so
-# they can't race. is_knockdown routes fast hits through the ragdoll; costs_life is the
-# blast opt-out. A life is only spent during a live team round — CTF and the lobby just
-# shove or stun, with no elimination.
+# Single per-victim outcome for a ball hit. The heart cost and the victim-side effect
+# (death ragdoll, knockdown stun, or soft shove) ship together so they can't race.
+# is_knockdown routes fast hits through the ragdoll; costs_life is the blast opt-out.
+# Hearts are spent during any live match (team, CTF and battle royale); the lobby just
+# shoves or stuns. A fatal hit ragdolls and eliminates in team/BR modes, while in CTF it
+# only benches the player briefly before they respawn (see _ctf_knockout).
 func server_resolve_hit(victim_id: int, thrower_id: int, impulse: Vector3, is_knockdown: bool, costs_life: bool = true) -> void:
 	if not multiplayer.is_server():
 		return
 	if not can_hit(victim_id, thrower_id):
 		return
-	var scoring := costs_life and state == State.PLAYING and game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG
+	var scoring := costs_life and state == State.PLAYING
 	var fatal := false
 	if scoring:
 		if not lives.has(victim_id) or lives[victim_id] <= 0:
@@ -151,11 +155,14 @@ func server_resolve_hit(victim_id: int, thrower_id: int, impulse: Vector3, is_kn
 		lives[victim_id] -= 1
 		fatal = lives[victim_id] <= 0
 	var p := _player(victim_id)
-	if p:
-		if fatal:
+	if fatal:
+		if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
+			_ctf_knockout(victim_id)
+		elif p:
 			p.set_alive_remote.rpc(false, true)
 			p.apply_knockdown.rpc_id(victim_id, impulse, 0.0, true)
-		elif is_knockdown:
+	elif p:
+		if is_knockdown:
 			p.apply_knockdown.rpc_id(victim_id, impulse, Player.KNOCKDOWN_TIME, false)
 		else:
 			p.apply_knockback_remote.rpc_id(victim_id, impulse)
@@ -201,8 +208,8 @@ func _start_round() -> void:
 	_broadcast()
 
 # CTF has a single continuous round: spawn everyone, reset objects, play until a team
-# reaches CTF_CAPTURE_LIMIT captures. lives are set so players count as alive, but nothing
-# decrements them (server_resolve_hit costs no life in CTF).
+# reaches CTF_CAPTURE_LIMIT captures. Hits cost hearts like any mode, but a knockout here
+# only benches the player for CTF_RESPAWN_DELAY before they respawn (see _ctf_knockout).
 func _start_ctf() -> void:
 	if not _both_teams_present():
 		state = State.WAITING
@@ -363,6 +370,32 @@ func _set_spectator(id: int, spectating: bool) -> void:
 	var p := _player(id)
 	if p:
 		p.set_alive_remote.rpc(not spectating, false)
+
+# CTF knockout: bench the player and free anything they held (a downed carrier must drop
+# the flag, not keep it glued to an invisible body), then queue their respawn.
+func _ctf_knockout(victim_id: int) -> void:
+	_set_spectator(victim_id, true)
+	_drop_held_items(victim_id)
+	_ctf_respawn_after(victim_id)
+
+func _ctf_respawn_after(victim_id: int) -> void:
+	await get_tree().create_timer(CTF_RESPAWN_DELAY).timeout
+	# The match may have ended or the player left while they were benched; only respawn if
+	# CTF is still being played and they're still on the roster.
+	if not multiplayer.is_server() or state != State.PLAYING:
+		return
+	if game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG or not lives.has(victim_id):
+		return
+	lives[victim_id] = STARTING_LIVES
+	_respawn(victim_id)
+	_broadcast()
+
+# Release every grabbable a player is carrying (the server owns ball authority, so it can
+# release directly; the held_by sync drops the ball on every peer).
+func _drop_held_items(id: int) -> void:
+	for g in get_tree().get_nodes_in_group("grabbable"):
+		if g.held_by == id and g.has_method("release"):
+			g.release()
 
 func _respawn(id: int) -> void:
 	var p := _player(id)
