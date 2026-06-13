@@ -7,15 +7,16 @@ class_name Pedestal
 # match can start yet.
 #
 # Each pedestal starts a specific game mode (set game_mode in the inspector) and shows the
-# matching floating object: team_object for Team, ctf_object for Capture the Flag. Both are
-# plain Node3D exports — drag any 3D node into them to swap the look. @tool so the object
-# swaps in the editor the moment you change the mode or the references.
+# matching floating object: team_object, ctf_object or br_object. All are plain Node3D
+# exports — drag any 3D node into them to swap the look. @tool so the object swaps in the
+# editor the moment you change the mode or the references.
 
-enum GameMode { TEAM, CAPTURE_THE_FLAG }
+enum GameMode { TEAM, CAPTURE_THE_FLAG, BATTLE_ROYALE }
 
 const MODE_NAMES := {
 	GameMode.TEAM: "Team Battle",
 	GameMode.CAPTURE_THE_FLAG: "Capture the Flag",
+	GameMode.BATTLE_ROYALE: "Battle Royale",
 }
 
 # Floating-object highlight: rests at its authored scale, swells when you're in range.
@@ -47,6 +48,12 @@ const BOB_SPEED := 1.6
 		ctf_object = value
 		_apply_mode_visuals()
 
+## Floating object shown in Battle Royale mode. Drag any 3D node here to swap the look.
+@export var br_object: Node3D:
+	set(value):
+		br_object = value
+		_apply_mode_visuals()
+
 @onready var prompt: Label3D = $Prompt
 @onready var area: Area3D = $Area3D
 
@@ -67,13 +74,18 @@ func _ready() -> void:
 	prompt.modulate.a = 0.0
 	prompt.outline_modulate.a = 0.0
 
-# Show the object that matches the mode and hide the other. Null-safe and editor-safe.
+# Show the object that matches the mode and hide the others. Null-safe and editor-safe.
 func _apply_mode_visuals() -> void:
-	object = ctf_object if game_mode == GameMode.CAPTURE_THE_FLAG else team_object
-	if team_object:
-		team_object.visible = team_object == object
-	if ctf_object:
-		ctf_object.visible = ctf_object == object
+	match game_mode:
+		GameMode.CAPTURE_THE_FLAG:
+			object = ctf_object
+		GameMode.BATTLE_ROYALE:
+			object = br_object
+		_:
+			object = team_object
+	for o in [team_object, ctf_object, br_object]:
+		if o:
+			o.visible = o == object
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():

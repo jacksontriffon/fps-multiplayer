@@ -160,7 +160,7 @@ func _request_spawn() -> void:
 	var peer_id := multiplayer.get_remote_sender_id()
 	if peer_id == 0:
 		peer_id = 1
-	var spawner := get_tree().get_first_node_in_group("spawn_points")
+	var spawner := MatchManager.current_spawner()
 	if spawner == null:
 		return
 	# Lobby join: any free spot, no team yet (teams are assigned when a match starts).

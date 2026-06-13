@@ -6,6 +6,10 @@ class_name SpawnPoints
 # is free-form — no fixed Team1/Team2 node structure required. Only points under THIS manager
 # are used, so each map's manager owns its own spawns after a map swap.
 
+# Which Pedestal.GameMode this spawn set serves; -1 serves every mode. A map can hold one
+# manager per mode and MatchManager picks the one matching the active mode.
+@export var mode: int = -1
+
 var _team_of: Dictionary = {}
 var _slot_of: Dictionary = {}
 

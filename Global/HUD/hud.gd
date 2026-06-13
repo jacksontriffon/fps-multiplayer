@@ -283,6 +283,14 @@ func _update_score() -> void:
 	if MatchManager.state == MatchManager.State.WAITING:
 		score_label.text = ""
 		return
+	# Battle royale has no team score — show how many players are still in.
+	if MatchManager.game_mode == Pedestal.GameMode.BATTLE_ROYALE:
+		var alive_n := 0
+		for v in MatchManager.lives.values():
+			if v > 0:
+				alive_n += 1
+		score_label.text = "%d remaining" % alive_n
+		return
 	var r: int = MatchManager.team_scores[0]
 	var b: int = MatchManager.team_scores[1]
 	score_label.text = "%s  %d  —  %d  %s" % [TEAM_NAMES[0], r, b, TEAM_NAMES[1]]
