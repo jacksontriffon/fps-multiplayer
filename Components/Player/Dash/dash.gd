@@ -6,7 +6,9 @@ class_name Dash
 # with a slower decay than knockback so it reads as a lunge even while moving, and
 # replicates via the existing position sync with no extra RPCs.
 
+# Air dashes get a weaker burst so you can't fling yourself across the map mid-jump.
 const DASH_IMPULSE := 9.0
+const DASH_IMPULSE_AIR := 4.0
 const DASH_COST := 40.0
 const DASH_COOLDOWN := 1.2
 
@@ -28,6 +30,7 @@ func _physics_process(delta: float) -> void:
 		if dir == Vector3.ZERO:
 			dir = head.transform.basis * Vector3.FORWARD
 		dir.y = 0.0
-		player.apply_dash(dir.normalized() * DASH_IMPULSE)
+		var impulse := DASH_IMPULSE if player.is_on_floor() else DASH_IMPULSE_AIR
+		player.apply_dash(dir.normalized() * impulse)
 		player.drain_stamina(DASH_COST)
 		_cooldown = DASH_COOLDOWN
