@@ -26,6 +26,14 @@ const FOV_CHANGE = 1.2
 # layered on top of the input-driven velocity, which would otherwise clobber it.
 const KNOCKBACK_DECAY = 8.0
 
+# Dash (set by the Dash component). The per-frame impulse feeds into dash_vel, which
+# builds up while you hold the dash and then bleeds off — the accumulation is what
+# gives it punch. DASH_DECAY fades the feed; DASH_BLEED drains the built-up velocity.
+# Both are applied in dash_vel regardless of floor state so a grounded dash builds up
+# exactly like an air one (the base movement hard-set used to swallow it on the ground).
+const DASH_DECAY = 4.0
+const DASH_BLEED = 5.0
+
 # Camera shake trauma added each time a ball hits us (see Head.add_trauma).
 const HIT_TRAUMA = 0.6
 
@@ -66,7 +74,14 @@ const TEAM_COLORS := [Color.RED, Color.BLUE]
 var speed = WALK_SPEED
 var _jump_buffer := 0.0
 var _coyote := 0.0
+
+# Set true on any frame this body jumps off the ground/coyote ledge. The
+# DoubleJump child reads it so it never spends an air jump on the same press.
+var jumped_from_ground := false
 var knockback := Vector3.ZERO
+var dash_impulse := Vector3.ZERO
+var dash_vel := Vector3.ZERO
+var _dash_last := Vector3.ZERO
 var stamina := MAX_STAMINA
 var _regen_delay := 0.0
 
@@ -113,6 +128,11 @@ func drain_stamina(amount: float) -> void:
 func apply_knockback(impulse: Vector3) -> void:
 	knockback += impulse
 
+# A dash burst from the Dash component. Set (not added) so re-dashing refreshes the
+# lunge rather than stacking; integrated alongside knockback in _physics_process.
+func apply_dash(impulse: Vector3) -> void:
+	dash_impulse = impulse
+
 # The server owns ball physics and detects hits, then calls this on the struck
 # player's authority peer. Guarded so only the server (peer 1) can shove players.
 @rpc("any_peer", "call_local", "reliable")
@@ -145,6 +165,9 @@ func set_alive_remote(value: bool) -> void:
 	if not value:
 		velocity = Vector3.ZERO
 		knockback = Vector3.ZERO
+		dash_impulse = Vector3.ZERO
+		dash_vel = Vector3.ZERO
+		_dash_last = Vector3.ZERO
 
 @rpc("any_peer", "call_local", "reliable")
 func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
@@ -153,6 +176,9 @@ func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
 	team = t
 	velocity = Vector3.ZERO
 	knockback = Vector3.ZERO
+	dash_impulse = Vector3.ZERO
+	dash_vel = Vector3.ZERO
+	_dash_last = Vector3.ZERO
 	stamina = MAX_STAMINA
 	position = pos
 	head.rotation.y = yaw
@@ -208,8 +234,15 @@ func _physics_process(delta: float) -> void:
 		_spectate(input_blocked)
 		return
 
-	# Climbing a rope overrides normal locomotion and gravity while it's active.
+	# Undo last frame's dash before the movement math so it can't feed back into the
+	# inertia integrator (the air/standing lerps read velocity); it's re-added below.
+	velocity -= _dash_last
+	_dash_last = Vector3.ZERO
+
+	# Climbing a rope overrides normal locomotion, gravity, and dash while it's active.
 	if _update_climb(delta, input_blocked):
+		dash_impulse = Vector3.ZERO
+		dash_vel = Vector3.ZERO
 		move_and_slide()
 		return
 
@@ -218,13 +251,15 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 
 	# Handle jump. Buffer the press and track a coyote window so a jump isn't
-	# dropped on a frame where is_on_floor() flickers off mid-sprint.
+	# dropped on a frame where is_on_floor() flickers off mid-sprint. The
+	# mid-air double jump lives in the DoubleJump child node.
 	_coyote = COYOTE_TIME if is_on_floor() else maxf(_coyote - delta, 0.0)
 	if not input_blocked and Input.is_action_just_pressed("jump"):
 		_jump_buffer = JUMP_BUFFER
 	else:
 		_jump_buffer = maxf(_jump_buffer - delta, 0.0)
-	if _jump_buffer > 0.0 and _coyote > 0.0:
+	jumped_from_ground = _jump_buffer > 0.0 and _coyote > 0.0
+	if jumped_from_ground:
 		velocity.y = JUMP_VELOCITY
 		_jump_buffer = 0.0
 		_coyote = 0.0
@@ -256,6 +291,14 @@ func _physics_process(delta: float) -> void:
 	# overwrite x/z outright, so knockback has to be added after them), then decay.
 	velocity += knockback
 	knockback = knockback.lerp(Vector3.ZERO, delta * KNOCKBACK_DECAY)
+	# Feed the dash impulse into dash_vel so it builds up, then bleeds. Subtracting
+	# _dash_last above kept this off the base inertia, so the buildup is the same on
+	# the ground as in the air rather than runaway in one and dead in the other.
+	dash_vel = dash_vel.lerp(Vector3.ZERO, delta * DASH_BLEED)
+	dash_vel += dash_impulse
+	_dash_last = dash_vel
+	velocity += _dash_last
+	dash_impulse = dash_impulse.lerp(Vector3.ZERO, delta * DASH_DECAY)
 
 	# FOV
 	var velocity_clamped = clamp(velocity.length(), 0.5, SPRINT_SPEED * 2)
