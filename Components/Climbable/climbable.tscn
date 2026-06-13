@@ -16,7 +16,7 @@ radial_segments = 8
 rings = 1
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_climb"]
-size = Vector3(1, 6, 1)
+size = Vector3(3, 6, 3)
 
 [node name="Climbable" type="Area3D"]
 script = ExtResource("1_climb")
