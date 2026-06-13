@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://dn5gm2e014upj"]
+[gd_scene load_steps=9 format=3 uid="uid://dn5gm2e014upj"]
 
 [ext_resource type="Script" uid="uid://b0dhcl4edi5pu" path="res://Components/Player/player.gd" id="1_1xasy"]
 [ext_resource type="PackedScene" uid="uid://br0nkwt1yd1i5" path="res://Components/Player/Hands/hands.tscn" id="2_1xasy"]
 [ext_resource type="Script" uid="uid://cp6no4h2gdagm" path="res://Components/Player/Head/head.gd" id="3_head"]
+[ext_resource type="Script" uid="uid://cw5prans3kt8r" path="res://Components/Player/Dash/dash.gd" id="4_dash"]
 [ext_resource type="Script" uid="uid://d281gvnn52dcj" path="res://Components/Player/DoubleJump/double_jump.gd" id="4_djump"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_y2flf"]
@@ -91,6 +92,11 @@ show_percentage = false
 
 [node name="Hands" parent="Head/Camera3D" node_paths=PackedStringArray("camera") instance=ExtResource("2_1xasy")]
 camera = NodePath("..")
+
+[node name="Dash" type="Node" parent="." node_paths=PackedStringArray("player", "head")]
+script = ExtResource("4_dash")
+player = NodePath("..")
+head = NodePath("../Head")
 
 [node name="DoubleJump" type="Node" parent="." node_paths=PackedStringArray("player")]
 script = ExtResource("4_djump")
