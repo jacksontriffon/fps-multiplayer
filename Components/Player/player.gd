@@ -64,6 +64,14 @@ const SPEC_PITCH_MAX := 1.2
 const SPEC_STICK_SPEED := 2.5
 const SPEC_MOUSE_SENS := 0.005
 
+# Climbing (ropes/ladders). Click to grab the rope while in its Area3D; from there
+# up/down climbs and jump leaps off.
+const CLIMB_SNAP := 12.0
+const CLIMB_DISMOUNT_PUSH := 3.0
+# After leaping off, ignore the rope briefly so holding a direction into it doesn't
+# instantly re-grab.
+const CLIMB_REGRAB_LOCK := 0.35
+
 # Stamina cost of sprinting (per second). The pool itself lives on the Stamina node.
 const SPRINT_DRAIN := 22.0
 
@@ -101,6 +109,12 @@ var dash_vel := Vector3.ZERO
 var _dash_last := Vector3.ZERO
 
 var alive := true
+
+# The Climbable (rope) we're currently inside, set by its Area3D on enter/exit. Only the
+# authority peer acts on it; position then replicates the climb like any other movement.
+var _climb_zone: Climbable = null
+var _climbing := false
+var _climb_regrab_lock := 0.0
 
 # Knockdown / ragdoll state (authority-local). _knocked_down is the non-fatal stun;
 # _ragdoll_active means the proxy is simulating and driving the body transform.
@@ -289,6 +303,14 @@ func _physics_process(delta: float) -> void:
 	# Undo last frame's dash before the movement math so it can't feed back into the
 	# inertia integrator (the air/standing lerps read velocity); it's re-added below.
 	velocity -= _dash_last
+	_dash_last = Vector3.ZERO
+
+	# Climbing a rope overrides normal locomotion, gravity, and dash while it's active.
+	if _update_climb(delta, input_blocked):
+		dash_impulse = Vector3.ZERO
+		dash_vel = Vector3.ZERO
+		move_and_slide()
+		return
 
 	# Add the gravity.
 	if not is_on_floor():
@@ -411,6 +433,53 @@ func _recover() -> void:
 	velocity = Vector3.ZERO
 	knockback = Vector3.ZERO
 	move_and_slide()
+
+func is_climbing() -> bool:
+	return _climbing
+
+# Called by a Climbable's Area3D on enter/exit (runs on every peer; only the authority
+# acts on it). Leaving the rope we're on drops us off it.
+func set_climb_zone(zone: Climbable, inside: bool) -> void:
+	if inside:
+		_climb_zone = zone
+	elif _climb_zone == zone:
+		_climb_zone = null
+		_climbing = false
+
+# A rope is in reach and we're not already on one; Hands' click handler gates on this.
+func can_grab_climb() -> bool:
+	return _climb_zone != null and not _climbing and _climb_regrab_lock <= 0.0
+
+# Latch onto the rope we're standing in. From here up/down climbs and jump leaps off.
+func grab_climb() -> void:
+	if can_grab_climb():
+		_climbing = true
+
+# Returns true while actively climbing, so _physics_process skips normal movement/gravity.
+# Climbing only begins via grab_climb() (a click) — never automatically from movement input.
+func _update_climb(delta: float, input_blocked: bool) -> bool:
+	_climb_regrab_lock = maxf(_climb_regrab_lock - delta, 0.0)
+	if not _climbing:
+		return false
+	# Dropped out of range, or a solid hit shook us loose.
+	if _climb_zone == null or knockback.length() > 1.0:
+		_climbing = false
+		return false
+	# Jump leaps off the rope, out the way you're facing.
+	if not input_blocked and Input.is_action_just_pressed("jump"):
+		_climbing = false
+		_climb_regrab_lock = CLIMB_REGRAB_LOCK
+		velocity = -head.global_transform.basis.z * CLIMB_DISMOUNT_PUSH
+		velocity.y = JUMP_VELOCITY
+		return true
+	# Cling to the rope: ease onto its centre line and drive straight up or down.
+	var climb_input := 0.0 if input_blocked else Input.get_axis("down", "up")
+	var anchor := _climb_zone.global_position
+	velocity.x = (anchor.x - global_position.x) * CLIMB_SNAP
+	velocity.z = (anchor.z - global_position.z) * CLIMB_SNAP
+	velocity.y = climb_input * _climb_zone.climb_speed
+	knockback = Vector3.ZERO
+	return true
 
 # Restore an upright, controllable body and tear down any ragdoll / spectate. Runs on
 # every peer via set_alive_remote(true) so remotes also see the body stand back up.
