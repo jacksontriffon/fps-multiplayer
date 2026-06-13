@@ -9,6 +9,13 @@ const WALK_SPEED = 5.0
 const SPRINT_SPEED = 7.0
 const JUMP_VELOCITY = 4.5
 
+# Dash — a quick burst of speed on a cooldown, paid from the stamina pool. Applied
+# as self-knockback (see apply_knockback) so it layers on top of input velocity and
+# decays the same way other impulses do.
+const DASH_IMPULSE := 12.0
+const DASH_COST := 40.0
+const DASH_COOLDOWN := 1.2
+
 # Keep jumps reliable when sprinting flickers is_on_floor() off between floor
 # seams: buffer a press briefly and allow a short post-ledge coyote window.
 const JUMP_BUFFER := 0.12
@@ -58,6 +65,7 @@ const TEAM_COLORS := [Color.RED, Color.BLUE]
 var speed = WALK_SPEED
 var _jump_buffer := 0.0
 var _coyote := 0.0
+var _dash_cooldown := 0.0
 var knockback := Vector3.ZERO
 var stamina := MAX_STAMINA
 var _regen_delay := 0.0
@@ -140,6 +148,7 @@ func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
 	velocity = Vector3.ZERO
 	knockback = Vector3.ZERO
 	stamina = MAX_STAMINA
+	_dash_cooldown = 0.0
 	position = pos
 	head.rotation.y = yaw
 
@@ -220,6 +229,17 @@ func _physics_process(delta: float) -> void:
 		drain_stamina(SPRINT_DRAIN * delta)
 	else:
 		speed = WALK_SPEED
+
+	# Handle Dash — a burst toward the move direction (or our facing if standing
+	# still), gated by stamina and a cooldown.
+	_dash_cooldown = maxf(_dash_cooldown - delta, 0.0)
+	if not input_blocked and Input.is_action_just_pressed("dash") and _dash_cooldown == 0.0 and stamina >= DASH_COST:
+		var dash_dir: Vector3 = direction if direction else head.transform.basis * Vector3.FORWARD
+		dash_dir.y = 0.0
+		apply_knockback(dash_dir.normalized() * DASH_IMPULSE)
+		drain_stamina(DASH_COST)
+		_dash_cooldown = DASH_COOLDOWN
+
 	if is_on_floor():
 		if direction:
 			velocity.x = direction.x * speed
