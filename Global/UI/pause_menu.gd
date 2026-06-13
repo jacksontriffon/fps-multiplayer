@@ -5,6 +5,7 @@ extends CanvasLayer
 # mouse so the buttons are clickable, restoring the prior mouse mode on continue.
 
 @onready var continue_button: Button = %ContinueButton
+@onready var lobby_button: Button = %LobbyButton
 @onready var quit_button: Button = %QuitButton
 
 var _saved_mouse_mode: Input.MouseMode = Input.MOUSE_MODE_VISIBLE
@@ -17,6 +18,7 @@ func is_open() -> bool:
 func _ready() -> void:
 	visible = false
 	continue_button.pressed.connect(close)
+	lobby_button.pressed.connect(_on_lobby)
 	quit_button.pressed.connect(func() -> void: get_tree().quit())
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -30,9 +32,19 @@ func _unhandled_input(event: InputEvent) -> void:
 func open() -> void:
 	_saved_mouse_mode = Input.get_mouse_mode()
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	# Nothing to leave when already in the lobby — only offer it mid-match.
+	lobby_button.visible = MatchManager.state != MatchManager.State.WAITING
 	visible = true
 	continue_button.grab_focus()
 
 func close() -> void:
 	visible = false
 	Input.set_mouse_mode(_saved_mouse_mode)
+
+# Abandon the current match and send everyone back to the lobby (server owns the flow).
+func _on_lobby() -> void:
+	if multiplayer.is_server():
+		MatchManager.server_request_to_lobby()
+	elif multiplayer.has_multiplayer_peer():
+		MatchManager.request_to_lobby.rpc_id(1)
+	close()

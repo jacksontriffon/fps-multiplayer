@@ -1,10 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://dn5gm2e014upj"]
+[gd_scene load_steps=11 format=3 uid="uid://dn5gm2e014upj"]
 
 [ext_resource type="Script" uid="uid://b0dhcl4edi5pu" path="res://Components/Player/player.gd" id="1_1xasy"]
 [ext_resource type="PackedScene" uid="uid://br0nkwt1yd1i5" path="res://Components/Player/Hands/hands.tscn" id="2_1xasy"]
 [ext_resource type="Script" uid="uid://cp6no4h2gdagm" path="res://Components/Player/Head/head.gd" id="3_head"]
-[ext_resource type="Script" uid="uid://cw5prans3kt8r" path="res://Components/Player/Dash/dash.gd" id="4_dash"]
-[ext_resource type="Script" uid="uid://d281gvnn52dcj" path="res://Components/Player/DoubleJump/double_jump.gd" id="4_djump"]
+[ext_resource type="Script" uid="uid://cxhwx6l78bddc" path="res://Components/Player/Stamina/stamina.gd" id="4_stmna"]
+[ext_resource type="Script" uid="uid://d281gvnn52dcj" path="res://Components/Player/DoubleJump/double_jump.gd" id="5_djump"]
+[ext_resource type="Script" uid="uid://cw5prans3kt8r" path="res://Components/Player/Dash/dash.gd" id="6_dash"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_y2flf"]
 
@@ -108,14 +109,18 @@ collision_mask = 0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ragdoll"]
 shape = SubResource("CapsuleShape3D_ragdoll")
 
-[node name="Dash" type="Node" parent="." node_paths=PackedStringArray("player", "head")]
-script = ExtResource("4_dash")
+[node name="Stamina" type="Node" parent="." node_paths=PackedStringArray("player")]
+script = ExtResource("4_stmna")
 player = NodePath("..")
-head = NodePath("../Head")
 
 [node name="DoubleJump" type="Node" parent="." node_paths=PackedStringArray("player")]
-script = ExtResource("4_djump")
+script = ExtResource("5_djump")
 player = NodePath("..")
+
+[node name="Dash" type="Node" parent="." node_paths=PackedStringArray("player", "head")]
+script = ExtResource("6_dash")
+player = NodePath("..")
+head = NodePath("../Head")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_1xasy")

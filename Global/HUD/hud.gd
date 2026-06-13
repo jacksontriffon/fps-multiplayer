@@ -105,8 +105,8 @@ func _update_stamina() -> void:
 		stamina_bar.visible = false
 		return
 	stamina_bar.visible = true
-	stamina_bar.value = player.stamina
-	var low := player.stamina <= Player.MAX_STAMINA * 0.3
+	stamina_bar.value = player.stamina.amount
+	var low := player.stamina.amount <= Stamina.MAX * 0.3
 	stamina_bar.self_modulate = Color(1, 0.55, 0.25) if low else Color.WHITE
 
 func _local_player() -> Player:

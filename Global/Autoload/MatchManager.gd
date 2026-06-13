@@ -120,6 +120,18 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String =
 func can_start() -> bool:
 	return state == State.WAITING and _team_of.size() >= MIN_PLAYERS
 
+# Any player can abandon the current match from the pause menu; the host drops everyone back
+# to the lobby. Returning to the lobby is inherently global — there's one shared map.
+@rpc("any_peer", "reliable")
+func request_to_lobby() -> void:
+	server_request_to_lobby()
+
+func server_request_to_lobby() -> void:
+	if not multiplayer.is_server() or state == State.WAITING:
+		return
+	_reset_token += 1  # cancel any pending round/match transition before resetting
+	_reset_to_waiting()
+
 # Peer ids of everyone present in the lobby, in a stable order. Read by the Map Select
 # menu to list the players waiting before a match starts.
 func roster() -> Array:

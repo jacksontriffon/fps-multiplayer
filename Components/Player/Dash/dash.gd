@@ -26,7 +26,7 @@ func _physics_process(delta: float) -> void:
 	_cooldown = maxf(_cooldown - delta, 0.0)
 	if Global.is_input_blocked() or not player.controllable():
 		return
-	if Input.is_action_just_pressed("dash") and _cooldown == 0.0 and player.stamina >= DASH_COST:
+	if Input.is_action_just_pressed("dash") and _cooldown == 0.0 and player.stamina.amount >= DASH_COST:
 		# Burst toward the move input, or our facing direction when standing still.
 		var input_dir := Input.get_vector("left", "right", "up", "down")
 		var dir := head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)
@@ -35,5 +35,5 @@ func _physics_process(delta: float) -> void:
 		dir.y = 0.0
 		var impulse := DASH_IMPULSE if player.is_on_floor() else DASH_IMPULSE_AIR
 		player.apply_dash(dir.normalized() * impulse)
-		player.drain_stamina(DASH_COST)
+		player.stamina.drain(DASH_COST)
 		_cooldown = DASH_COOLDOWN
