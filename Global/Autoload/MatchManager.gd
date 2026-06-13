@@ -148,23 +148,39 @@ func server_player_left(id: int) -> void:
 		_check_round_end()
 	_broadcast()
 
-func server_on_hit(victim_id: int, thrower_id: int) -> void:
-	if not multiplayer.is_server() or state != State.PLAYING:
-		return
-	if not lives.has(victim_id) or lives[victim_id] <= 0:
+# Single per-victim outcome for a ball hit. The heart cost and the victim-side effect
+# (death ragdoll, knockdown stun, or soft shove) ship together so they can't race.
+# is_knockdown routes fast hits through the ragdoll; costs_life is the blast opt-out.
+# Hearts are spent during any live match (team, CTF and battle royale); the lobby just
+# shoves or stuns. A fatal hit ragdolls and eliminates in team/BR modes, while in CTF it
+# only benches the player briefly before they respawn (see _ctf_knockout).
+func server_resolve_hit(victim_id: int, thrower_id: int, impulse: Vector3, is_knockdown: bool, costs_life: bool = true) -> void:
+	if not multiplayer.is_server():
 		return
 	if not can_hit(victim_id, thrower_id):
 		return
-	lives[victim_id] -= 1
-	if lives[victim_id] <= 0:
-		# In CTF a knockout is temporary: drop what they carried and queue a respawn.
-		# Other modes eliminate (the spectator stays out until the round/match resets).
+	var scoring := costs_life and state == State.PLAYING
+	var fatal := false
+	if scoring:
+		if not lives.has(victim_id) or lives[victim_id] <= 0:
+			return
+		lives[victim_id] -= 1
+		fatal = lives[victim_id] <= 0
+	var p := _player(victim_id)
+	if fatal:
 		if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
 			_ctf_knockout(victim_id)
+		elif p:
+			p.set_alive_remote.rpc(false, true)
+			p.apply_knockdown.rpc_id(victim_id, impulse, 0.0, true)
+	elif p:
+		if is_knockdown:
+			p.apply_knockdown.rpc_id(victim_id, impulse, Player.KNOCKDOWN_TIME, false)
 		else:
-			_set_spectator(victim_id, true)
-	_broadcast()
-	_check_round_end()
+			p.apply_knockback_remote.rpc_id(victim_id, impulse)
+	if scoring:
+		_broadcast()
+		_check_round_end()
 
 # Whether thrower_id's ball is allowed to get victim_id out. Central source of
 # truth for the hit rules; the ball's detection and this scoring path both use it.
@@ -371,7 +387,7 @@ func _living_counts() -> Array:
 func _set_spectator(id: int, spectating: bool) -> void:
 	var p := _player(id)
 	if p:
-		p.set_alive_remote.rpc(not spectating)
+		p.set_alive_remote.rpc(not spectating, false)
 
 # CTF knockout: bench the player and free anything they held (a downed carrier must drop
 # the flag, not keep it glued to an invisible body), then queue their respawn.
@@ -404,7 +420,7 @@ func _respawn(id: int) -> void:
 	if p == null:
 		return
 	var spawner := spawner_for(game_mode)
-	p.set_alive_remote.rpc(true)
+	p.set_alive_remote.rpc(true, false)
 	if spawner:
 		# Battle royale players are teamless, so any free spot in the mode's set will do.
 		if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
@@ -421,7 +437,7 @@ func _respawn_neutral(id: int) -> void:
 	if p == null:
 		return
 	var spawner := spawner_for(-1)
-	p.set_alive_remote.rpc(true)
+	p.set_alive_remote.rpc(true, false)
 	if spawner:
 		var spawn: Dictionary = spawner.reserve_any(id)
 		p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"], spawn["team"])
