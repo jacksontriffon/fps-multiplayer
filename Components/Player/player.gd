@@ -54,6 +54,10 @@ const TEAM_COLORS := [Color.RED, Color.BLUE]
 var speed = WALK_SPEED
 var _jump_buffer := 0.0
 var _coyote := 0.0
+
+# Set true on any frame this body jumps off the ground/coyote ledge. The
+# DoubleJump child reads it so it never spends an air jump on the same press.
+var jumped_from_ground := false
 var knockback := Vector3.ZERO
 
 var alive := true
@@ -185,13 +189,15 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 
 	# Handle jump. Buffer the press and track a coyote window so a jump isn't
-	# dropped on a frame where is_on_floor() flickers off mid-sprint.
+	# dropped on a frame where is_on_floor() flickers off mid-sprint. The
+	# mid-air double jump lives in the DoubleJump child node.
 	_coyote = COYOTE_TIME if is_on_floor() else maxf(_coyote - delta, 0.0)
 	if not input_blocked and Input.is_action_just_pressed("jump"):
 		_jump_buffer = JUMP_BUFFER
 	else:
 		_jump_buffer = maxf(_jump_buffer - delta, 0.0)
-	if _jump_buffer > 0.0 and _coyote > 0.0:
+	jumped_from_ground = _jump_buffer > 0.0 and _coyote > 0.0
+	if jumped_from_ground:
 		velocity.y = JUMP_VELOCITY
 		_jump_buffer = 0.0
 		_coyote = 0.0
