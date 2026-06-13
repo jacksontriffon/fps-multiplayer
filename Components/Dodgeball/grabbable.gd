@@ -58,6 +58,8 @@ var thrower_id := 0
 var _hit_cooldown := 0.0
 
 var _spawn_transform := Transform3D.IDENTITY
+# True while gamemode-gated off (see required_mode): hidden, frozen and non-colliding.
+var _mode_inactive := false
 # Local smoothed redness (0..1) driven from charge; visual only, not replicated.
 var _tint := 0.0
 # Local smoothed glow (0..1) driven from live_team; visual only, not replicated.
@@ -78,6 +80,19 @@ func _physics_process(delta: float) -> void:
 	# no peer is active (pre-connect, post-disconnect, or scene run standalone).
 	if not multiplayer.has_multiplayer_peer():
 		return
+	# Mode-tied objects (e.g. the CTF flag) only exist while their mode is the active match.
+	# Outside it, hide and fully disable so they can't be seen, grabbed or bumped into.
+	if not _mode_active():
+		_mode_inactive = true
+		visible = false
+		freeze = true
+		collision_layer = 0
+		collision_mask = 0
+		return
+	if _mode_inactive:
+		_mode_inactive = false
+		freeze = false
+		_apply_held_collision()
 	if is_multiplayer_authority():
 		_update_live_state()
 	_update_charge_tint(delta)
@@ -112,6 +127,8 @@ func _physics_process(delta: float) -> void:
 ## Returns true if the grab succeeded (ball was free). slot is the holder's
 ## inventory slot (0..2) this ball lands in.
 func grab(peer_id: int, slot: int) -> bool:
+	if not _mode_active():
+		return false  # gamemode-gated off — not grabbable
 	if held_by != 0:
 		return false  # already held; first grab wins
 	freeze = true
@@ -239,6 +256,14 @@ func _update_live_glow(delta: float) -> void:
 	var rate := GLOW_RISE if target > _glow else GLOW_FALL
 	_glow = move_toward(_glow, target, rate * delta)
 	set_live_glow(live_team, _glow)
+
+# The Pedestal.GameMode this object belongs to, or -1 for an every-mode object (a normal
+# ball). A mode-tied object is hidden and disabled unless its mode is the active match.
+func required_mode() -> int:
+	return -1
+
+func _mode_active() -> bool:
+	return required_mode() < 0 or MatchManager.is_mode_active(required_mode())
 
 # Overridden by subclasses that have a highlight visual.
 func toggle_highlight(_is_highlighted: bool) -> void:

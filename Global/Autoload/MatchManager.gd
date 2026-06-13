@@ -186,6 +186,12 @@ func can_hit(victim_id: int, thrower_id: int) -> bool:
 func team_of(id: int) -> int:
 	return _team_of.get(id, -1)
 
+# Whether `mode` is the gamemode currently being played. False in the lobby (WAITING), where
+# no mode is active. Replicated state, so every peer agrees — gamemode-specific map objects
+# (CTF flags, bases) gate their visibility on this so they only show in their own mode.
+func is_mode_active(mode: int) -> bool:
+	return state != State.WAITING and game_mode == mode
+
 func _start_round() -> void:
 	if not _both_teams_present():
 		state = State.WAITING
