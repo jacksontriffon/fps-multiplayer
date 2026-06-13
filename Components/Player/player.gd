@@ -31,6 +31,11 @@ const HIT_TRAUMA = 0.6
 
 const FLY_SPEED = 10.0
 
+# Climbing (ropes/ladders). While inside a Climbable's Area3D, pushing the up/down
+# movement actions drives the body straight up or down it; jump leaps off.
+const CLIMB_SNAP := 12.0
+const CLIMB_DISMOUNT_PUSH := 3.0
+
 # Stamina. Sprinting and winding up a throw both burn it; it refills after a short
 # idle. CHARGE_DRAIN is read by Hands while charging.
 const MAX_STAMINA := 150.0
@@ -63,6 +68,11 @@ var stamina := MAX_STAMINA
 var _regen_delay := 0.0
 
 var alive := true
+
+# The Climbable (rope) we're currently inside, set by its Area3D on enter/exit. Only the
+# authority peer acts on it; position then replicates the climb like any other movement.
+var _climb_zone: Climbable = null
+var _climbing := false
 
 # Generic gameplay effects: effect id -> set of grantor sources. Tracking sources lets
 # several grantors stack the same effect without clobbering each other, so the same
@@ -194,6 +204,11 @@ func _physics_process(delta: float) -> void:
 		_spectate(input_blocked)
 		return
 
+	# Climbing a rope overrides normal locomotion and gravity while it's active.
+	if _update_climb(input_blocked):
+		move_and_slide()
+		return
+
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
@@ -269,3 +284,41 @@ func _spectate(input_blocked: bool) -> void:
 			dir.y -= 1.0
 	velocity = dir.normalized() * FLY_SPEED if dir.length() > 0.01 else Vector3.ZERO
 	move_and_slide()
+
+# Called by a Climbable's Area3D on enter/exit (runs on every peer; only the authority
+# acts on it in _update_climb). Leaving the rope we're on drops us off it.
+func set_climb_zone(zone: Climbable, inside: bool) -> void:
+	if inside:
+		_climb_zone = zone
+	elif _climb_zone == zone:
+		_climb_zone = null
+		_climbing = false
+
+# Returns true while actively climbing, so _physics_process skips normal movement/gravity.
+func _update_climb(input_blocked: bool) -> bool:
+	if _climb_zone == null:
+		_climbing = false
+		return false
+	# A solid hit shakes you loose from the rope.
+	if knockback.length() > 1.0:
+		_climbing = false
+		return false
+	var climb_input := 0.0 if input_blocked else Input.get_axis("down", "up")
+	# Grab on once you push up or down against the rope; stay on until you leave or leap.
+	if not _climbing:
+		if absf(climb_input) < 0.1:
+			return false
+		_climbing = true
+	# Jump leaps off the rope, out the way you're facing.
+	if not input_blocked and Input.is_action_just_pressed("jump"):
+		_climbing = false
+		velocity = -head.global_transform.basis.z * CLIMB_DISMOUNT_PUSH
+		velocity.y = JUMP_VELOCITY
+		return true
+	# Cling to the rope: ease onto its centre line and drive straight up or down.
+	var anchor := _climb_zone.global_position
+	velocity.x = (anchor.x - global_position.x) * CLIMB_SNAP
+	velocity.z = (anchor.z - global_position.z) * CLIMB_SNAP
+	velocity.y = climb_input * _climb_zone.climb_speed
+	knockback = Vector3.ZERO
+	return true
