@@ -31,6 +31,14 @@ func _ready() -> void:
 		return
 	add_to_group("ctf_base")
 
+# Only show the base while Capture the Flag is the active match; hidden in the lobby and
+# other modes. Detection is owned by CTFManager (also mode-gated), so visuals are all that
+# need toggling here.
+func _process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+	visible = MatchManager.is_mode_active(Pedestal.GameMode.CAPTURE_THE_FLAG)
+
 func _apply_visuals() -> void:
 	if not is_node_ready():
 		return

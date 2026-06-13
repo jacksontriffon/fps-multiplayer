@@ -13,6 +13,9 @@ func _ready() -> void:
 	super()
 	add_to_group("flag")
 
+func required_mode() -> int:
+	return Pedestal.GameMode.CAPTURE_THE_FLAG
+
 func toggle_highlight(is_highlighted: bool) -> void:
 	outline_mesh.visible = is_highlighted
 
