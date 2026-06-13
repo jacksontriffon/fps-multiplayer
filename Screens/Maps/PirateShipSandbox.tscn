@@ -1,26 +1,63 @@
-[gd_scene load_steps=21 format=3 uid="uid://b0oj7lssgjnqm"]
+[gd_scene load_steps=27 format=3 uid="uid://b0oj7lssgjnqm"]
 
+[ext_resource type="Shader" uid="uid://dexlnknk1olyb" path="res://sky.gdshader" id="1_akk43"]
 [ext_resource type="Shader" uid="uid://cli3w3hjnm7bd" path="res://Screens/Maps/WindWakerWater.gdshader" id="1_f5ste"]
+[ext_resource type="Texture2D" uid="uid://ba64macpkkk08" path="res://Assets/Textures/Sky/sun_circle.png" id="2_akk43"]
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="2_ball"]
 [ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="3_spawn"]
 [ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="4_sp"]
 [ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="5_base"]
 [ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="6_flag"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_pirate"]
-sky_top_color = Color(0.015686275, 0.41960785, 0.827451, 1)
-sky_horizon_color = Color(0.30980393, 0.76862746, 1, 1)
-ground_bottom_color = Color(0.1254902, 0.3254902, 1, 1)
-ground_horizon_color = Color(0.25882354, 0.48235294, 1, 1)
+[sub_resource type="Curve" id="Curve_xxkg6"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.11371238, 1), 0.0, 0.0, 0, 0, Vector2(0.5317726, 0.8498641), 0.0, 0.0, 0, 0, Vector2(1, 0.6732337), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_g5pm0"]
+curve = SubResource("Curve_xxkg6")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_f5ste"]
+seed = 1
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_akk43"]
+noise = SubResource("FastNoiseLite_f5ste")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xxkg6"]
+shader = ExtResource("1_akk43")
+shader_parameter/cloud_shape_sampler = SubResource("NoiseTexture2D_akk43")
+shader_parameter/cloud_noise_sampler = SubResource("NoiseTexture2D_akk43")
+shader_parameter/cloud_curves = SubResource("CurveTexture_g5pm0")
+shader_parameter/clouds_samples = 32
+shader_parameter/shadow_sample = 4
+shader_parameter/clouds_density = 0.40000000596048
+shader_parameter/clouds_scale = 1.0
+shader_parameter/clouds_smoothness = 0.029999999329440002
+shader_parameter/clouds_light_color = Color(1, 1, 1, 1)
+shader_parameter/clouds_shadow_intensity = 1.0
+shader_parameter/high_clouds_sampler = SubResource("NoiseTexture2D_akk43")
+shader_parameter/high_clouds_density = 0.20000000298024
+shader_parameter/top_color = Color(0.34901962, 0.5882353, 1, 1)
+shader_parameter/bottom_color = Color(0, 0.32941177, 0.96862745, 1)
+shader_parameter/sun_scatter = Color(0.29803923, 0.29803923, 0.29803923, 1)
+shader_parameter/astro_tint = Color(0.90588236, 0.7882353, 0.627451, 1)
+shader_parameter/astro_sampler = ExtResource("2_akk43")
+shader_parameter/astro_scale = 6.400000095367679
+shader_parameter/astro_intensity = 3.0
+shader_parameter/stars_intensity = 0.0
+shader_parameter/shooting_stars_intensity = 0.0
+shader_parameter/shooting_star_tint = Color(0, 0, 0, 1)
 
 [sub_resource type="Sky" id="Sky_pirate"]
-sky_material = SubResource("ProceduralSkyMaterial_pirate")
+sky_material = SubResource("ShaderMaterial_xxkg6")
 
 [sub_resource type="Environment" id="Environment_pirate"]
 background_mode = 2
 sky = SubResource("Sky_pirate")
 tonemap_mode = 2
 glow_enabled = true
+adjustment_enabled = true
+adjustment_saturation = 1.5
 
 [sub_resource type="StandardMaterial3D" id="Material_waterdeep"]
 albedo_color = Color(0.05, 0.22, 0.38, 1)
@@ -301,7 +338,7 @@ albedo_color = Color(0.92, 0.9, 0.84, 1)
 environment = SubResource("Environment_pirate")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 12, 0)
+transform = Transform3D(0.8694214, -0.42052525, 0.25935453, 0.25186723, 0.82884073, 0.49958545, -0.4250519, -0.36902735, 0.82652855, 0, 12, 0)
 shadow_enabled = true
 
 [node name="Arena" type="Node3D" parent="."]
