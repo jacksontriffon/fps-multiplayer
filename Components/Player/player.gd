@@ -65,6 +65,7 @@ var _jump_buffer := 0.0
 var _coyote := 0.0
 var knockback := Vector3.ZERO
 var dash_impulse := Vector3.ZERO
+var _dash_last := Vector3.ZERO
 var stamina := MAX_STAMINA
 var _regen_delay := 0.0
 
@@ -143,6 +144,7 @@ func set_alive_remote(value: bool) -> void:
 		velocity = Vector3.ZERO
 		knockback = Vector3.ZERO
 		dash_impulse = Vector3.ZERO
+		_dash_last = Vector3.ZERO
 
 @rpc("any_peer", "call_local", "reliable")
 func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
@@ -152,6 +154,7 @@ func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
 	velocity = Vector3.ZERO
 	knockback = Vector3.ZERO
 	dash_impulse = Vector3.ZERO
+	_dash_last = Vector3.ZERO
 	stamina = MAX_STAMINA
 	position = pos
 	head.rotation.y = yaw
@@ -207,6 +210,10 @@ func _physics_process(delta: float) -> void:
 		_spectate(input_blocked)
 		return
 
+	# Undo last frame's dash before the movement math so it can't feed back into the
+	# inertia integrator (the air/standing lerps read velocity); it's re-added below.
+	velocity -= _dash_last
+
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
@@ -250,7 +257,8 @@ func _physics_process(delta: float) -> void:
 	# overwrite x/z outright, so knockback has to be added after them), then decay.
 	velocity += knockback
 	knockback = knockback.lerp(Vector3.ZERO, delta * KNOCKBACK_DECAY)
-	velocity += dash_impulse
+	_dash_last = dash_impulse
+	velocity += _dash_last
 	dash_impulse = dash_impulse.lerp(Vector3.ZERO, delta * DASH_DECAY)
 
 	# FOV
