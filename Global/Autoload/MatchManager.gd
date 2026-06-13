@@ -28,7 +28,7 @@ const MAP_OF := {
 	Pedestal.GameMode.CAPTURE_THE_FLAG: "res://Screens/Maps/ColosseumMap.tscn",
 }
 # Sandbox override for map testing: when true, every mode plays on SANDBOX_MAP instead.
-const SANDBOX_MAP := "res://Screens/Maps/PirateShipSandbox.tscn"
+const SANDBOX_MAP := "res://Screens/Maps/HungerGamesSandbox.tscn"
 const USE_SANDBOX_MAP := true
 
 var state: int = State.WAITING

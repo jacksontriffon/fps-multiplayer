@@ -1,0 +1,726 @@
+[gd_scene load_steps=14 format=3 uid="uid://dhng3rgmsandbx"]
+
+[ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
+[ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
+[ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="3_ball"]
+[ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="4_spawn"]
+[ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="5_sp"]
+[ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="6_base"]
+[ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="7_flag"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+sky_top_color = Color(0.38, 0.6, 0.86, 1)
+sky_horizon_color = Color(0.7, 0.8, 0.7, 1)
+ground_horizon_color = Color(0.55, 0.6, 0.45, 1)
+ground_bottom_color = Color(0.3, 0.35, 0.2, 1)
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_trunk"]
+albedo_color = Color(0.36, 0.24, 0.13, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_branch"]
+albedo_color = Color(0.47, 0.33, 0.18, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_leaf"]
+albedo_color = Color(0.2, 0.45, 0.17, 1)
+roughness = 1.0
+
+[node name="HungerGamesSandbox" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 20, 0)
+shadow_enabled = true
+
+[node name="Arena" type="Node3D" parent="."]
+
+[node name="Baseplate" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(96, 1, 96)
+material = ExtResource("1_grid")
+
+[node name="RimInnerN" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -11)
+use_collision = true
+size = Vector3(28, 0.4, 6)
+material = ExtResource("2_grid2")
+
+[node name="RimInnerS" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 11)
+use_collision = true
+size = Vector3(28, 0.4, 6)
+material = ExtResource("2_grid2")
+
+[node name="RimInnerE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0.2, 0)
+use_collision = true
+size = Vector3(6, 0.4, 16)
+material = ExtResource("2_grid2")
+
+[node name="RimInnerW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0.2, 0)
+use_collision = true
+size = Vector3(6, 0.4, 16)
+material = ExtResource("2_grid2")
+
+[node name="RimMidN" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -17)
+use_collision = true
+size = Vector3(40, 0.8, 6)
+material = ExtResource("2_grid2")
+
+[node name="RimMidS" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 17)
+use_collision = true
+size = Vector3(40, 0.8, 6)
+material = ExtResource("2_grid2")
+
+[node name="RimMidE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0.4, 0)
+use_collision = true
+size = Vector3(6, 0.8, 28)
+material = ExtResource("2_grid2")
+
+[node name="RimMidW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 0.4, 0)
+use_collision = true
+size = Vector3(6, 0.8, 28)
+material = ExtResource("2_grid2")
+
+[node name="PlainN" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -33)
+use_collision = true
+size = Vector3(92, 1.2, 26)
+material = ExtResource("1_grid")
+
+[node name="PlainS" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 33)
+use_collision = true
+size = Vector3(92, 1.2, 26)
+material = ExtResource("1_grid")
+
+[node name="PlainE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, 0.6, 0)
+use_collision = true
+size = Vector3(26, 1.2, 40)
+material = ExtResource("1_grid")
+
+[node name="PlainW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 0.6, 0)
+use_collision = true
+size = Vector3(26, 1.2, 40)
+material = ExtResource("1_grid")
+
+[node name="WallN" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.95, -46)
+use_collision = true
+size = Vector3(94, 1.5, 1)
+material = ExtResource("2_grid2")
+
+[node name="WallS" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.95, 46)
+use_collision = true
+size = Vector3(94, 1.5, 1)
+material = ExtResource("2_grid2")
+
+[node name="WallE" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 1.95, 0)
+use_collision = true
+size = Vector3(1, 1.5, 94)
+material = ExtResource("2_grid2")
+
+[node name="WallW" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 1.95, 0)
+use_collision = true
+size = Vector3(1, 1.5, 94)
+material = ExtResource("2_grid2")
+
+[node name="Spires" type="Node3D" parent="."]
+
+[node name="Spire1" type="Node3D" parent="Spires"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.96022, 0, 15.82104)
+
+[node name="Trunk" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.7, 0)
+use_collision = true
+size = Vector3(1.3, 11, 1.3)
+material = SubResource("Mat_trunk")
+
+[node name="Branch1" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, 0, 1, 1.05, 1.75, -0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch2" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 2.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch3" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 3.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch4" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 4.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch5" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 4.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch6" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 5.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch7" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 6.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch8" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 7.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch9" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 8.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch10" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 8.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch11" type="CSGBox3D" parent="Spires/Spire1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 9.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Canopy" type="CSGSphere3D" parent="Spires/Spire1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.4, 0)
+radius = 3.0
+material = SubResource("Mat_leaf")
+
+[node name="Spire2" type="Node3D" parent="Spires"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.77869, 0, 32.99081)
+
+[node name="Trunk" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.7, 0)
+use_collision = true
+size = Vector3(1.3, 11, 1.3)
+material = SubResource("Mat_trunk")
+
+[node name="Branch1" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, 0, 1, 1.05, 1.75, -0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch2" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 2.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch3" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 3.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch4" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 4.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch5" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 4.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch6" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 5.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch7" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 6.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch8" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 7.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch9" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 8.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch10" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 8.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch11" type="CSGBox3D" parent="Spires/Spire2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 9.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Canopy" type="CSGSphere3D" parent="Spires/Spire2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.4, 0)
+radius = 3.0
+material = SubResource("Mat_leaf")
+
+[node name="Spire3" type="Node3D" parent="Spires"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.18154, 0, 17.16977)
+
+[node name="Trunk" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.7, 0)
+use_collision = true
+size = Vector3(1.3, 11, 1.3)
+material = SubResource("Mat_trunk")
+
+[node name="Branch1" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, 0, 1, 1.05, 1.75, -0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch2" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 2.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch3" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 3.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch4" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 4.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch5" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 4.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch6" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 5.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch7" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 6.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch8" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 7.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch9" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 8.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch10" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 8.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch11" type="CSGBox3D" parent="Spires/Spire3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 9.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Canopy" type="CSGSphere3D" parent="Spires/Spire3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.4, 0)
+radius = 3.0
+material = SubResource("Mat_leaf")
+
+[node name="Spire4" type="Node3D" parent="Spires"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.96022, 0, -15.82104)
+
+[node name="Trunk" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.7, 0)
+use_collision = true
+size = Vector3(1.3, 11, 1.3)
+material = SubResource("Mat_trunk")
+
+[node name="Branch1" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, 0, 1, 1.05, 1.75, -0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch2" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 2.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch3" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 3.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch4" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 4.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch5" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 4.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch6" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 5.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch7" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 6.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch8" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 7.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch9" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 8.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch10" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 8.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch11" type="CSGBox3D" parent="Spires/Spire4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 9.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Canopy" type="CSGSphere3D" parent="Spires/Spire4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.4, 0)
+radius = 3.0
+material = SubResource("Mat_leaf")
+
+[node name="Spire5" type="Node3D" parent="Spires"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.77869, 0, -32.99081)
+
+[node name="Trunk" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.7, 0)
+use_collision = true
+size = Vector3(1.3, 11, 1.3)
+material = SubResource("Mat_trunk")
+
+[node name="Branch1" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, 0, 1, 1.05, 1.75, -0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch2" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 2.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch3" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 3.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch4" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 4.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch5" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 4.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch6" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 5.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch7" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 6.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch8" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 7.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch9" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 8.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch10" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 8.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch11" type="CSGBox3D" parent="Spires/Spire5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 9.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Canopy" type="CSGSphere3D" parent="Spires/Spire5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.4, 0)
+radius = 3.0
+material = SubResource("Mat_leaf")
+
+[node name="Spire6" type="Node3D" parent="Spires"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.18154, 0, -17.16977)
+
+[node name="Trunk" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.7, 0)
+use_collision = true
+size = Vector3(1.3, 11, 1.3)
+material = SubResource("Mat_trunk")
+
+[node name="Branch1" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, 0, 1, 1.05, 1.75, -0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch2" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 2.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch3" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 3.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch4" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 4.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch5" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 4.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch6" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 5.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch7" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(0.30902, 0, -0.95106, 0, 1, 0, 0.95106, 0, 0.30902, 0.32447, 6.55, -0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch8" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(-0.80902, 0, -0.58779, 0, 1, 0, 0.58779, 0, -0.80902, -0.84947, 7.35, -0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch9" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(-0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, -0.80902, -0.84947, 8.15, 0.61717)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch10" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(0.30902, 0, 0.95106, 0, 1, 0, -0.95106, 0, 0.30902, 0.32447, 8.95, 0.99861)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Branch11" type="CSGBox3D" parent="Spires/Spire6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 1.05, 9.75, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 0.6)
+material = SubResource("Mat_branch")
+
+[node name="Canopy" type="CSGSphere3D" parent="Spires/Spire6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.4, 0)
+radius = 3.0
+material = SubResource("Mat_leaf")
+
+[node name="Dodgeballs" type="Node3D" parent="."]
+
+[node name="Ball1" parent="Dodgeballs" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="Ball2" parent="Dodgeballs" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.5, 0)
+
+[node name="Ball3" parent="Dodgeballs" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0.5, 0)
+
+[node name="Ball4" parent="Dodgeballs" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 2.5)
+
+[node name="Ball5" parent="Dodgeballs" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -2.5)
+
+[node name="Ball6" parent="Dodgeballs" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.5, 2)
+
+[node name="Ball7" parent="Dodgeballs" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, 2)
+
+[node name="Ball8" parent="Dodgeballs" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.5, -2)
+
+[node name="Ball9" parent="Dodgeballs" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, -2)
+
+[node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("6_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 1.2, 0)
+flag = NodePath("../RedFlag")
+
+[node name="BlueBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("6_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 1.2, 0)
+team = 1
+flag = NodePath("../BlueFlag")
+
+[node name="RedFlag" parent="." instance=ExtResource("7_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 2.2, 0)
+
+[node name="BlueFlag" parent="." instance=ExtResource("7_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 2.2, 0)
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+script = ExtResource("4_spawn")
+
+[node name="Spawn1" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 24, 1.3, 0)
+team = 0
+
+[node name="Spawn2" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0.5, 0, -0.86603, 0, 1, 0, 0.86603, 0, 0.5, 20.78461, 1.3, 12)
+team = 1
+
+[node name="Spawn3" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0.86603, 0, -0.5, 0, 1, 0, 0.5, 0, 0.86603, 12, 1.3, 20.78461)
+team = 0
+
+[node name="Spawn4" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, 0, 1, 0, 1.3, 24)
+team = 1
+
+[node name="Spawn5" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0.86603, 0, 0.5, 0, 1, 0, -0.5, 0, 0.86603, -12, 1.3, 20.78461)
+team = 0
+
+[node name="Spawn6" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0.5, 0, 0.86603, 0, 1, 0, -0.86603, 0, 0.5, -20.78461, 1.3, 12)
+team = 1
+
+[node name="Spawn7" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -24, 1.3, 0)
+team = 0
+
+[node name="Spawn8" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(-0.5, 0, 0.86603, 0, 1, 0, -0.86603, 0, -0.5, -20.78461, 1.3, -12)
+team = 1
+
+[node name="Spawn9" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(-0.86603, 0, 0.5, 0, 1, 0, -0.5, 0, -0.86603, -12, 1.3, -20.78461)
+team = 0
+
+[node name="Spawn10" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, -0, 0, -1, -0, 1.3, -24)
+team = 1
+
+[node name="Spawn11" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(-0.86603, 0, -0.5, 0, 1, 0, 0.5, 0, -0.86603, 12, 1.3, -20.78461)
+team = 0
+
+[node name="Spawn12" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(-0.5, 0, -0.86603, 0, 1, 0, 0.86603, 0, -0.5, 20.78461, 1.3, -12)
+team = 1
