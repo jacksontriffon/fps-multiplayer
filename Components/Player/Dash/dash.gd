@@ -10,7 +10,7 @@ class_name Dash
 # These feed Player's dash_vel accumulator, so the effective lunge is several times
 # the raw number — tune there and in DASH_DECAY / DASH_BLEED for distance.
 const DASH_IMPULSE := 3.0
-const DASH_IMPULSE_AIR := 1.5
+const DASH_IMPULSE_AIR := 2.5
 const DASH_COST := 40.0
 const DASH_COOLDOWN := 1.2
 

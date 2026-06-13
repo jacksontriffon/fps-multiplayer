@@ -87,7 +87,7 @@ costs_a_life = true
 respawn_delay = 4.0
 
 [node name="Ship" type="Node3D" parent="LobbyTerrain"]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0, 0, 0)
+transform = Transform3D(-3.059797e-08, 0, 0.7, 0, 0.7, 0, -0.7, 0, -3.059797e-08, -28.40216, -2.3075619, 15.21446)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="LobbyTerrain/Ship"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12160492, 0.5485264, 32.737488)
@@ -1737,7 +1737,7 @@ size = Vector3(13.464809, 1, 26.692139)
 script = ExtResource("4_spawn")
 
 [node name="Spawn1" parent="SpawnPoints" instance=ExtResource("5_sp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.384892, 12.009901, 4.460351)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.384892, 0.08085677, 2.3524404)
 team = -1
 
 [node name="Spawn2" parent="SpawnPoints" instance=ExtResource("5_sp")]
@@ -1749,7 +1749,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9043412, 0.1, 0.65613174)
 team = -1
 
 [node name="Spawn4" parent="SpawnPoints" instance=ExtResource("5_sp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1768069, 10.2936125, 0.7821579)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1768069, 0.032584757, 0.7821579)
 team = -1
 
 [node name="Spawn5" parent="SpawnPoints" instance=ExtResource("5_sp")]
@@ -1757,7 +1757,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3512921, 0.1, 0.85092545)
 team = -1
 
 [node name="Spawn6" parent="SpawnPoints" instance=ExtResource("5_sp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38397503, 11.611722, 0.041238785)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38397503, 0.111757874, 0.041238785)
 team = -1
 
 [node name="Pedestal" parent="." instance=ExtResource("6_ped")]
