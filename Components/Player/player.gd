@@ -31,13 +31,20 @@ const HIT_TRAUMA = 0.6
 
 const FLY_SPEED = 10.0
 
-# Stamina. Sprinting and winding up a throw both burn it; it refills after a short
-# idle. CHARGE_DRAIN is read by Hands while charging.
-const MAX_STAMINA := 150.0
+# Stamina is a fixed pool (TOTAL_STAMINA) that other systems carve into: each "reservation"
+# takes a slice, shrinking the usable max. Hearts are the first source — every heart reserves
+# STAMINA_PER_HEART — so a player with fewer hearts has a larger stamina pool. Sprinting and
+# winding up a throw burn the remaining stamina; it refills after a short idle. CHARGE_DRAIN
+# is read by Hands while charging.
+const TOTAL_STAMINA := 150.0
+const STAMINA_PER_HEART := 24.0
 const SPRINT_DRAIN := 22.0
 const CHARGE_DRAIN := 25.0
 const STAMINA_REGEN := 20.0
 const STAMINA_REGEN_DELAY := 0.6
+
+# Reservation source ids. Add more (debuffs, abilities) and they shrink the pool the same way.
+const STAMINA_RES_HEARTS := &"hearts"
 
 const TEAM_COLORS := [Color.RED, Color.BLUE]
 
@@ -59,8 +66,13 @@ var speed = WALK_SPEED
 var _jump_buffer := 0.0
 var _coyote := 0.0
 var knockback := Vector3.ZERO
-var stamina := MAX_STAMINA
+var stamina := TOTAL_STAMINA
 var _regen_delay := 0.0
+
+# Stamina reservations: source id -> amount of the pool it claims. Keyed by source so
+# several can stack without clobbering each other. The usable max is TOTAL_STAMINA minus
+# the sum of these. The HUD reads stamina_capacity() to size the bar.
+var _stamina_reservations := {}
 
 var alive := true
 
@@ -92,6 +104,32 @@ func has_stamina() -> bool:
 func drain_stamina(amount: float) -> void:
 	stamina = maxf(stamina - amount, 0.0)
 	_regen_delay = STAMINA_REGEN_DELAY
+
+# Claim part of the stamina pool for a source (0 or less clears it).
+func reserve_stamina(source: StringName, amount: float) -> void:
+	if amount > 0.0:
+		_stamina_reservations[source] = amount
+	else:
+		_stamina_reservations.erase(source)
+
+# Usable stamina max: the pool minus everything reserved (never below zero).
+func stamina_capacity() -> float:
+	var reserved := 0.0
+	for amount in _stamina_reservations.values():
+		reserved += amount
+	return maxf(TOTAL_STAMINA - reserved, 0.0)
+
+# Hearts (and, later, other debuffs) each carve a slice out of the pool, so the usable max
+# grows as a player loses hearts. Recomputed each frame from match state. Hidden in the
+# lobby/CTF (no lives), and treated as one heart while the infinite-hearts effect is up.
+func _refresh_stamina_reservations() -> void:
+	var hearts := 0
+	if has_effect(INFINITE_HEARTS):
+		hearts = 1
+	elif MatchManager.state != MatchManager.State.WAITING \
+		and MatchManager.game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG:
+		hearts = maxi(MatchManager.lives.get(name.to_int(), 0), 0)
+	reserve_stamina(STAMINA_RES_HEARTS, float(hearts) * STAMINA_PER_HEART)
 
 # Push this body around. Movement is simulated on this player's own authority peer,
 # so knockback must be applied there: the local throw recoil calls this directly,
@@ -139,7 +177,8 @@ func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
 	team = t
 	velocity = Vector3.ZERO
 	knockback = Vector3.ZERO
-	stamina = MAX_STAMINA
+	_refresh_stamina_reservations()
+	stamina = stamina_capacity()
 	position = pos
 	head.rotation.y = yaw
 
@@ -243,10 +282,14 @@ func _physics_process(delta: float) -> void:
 	var target_fov = BASE_FOV + FOV_CHANGE * velocity_clamped
 	camera.fov = lerp(camera.fov, target_fov, delta * 8.0)
 
-	# Refill stamina once we've stopped spending it for a moment.
+	# Hearts/debuffs may have changed the pool — clamp to the current max, then refill once
+	# we've stopped spending it for a moment.
+	_refresh_stamina_reservations()
+	var cap := stamina_capacity()
+	stamina = minf(stamina, cap)
 	_regen_delay = maxf(_regen_delay - delta, 0.0)
-	if _regen_delay == 0.0 and stamina < MAX_STAMINA:
-		stamina = minf(stamina + STAMINA_REGEN * delta, MAX_STAMINA)
+	if _regen_delay == 0.0 and stamina < cap:
+		stamina = minf(stamina + STAMINA_REGEN * delta, cap)
 
 	move_and_slide()
 
