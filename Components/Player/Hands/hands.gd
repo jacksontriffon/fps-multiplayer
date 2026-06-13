@@ -30,6 +30,12 @@ const RECOIL_MIN_SCALE := 0.3
 const AIM_DISTANCE := 50.0
 const AIM_MAX_DISTANCE := 1000.0
 
+# Grab targeting: a ball is only grabbable inside a narrow cone down the camera's
+# center sight line. The Area3D in the scene is just the broad phase; this is the
+# real filter.
+const INTERACT_CONE_HALF_ANGLE := deg_to_rad(12.0)
+const INTERACT_REACH := 3.0
+
 var grabbable_objects: Array[Grabbable] = []
 var highlighted: Grabbable = null
 
@@ -205,28 +211,36 @@ func _on_grabbable_area_area_exited(_area: Area3D) -> void:
 # --- Highlight (local visual for the controlling peer) ---------------------
 func update_highlight() -> void:
 	# Nothing to highlight while the active slot already holds a ball.
-	var nearest: Grabbable = null
+	var target: Grabbable = null
 	if _equipped_ball_of(_get_player()) == null:
-		nearest = get_nearest_grabbable_object()
-	if nearest == highlighted:
+		target = get_targeted_grabbable()
+	if target == highlighted:
 		return
 	if highlighted:
 		highlighted.toggle_highlight(false)
-	if nearest:
-		nearest.toggle_highlight(true)
-	highlighted = nearest
+	if target:
+		target.toggle_highlight(true)
+	highlighted = target
 
-func get_nearest_grabbable_object() -> Grabbable:
-	var nearest: Grabbable = null
-	var nearest_dist := INF
+# The free ball most centered on the crosshair: inside the interaction cone and
+# within reach, preferring the smallest angle off the sight line over proximity.
+func get_targeted_grabbable() -> Grabbable:
+	var origin := camera.global_position
+	var forward := -camera.global_transform.basis.z
+	var best: Grabbable = null
+	var best_angle := INTERACT_CONE_HALF_ANGLE
 	for object in grabbable_objects:
 		if object.held_by != 0:
 			continue  # skip balls someone is already holding
-		var d := object.global_position.distance_squared_to(global_position)
-		if d < nearest_dist:
-			nearest_dist = d
-			nearest = object
-	return nearest
+		var to_object: Vector3 = object.global_position - origin
+		var dist := to_object.length()
+		if dist > INTERACT_REACH or is_zero_approx(dist):
+			continue
+		var angle := forward.angle_to(to_object)
+		if angle <= best_angle:
+			best_angle = angle
+			best = object
+	return best
 
 # The ball occupying the player's currently active slot, or null if it's empty.
 func _equipped_ball_of(player: Player) -> Grabbable:
