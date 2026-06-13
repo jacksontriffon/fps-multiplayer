@@ -7,6 +7,8 @@ class_name Dash
 # replicates via the existing position sync with no extra RPCs.
 
 # Air dashes get a weaker burst so you can't fling yourself across the map mid-jump.
+# These feed Player's dash_vel accumulator, so the effective lunge is several times
+# the raw number — tune there and in DASH_DECAY / DASH_BLEED for distance.
 const DASH_IMPULSE := 9.0
 const DASH_IMPULSE_AIR := 4.0
 const DASH_COST := 40.0
