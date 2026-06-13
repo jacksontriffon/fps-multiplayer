@@ -153,9 +153,9 @@ func _apply_blast(center: Vector3) -> void:
 		var strength := lerpf(knockback_edge, knockback_center, falloff)
 		var away := to_victim / dist if dist > 0.01 else Vector3.UP
 		var impulse := (away + Vector3.UP * upward_boost).normalized() * strength
-		player.apply_knockback_remote.rpc_id(victim_id, impulse)
-		if costs_a_life:
-			MatchManager.server_on_hit(victim_id, _armed_thrower)
+		# A strong blast knocks victims down; weaker edge shoves just push them.
+		var is_knockdown := strength >= knockback_center * 0.5
+		MatchManager.server_resolve_hit(victim_id, _armed_thrower, impulse, is_knockdown, costs_a_life)
 	# Free balls near the blast get tossed too.
 	for node in get_tree().get_nodes_in_group("grabbable"):
 		var ball := node as Grabbable

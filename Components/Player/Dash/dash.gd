@@ -24,7 +24,7 @@ func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():
 		return
 	_cooldown = maxf(_cooldown - delta, 0.0)
-	if Global.is_input_blocked() or not player.alive:
+	if Global.is_input_blocked() or not player.controllable():
 		return
 	if Input.is_action_just_pressed("dash") and _cooldown == 0.0 and player.stamina.amount >= DASH_COST:
 		# Burst toward the move input, or our facing direction when standing still.
