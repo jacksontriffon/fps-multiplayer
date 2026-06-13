@@ -110,11 +110,6 @@ func _update_bar(id: int) -> void:
 	lives_text.visible = false
 	if infinite:
 		_update_lives_infinite()
-	# Lives/hearts are a Team-mode concept; CTF has no elimination, so it shows no hearts —
-	# the bar is then pure stamina, which still applies (you throw in CTF too).
-	elif MatchManager.game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
-		_ensure_hearts(0)
-		_infinity_label.visible = false
 	else:
 		_update_lives(MatchManager.lives[id])
 	_update_stamina()

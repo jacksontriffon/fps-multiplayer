@@ -135,14 +135,14 @@ func stamina_capacity() -> float:
 	return maxf(TOTAL_STAMINA - reserved, 0.0)
 
 # Hearts (and, later, other debuffs) each carve a slice out of the pool, so the usable max
-# grows as a player loses hearts. Recomputed each frame from match state. Hidden in the
-# lobby/CTF (no lives), and treated as one heart while the infinite-hearts effect is up.
+# grows as a player loses hearts. Recomputed each frame from match state: no reservation in
+# the lobby (no lives yet), and one heart while the infinite-hearts effect is up. Every mode
+# with lives — including CTF — feeds in here so the bar matches the hearts the HUD shows.
 func _refresh_stamina_reservations() -> void:
 	var hearts := 0
 	if has_effect(INFINITE_HEARTS):
 		hearts = 1
-	elif MatchManager.state != MatchManager.State.WAITING \
-		and MatchManager.game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG:
+	elif MatchManager.state != MatchManager.State.WAITING:
 		hearts = maxi(MatchManager.lives.get(name.to_int(), 0), 0)
 	reserve_stamina(STAMINA_RES_HEARTS, float(hearts) * STAMINA_PER_HEART)
 
