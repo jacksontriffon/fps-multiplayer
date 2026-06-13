@@ -26,6 +26,7 @@ const LOBBY_MAP := "res://Screens/Maps/LobbyMap.tscn"
 const MAP_OF := {
 	Pedestal.GameMode.TEAM: "res://Screens/Maps/ColosseumMap.tscn",
 	Pedestal.GameMode.CAPTURE_THE_FLAG: "res://Screens/Maps/ColosseumMap.tscn",
+	Pedestal.GameMode.BATTLE_ROYALE: "res://Screens/Maps/HungerGamesSandbox.tscn",
 }
 # Sandbox override for map testing: when true, every mode plays on SANDBOX_MAP instead.
 const SANDBOX_MAP := "res://Screens/Maps/HungerGamesSandbox.tscn"
@@ -74,24 +75,30 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
 	game_mode = mode
 	team_scores = [0, 0]
 	round_num = 0
-	# Split the teamless lobby roster into teams now, as the match begins.
-	_assign_teams()
+	# Split the teamless lobby roster into teams now, as the match begins. Battle royale is
+	# every player for themselves, so the roster stays teamless (-1).
+	if mode != Pedestal.GameMode.BATTLE_ROYALE:
+		_assign_teams()
 	# Swap every peer into this mode's map first, then wait a frame so the new map's
 	# SpawnPoints and balls are in the tree before we reset and spawn players into them.
 	await _load_map_for(SANDBOX_MAP if USE_SANDBOX_MAP else MAP_OF[mode])
 	# A player may have left during the swap; bail back to the lobby if we can't start anymore.
-	if not _both_teams_present():
+	if not _enough_players_present():
 		await _to_lobby()
 		state = State.WAITING
 		status_text = ""
 		_broadcast()
 		return
-	# The two modes are mutually exclusive: Team runs the rounds/elimination loop and is
-	# won by round wins; CTF has no elimination and is won by flag captures.
-	if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
-		_start_ctf()
-	else:
-		_start_round()
+	# The modes are mutually exclusive: Team runs the rounds/elimination loop and is won by
+	# round wins; CTF has no elimination and is won by flag captures; battle royale is a
+	# single free-for-all round won by the last player standing.
+	match game_mode:
+		Pedestal.GameMode.CAPTURE_THE_FLAG:
+			_start_ctf()
+		Pedestal.GameMode.BATTLE_ROYALE:
+			_start_battle_royale()
+		_:
+			_start_round()
 
 func can_start() -> bool:
 	return state == State.WAITING and _team_of.size() >= MIN_PLAYERS
@@ -109,7 +116,7 @@ func server_on_hit(victim_id: int, thrower_id: int) -> void:
 	if not multiplayer.is_server() or state != State.PLAYING:
 		return
 	# CTF has no elimination — hits still shove players (that's physics), but cost no lives.
-	if game_mode != Pedestal.GameMode.TEAM:
+	if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
 		return
 	if not lives.has(victim_id) or lives[victim_id] <= 0:
 		return
@@ -129,9 +136,10 @@ func can_hit(victim_id: int, thrower_id: int) -> bool:
 		return false
 	if victim_id == thrower_id:
 		return self_hit
-	# The lobby (teamless WAITING) is a free-for-all so players can shove each other
-	# around; matches use the configured friendly_fire rule (off = real dodgeball).
-	var ff := friendly_fire or state == State.WAITING
+	# The lobby (teamless WAITING) and battle royale are free-for-alls; team matches use
+	# the configured friendly_fire rule (off = real dodgeball).
+	var ff := friendly_fire or state == State.WAITING \
+		or game_mode == Pedestal.GameMode.BATTLE_ROYALE
 	if not ff and _team_of.get(victim_id, -1) == _team_of.get(thrower_id, -2):
 		return false
 	return true
@@ -176,6 +184,18 @@ func _start_ctf() -> void:
 		_respawn(id)
 	_broadcast()
 
+# Battle royale: one continuous free-for-all round, last player with lives left wins.
+func _start_battle_royale() -> void:
+	state = State.PLAYING
+	status_text = "Battle Royale — last one standing"
+	for ball in get_tree().get_nodes_in_group("grabbable"):
+		if ball.has_method("server_reset"):
+			ball.server_reset()
+	for id in _team_of:
+		lives[id] = STARTING_LIVES
+		_respawn(id)
+	_broadcast()
+
 # Reported by the CaptureTheFlag arena when a carrier delivers the flag. Owns CTF scoring
 # so the HUD (which reads team_scores) shows it.
 func server_on_flag_capture(scoring_team: int) -> void:
@@ -193,10 +213,13 @@ func server_on_flag_capture(scoring_team: int) -> void:
 		_broadcast()
 
 func _check_round_end() -> void:
-	# Last-team-standing only ends rounds in Team mode; CTF ends on captures.
-	if game_mode != Pedestal.GameMode.TEAM:
-		return
 	if state != State.PLAYING:
+		return
+	# Battle royale ends when one player is left; CTF ends on captures, not eliminations.
+	if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
+		_check_br_end()
+		return
+	if game_mode != Pedestal.GameMode.TEAM:
 		return
 	var counts := _living_counts()
 	var teams_alive := 0
@@ -224,6 +247,22 @@ func _end_round(winner: int) -> void:
 func _end_match(winner: int) -> void:
 	state = State.MATCH_OVER
 	status_text = "%s wins the match!" % TEAM_NAMES[winner]
+	_broadcast()
+	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
+
+func _check_br_end() -> void:
+	var winner := -1
+	var alive_n := 0
+	for id in _team_of:
+		if lives.get(id, 0) > 0:
+			alive_n += 1
+			winner = id
+	if alive_n <= 1:
+		_end_match_br(winner if alive_n == 1 else -1)
+
+func _end_match_br(winner_id: int) -> void:
+	state = State.MATCH_OVER
+	status_text = ("Player %d is the last one standing!" % winner_id) if winner_id > 0 else "Nobody survived!"
 	_broadcast()
 	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
 
@@ -261,6 +300,13 @@ func _both_teams_present() -> bool:
 			return false
 	return true
 
+# Whether the roster still supports the active mode: battle royale just needs bodies,
+# team modes need at least one player per side.
+func _enough_players_present() -> bool:
+	if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
+		return _team_of.size() >= MIN_PLAYERS
+	return _both_teams_present()
+
 func _team_player_counts() -> Array:
 	var counts := [0, 0]
 	for id in _team_of:
@@ -287,9 +333,14 @@ func _respawn(id: int) -> void:
 	var p := _player(id)
 	if p == null:
 		return
-	var spawner := get_tree().get_first_node_in_group("spawn_points")
+	var spawner := spawner_for(game_mode)
 	p.set_alive_remote.rpc(true)
 	if spawner:
+		# Battle royale players are teamless, so any free spot in the mode's set will do.
+		if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
+			var spawn: Dictionary = spawner.reserve_any(id)
+			p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"], spawn["team"])
+			return
 		# Keep the player's existing team so a fresh map's empty spawner can't flip it.
 		var spawn: Dictionary = spawner.reserve(id, team_of(id))
 		p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"], spawn["team"])
@@ -299,11 +350,32 @@ func _respawn_neutral(id: int) -> void:
 	var p := _player(id)
 	if p == null:
 		return
-	var spawner := get_tree().get_first_node_in_group("spawn_points")
+	var spawner := spawner_for(-1)
 	p.set_alive_remote.rpc(true)
 	if spawner:
 		var spawn: Dictionary = spawner.reserve_any(id)
 		p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"], spawn["team"])
+
+# The spawn manager to use right now: the active mode's set during a match, the
+# mode-agnostic set while waiting in the lobby.
+func current_spawner() -> SpawnPoints:
+	return spawner_for(game_mode if state != State.WAITING else -1)
+
+# The spawn manager serving `mode` in the current map. Prefers an exact mode match, then a
+# mode-agnostic manager (-1, e.g. the lobby or single-set maps), then whatever exists.
+func spawner_for(mode: int) -> SpawnPoints:
+	var any: SpawnPoints = null
+	var agnostic: SpawnPoints = null
+	for s in get_tree().get_nodes_in_group("spawn_points"):
+		if s is not SpawnPoints:
+			continue
+		if s.mode == mode:
+			return s
+		if s.mode == -1 and agnostic == null:
+			agnostic = s
+		if any == null:
+			any = s
+	return agnostic if agnostic else any
 
 func _player(id: int) -> Node:
 	return get_tree().current_scene.get_node_or_null(str(id))

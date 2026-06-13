@@ -161,7 +161,7 @@ func _join_enet():
 func _add_player(id: int = 1):
 	var player = player_scene.instantiate()
 	player.name = str(id)
-	var spawner := get_tree().get_first_node_in_group("spawn_points")
+	var spawner := MatchManager.current_spawner()
 	if spawner:
 		# Lobby spawn: any free spot, teamless (player.team -1 reads as neutral grey).
 		var spawn: Dictionary = spawner.reserve_any(id)
@@ -171,8 +171,8 @@ func _add_player(id: int = 1):
 	call_deferred("add_child", player)
 
 func _remove_player(id: int):
-	var spawner := get_tree().get_first_node_in_group("spawn_points")
-	if spawner:
+	# Maps can hold one spawn manager per mode; drop the player's slot from all of them.
+	for spawner in get_tree().get_nodes_in_group("spawn_points"):
 		spawner.release(id)
 	MatchManager.server_player_left(id)
 

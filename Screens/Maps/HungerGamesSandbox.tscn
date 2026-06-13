@@ -660,67 +660,160 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.5, -2)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, -2)
 
 [node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("6_base")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 1.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.8, 0)
 flag = NodePath("../RedFlag")
 
 [node name="BlueBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("6_base")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 1.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.8, 0)
 team = 1
 flag = NodePath("../BlueFlag")
 
 [node name="RedFlag" parent="." instance=ExtResource("7_flag")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 2.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 1.8, 0)
 
 [node name="BlueFlag" parent="." instance=ExtResource("7_flag")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 2.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 1.8, 0)
 
-[node name="SpawnPoints" type="Node3D" parent="."]
+[node name="SpawnPointsTeam" type="Node3D" parent="."]
 script = ExtResource("4_spawn")
+mode = 0
 
-[node name="Spawn1" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Red1" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.3, -24)
+
+[node name="Red2" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.3, -24)
+
+[node name="Red3" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.3, -24)
+
+[node name="Red4" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.3, -24)
+
+[node name="Red5" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.3, -24)
+
+[node name="Red6" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.3, -24)
+
+[node name="Blue1" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -10, 1.3, 24)
+team = 1
+
+[node name="Blue2" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -6, 1.3, 24)
+team = 1
+
+[node name="Blue3" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -2, 1.3, 24)
+team = 1
+
+[node name="Blue4" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 2, 1.3, 24)
+team = 1
+
+[node name="Blue5" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 6, 1.3, 24)
+team = 1
+
+[node name="Blue6" parent="SpawnPointsTeam" instance=ExtResource("5_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 10, 1.3, 24)
+team = 1
+
+[node name="SpawnPointsCTF" type="Node3D" parent="."]
+script = ExtResource("4_spawn")
+mode = 1
+
+[node name="Red1" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -22, 1.3, -10)
+
+[node name="Red2" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -22, 1.3, -6)
+
+[node name="Red3" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -22, 1.3, -2)
+
+[node name="Red4" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -22, 1.3, 2)
+
+[node name="Red5" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -22, 1.3, 6)
+
+[node name="Red6" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -22, 1.3, 10)
+
+[node name="Blue1" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 22, 1.3, -10)
+team = 1
+
+[node name="Blue2" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 22, 1.3, -6)
+team = 1
+
+[node name="Blue3" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 22, 1.3, -2)
+team = 1
+
+[node name="Blue4" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 22, 1.3, 2)
+team = 1
+
+[node name="Blue5" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 22, 1.3, 6)
+team = 1
+
+[node name="Blue6" parent="SpawnPointsCTF" instance=ExtResource("5_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 22, 1.3, 10)
+team = 1
+
+[node name="SpawnPointsBR" type="Node3D" parent="."]
+script = ExtResource("4_spawn")
+mode = 2
+
+[node name="Spawn1" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 24, 1.3, 0)
-team = 0
+team = -1
 
-[node name="Spawn2" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn2" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(0.5, 0, -0.86603, 0, 1, 0, 0.86603, 0, 0.5, 20.78461, 1.3, 12)
-team = 1
+team = -1
 
-[node name="Spawn3" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn3" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(0.86603, 0, -0.5, 0, 1, 0, 0.5, 0, 0.86603, 12, 1.3, 20.78461)
-team = 0
+team = -1
 
-[node name="Spawn4" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn4" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(1, 0, -0, 0, 1, 0, 0, 0, 1, 0, 1.3, 24)
-team = 1
+team = -1
 
-[node name="Spawn5" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn5" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(0.86603, 0, 0.5, 0, 1, 0, -0.5, 0, 0.86603, -12, 1.3, 20.78461)
-team = 0
+team = -1
 
-[node name="Spawn6" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn6" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(0.5, 0, 0.86603, 0, 1, 0, -0.86603, 0, 0.5, -20.78461, 1.3, 12)
-team = 1
+team = -1
 
-[node name="Spawn7" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn7" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -24, 1.3, 0)
-team = 0
+team = -1
 
-[node name="Spawn8" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn8" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(-0.5, 0, 0.86603, 0, 1, 0, -0.86603, 0, -0.5, -20.78461, 1.3, -12)
-team = 1
+team = -1
 
-[node name="Spawn9" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn9" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(-0.86603, 0, 0.5, 0, 1, 0, -0.5, 0, -0.86603, -12, 1.3, -20.78461)
-team = 0
+team = -1
 
-[node name="Spawn10" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn10" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, -0, 0, -1, -0, 1.3, -24)
-team = 1
+team = -1
 
-[node name="Spawn11" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn11" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(-0.86603, 0, -0.5, 0, 1, 0, 0.5, 0, -0.86603, 12, 1.3, -20.78461)
-team = 0
+team = -1
 
-[node name="Spawn12" parent="SpawnPoints" instance=ExtResource("5_sp")]
+[node name="Spawn12" parent="SpawnPointsBR" instance=ExtResource("5_sp")]
 transform = Transform3D(-0.5, 0, -0.86603, 0, 1, 0, 0.86603, 0, -0.5, 20.78461, 1.3, -12)
-team = 1
+team = -1
