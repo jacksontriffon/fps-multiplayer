@@ -39,13 +39,8 @@ const HIT_TRAUMA = 0.6
 
 const FLY_SPEED = 10.0
 
-# Stamina. Sprinting and winding up a throw both burn it; it refills after a short
-# idle. CHARGE_DRAIN is read by Hands while charging.
-const MAX_STAMINA := 150.0
+# Stamina cost of sprinting (per second). The pool itself lives on the Stamina node.
 const SPRINT_DRAIN := 22.0
-const CHARGE_DRAIN := 25.0
-const STAMINA_REGEN := 20.0
-const STAMINA_REGEN_DELAY := 0.6
 
 const TEAM_COLORS := [Color.RED, Color.BLUE]
 
@@ -53,6 +48,7 @@ const TEAM_COLORS := [Color.RED, Color.BLUE]
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var mesh: MeshInstance3D = $MeshInstance3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
+@onready var stamina: Stamina = $Stamina
 
 @export var team: int = 0:
 	set(value):
@@ -74,8 +70,6 @@ var knockback := Vector3.ZERO
 var dash_impulse := Vector3.ZERO
 var dash_vel := Vector3.ZERO
 var _dash_last := Vector3.ZERO
-var stamina := MAX_STAMINA
-var _regen_delay := 0.0
 
 var alive := true
 
@@ -99,14 +93,6 @@ func set_effect(id: StringName, active: bool, source: StringName = &"default") -
 		sources.erase(source)
 		if sources.is_empty():
 			_effects.erase(id)
-
-# Stamina is spent by sprinting (here) and by charging a throw (Hands calls these).
-func has_stamina() -> bool:
-	return stamina > 0.0
-
-func drain_stamina(amount: float) -> void:
-	stamina = maxf(stamina - amount, 0.0)
-	_regen_delay = STAMINA_REGEN_DELAY
 
 # Push this body around. Movement is simulated on this player's own authority peer,
 # so knockback must be applied there: the local throw recoil calls this directly,
@@ -165,7 +151,7 @@ func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
 	dash_impulse = Vector3.ZERO
 	dash_vel = Vector3.ZERO
 	_dash_last = Vector3.ZERO
-	stamina = MAX_STAMINA
+	stamina.refill()
 	position = pos
 	head.rotation.y = yaw
 
@@ -247,9 +233,9 @@ func _physics_process(delta: float) -> void:
 	var direction = (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	# Handle Sprint — burns stamina, and only while actually moving.
-	if not input_blocked and Input.is_action_pressed("sprint") and direction and has_stamina():
+	if not input_blocked and Input.is_action_pressed("sprint") and direction and stamina.has_stamina():
 		speed = SPRINT_SPEED
-		drain_stamina(SPRINT_DRAIN * delta)
+		stamina.drain(SPRINT_DRAIN * delta)
 	else:
 		speed = WALK_SPEED
 	if is_on_floor():
@@ -282,11 +268,6 @@ func _physics_process(delta: float) -> void:
 	var velocity_clamped = clamp(velocity.length(), 0.5, SPRINT_SPEED * 2)
 	var target_fov = BASE_FOV + FOV_CHANGE * velocity_clamped
 	camera.fov = lerp(camera.fov, target_fov, delta * 8.0)
-
-	# Refill stamina once we've stopped spending it for a moment.
-	_regen_delay = maxf(_regen_delay - delta, 0.0)
-	if _regen_delay == 0.0 and stamina < MAX_STAMINA:
-		stamina = minf(stamina + STAMINA_REGEN * delta, MAX_STAMINA)
 
 	move_and_slide()
 
