@@ -14,9 +14,6 @@ const JUMP_VELOCITY = 4.5
 const JUMP_BUFFER := 0.12
 const COYOTE_TIME := 0.1
 
-# Extra mid-air jumps allowed before landing. 1 = double jump.
-const MAX_AIR_JUMPS := 1
-
 # Friction
 const AIR_FRICTION = 5.0
 const GROUND_FRICTION = 10.0
@@ -61,7 +58,10 @@ const TEAM_COLORS := [Color.RED, Color.BLUE]
 var speed = WALK_SPEED
 var _jump_buffer := 0.0
 var _coyote := 0.0
-var _air_jumps := 0
+
+# Set true on any frame this body jumps off the ground/coyote ledge. The
+# DoubleJump child reads it so it never spends an air jump on the same press.
+var jumped_from_ground := false
 var knockback := Vector3.ZERO
 var stamina := MAX_STAMINA
 var _regen_delay := 0.0
@@ -203,26 +203,18 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 
 	# Handle jump. Buffer the press and track a coyote window so a jump isn't
-	# dropped on a frame where is_on_floor() flickers off mid-sprint. Landing
-	# refills the air-jump budget that powers the mid-air double jump.
-	if is_on_floor():
-		_coyote = COYOTE_TIME
-		_air_jumps = MAX_AIR_JUMPS
-	else:
-		_coyote = maxf(_coyote - delta, 0.0)
+	# dropped on a frame where is_on_floor() flickers off mid-sprint. The
+	# mid-air double jump lives in the DoubleJump child node.
+	_coyote = COYOTE_TIME if is_on_floor() else maxf(_coyote - delta, 0.0)
 	if not input_blocked and Input.is_action_just_pressed("jump"):
 		_jump_buffer = JUMP_BUFFER
 	else:
 		_jump_buffer = maxf(_jump_buffer - delta, 0.0)
-	if _jump_buffer > 0.0:
-		if _coyote > 0.0:
-			velocity.y = JUMP_VELOCITY
-			_jump_buffer = 0.0
-			_coyote = 0.0
-		elif _air_jumps > 0:
-			velocity.y = JUMP_VELOCITY
-			_jump_buffer = 0.0
-			_air_jumps -= 1
+	jumped_from_ground = _jump_buffer > 0.0 and _coyote > 0.0
+	if jumped_from_ground:
+		velocity.y = JUMP_VELOCITY
+		_jump_buffer = 0.0
+		_coyote = 0.0
 
 	# Handle movement direction
 	var input_dir := Vector2.ZERO if input_blocked else Input.get_vector("left", "right", "up", "down")
