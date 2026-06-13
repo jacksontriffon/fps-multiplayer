@@ -59,6 +59,13 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Continue"
 
+[node name="LobbyButton" type="Button" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Back to Lobby"
+
 [node name="QuitButton" type="Button" parent="Center/Panel/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(220, 48)
