@@ -107,16 +107,17 @@ func _process(delta: float) -> void:
 	prompt.modulate.a = a
 	prompt.outline_modulate.a = a
 
-	if near and MatchManager.can_start() and Input.is_action_just_pressed("interaction"):
-		_start()
+	# Interacting opens the pre-match Map Select menu (mode, map pick, player list); the
+	# match itself starts from there. Open even without enough players so you can see who's
+	# waiting — the menu's Start button stays disabled until the lobby is full enough.
+	if near and not MapSelect.is_open() and Input.is_action_just_pressed("interaction"):
+		MapSelect.open(game_mode)
 
 # Empty when the prompt shouldn't show; the billboard Label3D renders whatever this returns.
 func prompt_text() -> String:
 	if MatchManager.state != MatchManager.State.WAITING or not _local_near():
 		return ""
-	if MatchManager.can_start():
-		return "Interact to Start %s" % MODE_NAMES[game_mode]
-	return "Add more players to start the game"
+	return "Interact to set up %s" % MODE_NAMES[game_mode]
 
 func _local_near() -> bool:
 	var p := _local_player()
@@ -126,9 +127,3 @@ func _local_player() -> Node3D:
 	if not multiplayer.has_multiplayer_peer():
 		return null
 	return get_tree().current_scene.get_node_or_null(str(multiplayer.get_unique_id()))
-
-func _start() -> void:
-	if multiplayer.is_server():
-		MatchManager.server_request_start(game_mode)
-	else:
-		MatchManager.request_start.rpc_id(1, game_mode)

@@ -28,9 +28,20 @@ const MAP_OF := {
 	Pedestal.GameMode.CAPTURE_THE_FLAG: "res://Screens/Maps/ColosseumMap.tscn",
 	Pedestal.GameMode.BATTLE_ROYALE: "res://Screens/Maps/HungerGamesSandbox.tscn",
 }
-# Sandbox override for map testing: when true, every mode plays on SANDBOX_MAP instead.
+# Sandbox override for map testing: when true, a start with no chosen map falls back to
+# SANDBOX_MAP. The Map Select menu always passes an explicit map, so it overrides this.
 const SANDBOX_MAP := "res://Screens/Maps/HungerGamesSandbox.tscn"
 const USE_SANDBOX_MAP := true
+
+# Maps the pre-match Map Select menu offers. `path` feeds straight into server_request_start;
+# `name` is the button label. Single source of truth for the selectable arena list.
+const MAP_CHOICES := [
+	{"name": "Colosseum", "path": "res://Screens/Maps/ColosseumMap.tscn"},
+	{"name": "Team Arena", "path": "res://Screens/Maps/TeamArena.tscn"},
+	{"name": "CTF Arena", "path": "res://Screens/Maps/CTFArena.tscn"},
+	{"name": "Hunger Games", "path": "res://Screens/Maps/HungerGamesSandbox.tscn"},
+	{"name": "Pirate Ship", "path": "res://Screens/Maps/PirateShipSandbox.tscn"},
+]
 
 var state: int = State.WAITING
 var team_scores := [0, 0]
@@ -63,13 +74,14 @@ func server_player_ready(id: int) -> void:
 		_set_spectator(id, true)
 	_broadcast()
 
-# Any player at the podium can ask the server to start; it validates and begins.
-# mode is a Pedestal.GameMode, chosen by the pedestal that was used.
+# Any player at the podium can ask the server to start; it validates and begins. mode is a
+# Pedestal.GameMode and map_path the arena chosen in the Map Select menu (empty = use the
+# mode's default / sandbox).
 @rpc("any_peer", "reliable")
-func request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
-	server_request_start(mode)
+func request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String = "") -> void:
+	server_request_start(mode, map_path)
 
-func server_request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
+func server_request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String = "") -> void:
 	if not multiplayer.is_server() or not can_start():
 		return
 	game_mode = mode
@@ -79,9 +91,11 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
 	# every player for themselves, so the roster stays teamless (-1).
 	if mode != Pedestal.GameMode.BATTLE_ROYALE:
 		_assign_teams()
-	# Swap every peer into this mode's map first, then wait a frame so the new map's
+	# Swap every peer into the chosen map first, then wait a frame so the new map's
 	# SpawnPoints and balls are in the tree before we reset and spawn players into them.
-	await _load_map_for(SANDBOX_MAP if USE_SANDBOX_MAP else MAP_OF[mode])
+	# An explicit pick from Map Select wins; otherwise fall back to the sandbox/mode default.
+	var chosen_map: String = map_path if map_path != "" else (SANDBOX_MAP if USE_SANDBOX_MAP else MAP_OF[mode])
+	await _load_map_for(chosen_map)
 	# A player may have left during the swap; bail back to the lobby if we can't start anymore.
 	if not _enough_players_present():
 		await _to_lobby()
@@ -102,6 +116,13 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM) -> void:
 
 func can_start() -> bool:
 	return state == State.WAITING and _team_of.size() >= MIN_PLAYERS
+
+# Peer ids of everyone present in the lobby, in a stable order. Read by the Map Select
+# menu to list the players waiting before a match starts.
+func roster() -> Array:
+	var ids := _team_of.keys()
+	ids.sort()
+	return ids
 
 func server_player_left(id: int) -> void:
 	if not multiplayer.is_server():

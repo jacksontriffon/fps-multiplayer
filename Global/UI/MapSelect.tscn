@@ -1,0 +1,133 @@
+[gd_scene load_steps=4 format=3 uid="uid://b2mapselect8ui0"]
+
+[ext_resource type="Script" path="res://Global/UI/map_select.gd" id="1_ms"]
+
+[sub_resource type="StyleBoxFlat" id="panel_bg"]
+content_margin_left = 36.0
+content_margin_top = 28.0
+content_margin_right = 36.0
+content_margin_bottom = 28.0
+bg_color = Color(0, 0, 0, 0.7)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.18)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="col_bg"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 1, 1, 0.05)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="MapSelect" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_ms")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Center" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("panel_bg")
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="ModeTitle" type="Label" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Set Up Match"
+horizontal_alignment = 1
+
+[node name="Columns" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="MapColumn" type="PanelContainer" parent="Center/Panel/VBox/Columns"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("col_bg")
+
+[node name="MapVBox" type="VBoxContainer" parent="Center/Panel/VBox/Columns/MapColumn"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MapHeading" type="Label" parent="Center/Panel/VBox/Columns/MapColumn/MapVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Map"
+
+[node name="MapList" type="VBoxContainer" parent="Center/Panel/VBox/Columns/MapColumn/MapVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PlayerColumn" type="PanelContainer" parent="Center/Panel/VBox/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("col_bg")
+
+[node name="PlayerVBox" type="VBoxContainer" parent="Center/Panel/VBox/Columns/PlayerColumn"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlayerHeading" type="Label" parent="Center/Panel/VBox/Columns/PlayerColumn/PlayerVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Players"
+
+[node name="PlayerList" type="VBoxContainer" parent="Center/Panel/VBox/Columns/PlayerColumn/PlayerVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Hint" type="Label" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.78, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = ""
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="BackButton" type="Button" parent="Center/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Back"
+
+[node name="StartButton" type="Button" parent="Center/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Start Match"
