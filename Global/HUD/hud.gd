@@ -25,6 +25,7 @@ const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
 @onready var banner_label: Label = %Banner
 @onready var hurt_overlay: ColorRect = %HurtOverlay
 @onready var damage_indicator: Control = %DamageIndicator
+@onready var spectate_text: Label = %SpectateText
 
 # world_dir points from the player toward where the hit came from.
 func hit_from(world_dir: Vector3) -> void:
@@ -73,6 +74,7 @@ func _process(delta: float) -> void:
 	_update_hurt(delta, id)
 	_update_score()
 	_update_banner(delta)
+	_update_spectate()
 	# Slowly turn the live item previews so they read as 3D.
 	for i in _preview_active.size():
 		if _preview_active[i]:
@@ -294,6 +296,11 @@ func _update_score() -> void:
 	var r: int = MatchManager.team_scores[0]
 	var b: int = MatchManager.team_scores[1]
 	score_label.text = "%s  %d  —  %d  %s" % [TEAM_NAMES[0], r, b, TEAM_NAMES[1]]
+
+# Death cam / spectator status, sourced from the local player's own spectator state.
+func _update_spectate() -> void:
+	var player := _local_player()
+	spectate_text.text = player.spectate_text if player else ""
 
 func _update_banner(delta: float) -> void:
 	if MatchManager.state == MatchManager.State.WAITING:

@@ -133,21 +133,35 @@ func server_player_left(id: int) -> void:
 		_check_round_end()
 	_broadcast()
 
-func server_on_hit(victim_id: int, thrower_id: int) -> void:
-	if not multiplayer.is_server() or state != State.PLAYING:
-		return
-	# CTF has no elimination — hits still shove players (that's physics), but cost no lives.
-	if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
-		return
-	if not lives.has(victim_id) or lives[victim_id] <= 0:
+# Single per-victim outcome for a ball hit. The fatal/non-fatal decision and the
+# victim-side effect (death ragdoll, knockdown stun, or soft shove) ship together so
+# they can't race. is_knockdown routes fast hits through the ragdoll; costs_life is the
+# blast opt-out. A life is only spent during a live team round — CTF and the lobby just
+# shove or stun, with no elimination.
+func server_resolve_hit(victim_id: int, thrower_id: int, impulse: Vector3, is_knockdown: bool, costs_life: bool = true) -> void:
+	if not multiplayer.is_server():
 		return
 	if not can_hit(victim_id, thrower_id):
 		return
-	lives[victim_id] -= 1
-	if lives[victim_id] <= 0:
-		_set_spectator(victim_id, true)
-	_broadcast()
-	_check_round_end()
+	var scoring := costs_life and state == State.PLAYING and game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG
+	var fatal := false
+	if scoring:
+		if not lives.has(victim_id) or lives[victim_id] <= 0:
+			return
+		lives[victim_id] -= 1
+		fatal = lives[victim_id] <= 0
+	var p := _player(victim_id)
+	if p:
+		if fatal:
+			p.set_alive_remote.rpc(false, true)
+			p.apply_knockdown.rpc_id(victim_id, impulse, 0.0, true)
+		elif is_knockdown:
+			p.apply_knockdown.rpc_id(victim_id, impulse, Player.KNOCKDOWN_TIME, false)
+		else:
+			p.apply_knockback_remote.rpc_id(victim_id, impulse)
+	if scoring:
+		_broadcast()
+		_check_round_end()
 
 # Whether thrower_id's ball is allowed to get victim_id out. Central source of
 # truth for the hit rules; the ball's detection and this scoring path both use it.
@@ -188,7 +202,7 @@ func _start_round() -> void:
 
 # CTF has a single continuous round: spawn everyone, reset objects, play until a team
 # reaches CTF_CAPTURE_LIMIT captures. lives are set so players count as alive, but nothing
-# decrements them (server_on_hit is a no-op here).
+# decrements them (server_resolve_hit costs no life in CTF).
 func _start_ctf() -> void:
 	if not _both_teams_present():
 		state = State.WAITING
@@ -348,14 +362,14 @@ func _living_counts() -> Array:
 func _set_spectator(id: int, spectating: bool) -> void:
 	var p := _player(id)
 	if p:
-		p.set_alive_remote.rpc(not spectating)
+		p.set_alive_remote.rpc(not spectating, false)
 
 func _respawn(id: int) -> void:
 	var p := _player(id)
 	if p == null:
 		return
 	var spawner := spawner_for(game_mode)
-	p.set_alive_remote.rpc(true)
+	p.set_alive_remote.rpc(true, false)
 	if spawner:
 		# Battle royale players are teamless, so any free spot in the mode's set will do.
 		if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
@@ -372,7 +386,7 @@ func _respawn_neutral(id: int) -> void:
 	if p == null:
 		return
 	var spawner := spawner_for(-1)
-	p.set_alive_remote.rpc(true)
+	p.set_alive_remote.rpc(true, false)
 	if spawner:
 		var spawn: Dictionary = spawner.reserve_any(id)
 		p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"], spawn["team"])

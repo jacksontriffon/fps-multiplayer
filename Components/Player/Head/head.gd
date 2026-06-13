@@ -24,6 +24,7 @@ var _trauma := 0.0
 @onready var crosshairs: CanvasLayer = %Crosshairs
 @onready var charge_bar: ProgressBar = %ChargeBar
 @onready var hands: Hands = $Camera3D/Hands
+@onready var _player: Player = get_parent() as Player
 
 
 func _ready() -> void:
@@ -39,6 +40,10 @@ func _process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer():
 		return
 	if not is_multiplayer_authority():
+		return
+	# No first-person look while stunned (the body's tumble drives the camera) or dead
+	# (the spectator camera takes over).
+	if _player and not _player.controllable():
 		return
 	# Right-stick look. get_vector applies the actions' deadzone; mouse look is
 	# handled separately in _unhandled_input. Both feed _apply_look. Skipped while the
@@ -73,6 +78,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not multiplayer.has_multiplayer_peer():
 		return
 	if not is_multiplayer_authority():
+		return
+	if _player and not _player.controllable():
 		return
 	# Ignore mouse look while the cursor is free (e.g. the pause overlay is open).
 	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:

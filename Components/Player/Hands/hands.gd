@@ -67,7 +67,7 @@ func _physics_process(delta: float) -> void:
 		var player := _get_player()
 		# Drop the wind-up if we died or lost the ball (e.g. a round reset), so it
 		# stops draining stamina with nothing in hand.
-		if player == null or not player.alive or _equipped_ball_of(player) == null:
+		if player == null or not player.controllable() or _equipped_ball_of(player) == null:
 			_charging = false
 			_charge = 0.0
 		else:
@@ -86,7 +86,7 @@ func _physics_process(delta: float) -> void:
 # Input.is_action_just_* edge-detects correctly for both buttons and axes.
 func _handle_interaction_input() -> void:
 	var me := _get_player()
-	if me and not me.alive:
+	if me and not me.controllable():
 		return
 	# Grab happens immediately on press, and only when the active slot is empty.
 	var grabbed_this_frame := false

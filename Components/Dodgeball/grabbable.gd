@@ -20,6 +20,7 @@ const HIT_SPEED_MAX = 24.0      # speed at which knockback maxes out
 const HIT_KNOCKBACK_MIN = 4.0   # shove at the hit threshold
 const HIT_KNOCKBACK_MAX = 14.0  # shove at (or above) HIT_SPEED_MAX
 const HIT_COOLDOWN = 0.3        # min seconds between hits from the same ball
+const KNOCKDOWN_SPEED = 20.0    # ball speed at which a hit ragdolls instead of shoving
 
 # Charge tint reddens the ball for observers; it rises with charge, falls fast on release.
 const TINT_RISE = 5.0
@@ -186,8 +187,9 @@ func _server_check_hit(delta: float) -> void:
 		if away.length() < 0.01:
 			away = -linear_velocity  # degenerate fallback
 		var impulse := away.normalized() * knockback
-		player.apply_knockback_remote.rpc_id(victim_id, impulse)
-		MatchManager.server_on_hit(victim_id, thrower_id)
+		# A fast enough hit knocks the victim down; the server owns the one coherent
+		# outcome (death / knockdown / shove) so the effect and any elimination ship together.
+		MatchManager.server_resolve_hit(victim_id, thrower_id, impulse, speed >= KNOCKDOWN_SPEED)
 		_hit_cooldown = HIT_COOLDOWN
 		return
 
