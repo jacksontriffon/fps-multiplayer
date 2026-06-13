@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://dn5gm2e014upj"]
+[gd_scene load_steps=8 format=3 uid="uid://dn5gm2e014upj"]
 
 [ext_resource type="Script" uid="uid://b0dhcl4edi5pu" path="res://Components/Player/player.gd" id="1_1xasy"]
 [ext_resource type="PackedScene" uid="uid://br0nkwt1yd1i5" path="res://Components/Player/Hands/hands.tscn" id="2_1xasy"]
 [ext_resource type="Script" uid="uid://cp6no4h2gdagm" path="res://Components/Player/Head/head.gd" id="3_head"]
+[ext_resource type="Script" uid="uid://cxhwx6l78bddc" path="res://Components/Player/Stamina/stamina.gd" id="4_stmna"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_y2flf"]
 
@@ -90,6 +91,10 @@ show_percentage = false
 
 [node name="Hands" parent="Head/Camera3D" node_paths=PackedStringArray("camera") instance=ExtResource("2_1xasy")]
 camera = NodePath("..")
+
+[node name="Stamina" type="Node" parent="." node_paths=PackedStringArray("player")]
+script = ExtResource("4_stmna")
+player = NodePath("..")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_1xasy")
