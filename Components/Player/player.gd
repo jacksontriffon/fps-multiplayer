@@ -7,6 +7,7 @@ class_name Player
 
 const WALK_SPEED = 5.0
 const SPRINT_SPEED = 7.0
+const CROUCH_SPEED = 2.5
 const JUMP_VELOCITY = 4.5
 
 # Keep jumps reliable when sprinting flickers is_on_floor() off between floor
@@ -95,6 +96,10 @@ enum SpecPhase { DEATH_CAM, CHASE, FREE }
 # Which of the 3 inventory slots is selected (0..2). Set by the controlling peer
 # via the number keys and replicated, so the server knows which held ball to equip.
 @export var active_slot: int = 0
+
+# Set by the Crouch component on the controlling peer and replicated, so every peer
+# ducks the body. Read here to cap movement speed and suppress sprint while crouched.
+@export var crouching: bool = false
 
 var speed = WALK_SPEED
 var _jump_buffer := 0.0
@@ -334,8 +339,11 @@ func _physics_process(delta: float) -> void:
 	var input_dir := Vector2.ZERO if input_blocked else Input.get_vector("left", "right", "up", "down")
 	var direction = (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
-	# Handle Sprint — burns stamina, and only while actually moving.
-	if not input_blocked and Input.is_action_pressed("sprint") and direction and stamina.has_stamina():
+	# Handle Sprint — burns stamina, and only while actually moving. Crouch caps speed
+	# and locks out the sprint.
+	if crouching:
+		speed = CROUCH_SPEED
+	elif not input_blocked and Input.is_action_pressed("sprint") and direction and stamina.has_stamina():
 		speed = SPRINT_SPEED
 		stamina.drain(SPRINT_DRAIN * delta)
 	else:
