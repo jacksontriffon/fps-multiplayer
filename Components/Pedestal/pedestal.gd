@@ -114,7 +114,7 @@ func _process(delta: float) -> void:
 func prompt_text() -> String:
 	if not _targeted or not can_interact():
 		return ""
-	return "Interact to set up %s" % MODE_NAMES[game_mode]
+	return "Interact to play"
 
 # --- Interactable (driven by the local player's Hands) ----------------------
 
@@ -122,12 +122,12 @@ func prompt_text() -> String:
 func can_interact() -> bool:
 	return MatchManager.state == MatchManager.State.WAITING
 
-# Clicked on the crosshair: open the pre-match Map Select menu (mode, map pick, player
-# list); the match itself starts from there. Open even without enough players so you can
-# see who's waiting — the menu's Start button stays disabled until the lobby is full enough.
+# Clicked on the crosshair: open the lobby menu — a big START for the Classic tournament plus
+# a Customise view (mode, map pick, player list). The match starts from there; the Start
+# buttons stay disabled until the lobby has enough players.
 func interact() -> void:
 	if can_interact():
-		MapSelect.open(game_mode)
+		MapSelect.open()
 
 func set_targeted(value: bool) -> void:
 	_targeted = value

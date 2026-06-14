@@ -1761,15 +1761,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38397503, 0.111757874, 0.04
 team = -1
 
 [node name="Pedestal" parent="." instance=ExtResource("6_ped")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -11)
-
-[node name="PedestalCTF" parent="." instance=ExtResource("6_ped")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, -11)
-game_mode = 1
-
-[node name="PedestalBR" parent="." instance=ExtResource("6_ped")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 0, -11)
-game_mode = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11)
 
 [node name="InfiniteHeartZone" type="Area3D" parent="."]
 script = ExtResource("7_infzone")
