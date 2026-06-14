@@ -44,6 +44,8 @@ const MAP_CHOICES := [
 	{"name": "CTF Arena", "path": "res://Screens/Maps/CTFArena.tscn"},
 	{"name": "Hunger Games", "path": "res://Screens/Maps/HungerGamesSandbox.tscn"},
 	{"name": "Pirate Ship", "path": "res://Screens/Maps/PirateShipSandbox.tscn"},
+	{"name": "Office", "path": "res://Screens/Maps/Office.tscn"},
+	{"name": "Hedge Maze", "path": "res://Screens/Maps/HedgeMaze.tscn"},
 ]
 
 # Classic mode is a Team-Battle tournament: TOURNAMENT_MAPS maps drawn at random from this
@@ -201,10 +203,10 @@ func server_player_left(id: int) -> void:
 # Hearts are spent during any live match (team, CTF and battle royale); the lobby just
 # shoves or stuns. A fatal hit ragdolls and eliminates in team/BR modes, while in CTF it
 # only benches the player briefly before they respawn (see _ctf_knockout).
-func server_resolve_hit(victim_id: int, thrower_id: int, impulse: Vector3, is_knockdown: bool, costs_life: bool = true) -> void:
+func server_resolve_hit(victim_id: int, thrower_id: int, impulse: Vector3, is_knockdown: bool, costs_life: bool = true, force := false) -> void:
 	if not multiplayer.is_server():
 		return
-	if not can_hit(victim_id, thrower_id):
+	if not force and not can_hit(victim_id, thrower_id):
 		return
 	var scoring := costs_life and state == State.PLAYING
 	var fatal := false

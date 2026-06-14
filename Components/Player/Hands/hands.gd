@@ -46,6 +46,12 @@ const INTERACT_REACH := 3.0
 var grabbable_objects: Array[Grabbable] = []
 var highlighted: Grabbable = null
 
+# World interactables (e.g. the lobby pedestal) overlapping the interaction area, plus the
+# one currently on the crosshair. Same broad-phase + cone targeting as grabbable balls, but
+# these stay in the world and run their own interact() instead of being picked up.
+var interactables: Array[Node3D] = []
+var highlighted_interactable: Node3D = null
+
 var _cam_base_pos := Vector3.ZERO
 var _recoil_offset := Vector3.ZERO
 
@@ -65,6 +71,7 @@ func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 	update_highlight()
+	update_interactable_highlight()
 	# No grabbing or throwing while the pause overlay is up.
 	if not Global.is_input_blocked():
 		_handle_interaction_input()
@@ -126,6 +133,10 @@ func _try_interact(me: Player) -> bool:
 	# Climbing a rope works whether or not we're holding a ball.
 	if me.can_grab_climb():
 		me.grab_climb()
+		return true
+	# Click a world interactable on the crosshair (e.g. the lobby pedestal), ball or no ball.
+	if highlighted_interactable != null and is_instance_valid(highlighted_interactable):
+		highlighted_interactable.interact()
 		return true
 	return false
 
@@ -227,11 +238,24 @@ func _on_grabbable_area_body_exited(body: Node3D) -> void:
 	if body is Grabbable:
 		grabbable_objects.erase(body)
 
-func _on_grabbable_area_area_entered(_area: Area3D) -> void:
-	pass
+# Interactables expose their collider as an Area3D; track the owning interactable node.
+func _on_grabbable_area_area_entered(area: Area3D) -> void:
+	var node := _interactable_of(area)
+	if node and node not in interactables:
+		interactables.push_back(node)
 
-func _on_grabbable_area_area_exited(_area: Area3D) -> void:
-	pass
+func _on_grabbable_area_area_exited(area: Area3D) -> void:
+	var node := _interactable_of(area)
+	if node:
+		interactables.erase(node)
+
+# Resolve a detected collider to the interactable node driving it: the collider itself, its
+# scene owner, or its parent — whichever is in the "interactable" group.
+func _interactable_of(area: Area3D) -> Node3D:
+	for n in [area, area.owner, area.get_parent()]:
+		if n is Node3D and n.is_in_group("interactable"):
+			return n
+	return null
 
 # --- Highlight (local visual for the controlling peer) ---------------------
 func update_highlight() -> void:
@@ -246,6 +270,43 @@ func update_highlight() -> void:
 	if target:
 		target.toggle_highlight(true)
 	highlighted = target
+
+# Highlight the interactable on the crosshair (swells it + fades in its prompt). Skipped
+# while a grabbable ball is already targeted so the two never fight over one click.
+func update_interactable_highlight() -> void:
+	var target: Node3D = null
+	if highlighted == null:
+		target = get_targeted_interactable()
+	if target == highlighted_interactable:
+		return
+	if highlighted_interactable != null and is_instance_valid(highlighted_interactable):
+		highlighted_interactable.set_targeted(false)
+	if target:
+		target.set_targeted(true)
+	highlighted_interactable = target
+
+# The interactable most centered on the crosshair: in the interaction area and inside the
+# cone, preferring the smallest angle off the sight line. Distance is already bounded by the
+# broad-phase area overlap, so only the aim angle is filtered here.
+func get_targeted_interactable() -> Node3D:
+	var origin := camera.global_position
+	var forward := -camera.global_transform.basis.z
+	var best: Node3D = null
+	var best_angle := INTERACT_CONE_HALF_ANGLE
+	for node in interactables:
+		if not is_instance_valid(node):
+			continue
+		if node.has_method("can_interact") and not node.can_interact():
+			continue
+		var point: Vector3 = node.interact_point() if node.has_method("interact_point") else node.global_position
+		var to_node := point - origin
+		if is_zero_approx(to_node.length()):
+			continue
+		var angle := forward.angle_to(to_node)
+		if angle <= best_angle:
+			best_angle = angle
+			best = node
+	return best
 
 # The free ball most centered on the crosshair: inside the interaction cone and
 # within reach, preferring the smallest angle off the sight line over proximity.
