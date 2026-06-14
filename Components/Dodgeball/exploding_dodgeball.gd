@@ -142,8 +142,6 @@ func _apply_blast(center: Vector3) -> void:
 		if player == null or not player.alive:
 			continue
 		var victim_id := player.name.to_int()
-		if not MatchManager.can_hit(victim_id, _armed_thrower):
-			continue
 		var to_victim := player.global_position - center
 		var dist := to_victim.length()
 		if dist > explosion_radius:
@@ -155,7 +153,7 @@ func _apply_blast(center: Vector3) -> void:
 		var impulse := (away + Vector3.UP * upward_boost).normalized() * strength
 		# A strong blast knocks victims down; weaker edge shoves just push them.
 		var is_knockdown := strength >= knockback_center * 0.5
-		MatchManager.server_resolve_hit(victim_id, _armed_thrower, impulse, is_knockdown, costs_a_life)
+		MatchManager.server_resolve_hit(victim_id, _armed_thrower, impulse, is_knockdown, costs_a_life, true)
 	# Free balls near the blast get tossed too.
 	for node in get_tree().get_nodes_in_group("grabbable"):
 		var ball := node as Grabbable
