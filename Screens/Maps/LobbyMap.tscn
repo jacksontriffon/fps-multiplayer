@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://blg2uymfm5m1u"]
+[gd_scene load_steps=14 format=3 uid="uid://blg2uymfm5m1u"]
 
 [ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
 [ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://c60hxnsma28oh" path="res://Components/Pedestal/pedestal.tscn" id="6_ped"]
 [ext_resource type="Script" uid="uid://crd0u7gufnfiq" path="res://Components/InfiniteHeartZone/infinite_heart_zone.gd" id="7_infzone"]
 [ext_resource type="PackedScene" path="res://Components/Dodgeball/exploding_dodgeball.tscn" id="8_xball"]
+[ext_resource type="PackedScene" path="res://Components/AbilityOrb/ability_orb.tscn" id="9_orb"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lm"]
 
@@ -1777,3 +1778,10 @@ script = ExtResource("7_infzone")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="InfiniteHeartZone"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -7.7)
 shape = SubResource("BoxShape3D_infzone")
+
+[node name="DashOrb" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.1, 0.8)
+
+[node name="DoubleJumpOrb" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.1, 0.8)
+ability = 1

@@ -15,6 +15,10 @@ const REGEN_DELAY := 0.6
 
 # Reservation source ids. Add more (debuffs, abilities) and they shrink the pool the same way.
 const RES_HEARTS := &"hearts"
+# Owned abilities each carve a container slice the width of their cost — the HUD draws it
+# as a cell and the player spends from the pool to fire the ability.
+const RES_DASH := &"dash"
+const RES_DOUBLE_JUMP := &"double_jump"
 
 @export var player: Player
 
@@ -62,6 +66,9 @@ func _refresh_reservations() -> void:
 	elif MatchManager.state != MatchManager.State.WAITING:
 		hearts = maxi(MatchManager.lives.get(player.name.to_int(), 0), 0)
 	reserve(RES_HEARTS, float(hearts) * PER_HEART)
+	# Each unlocked ability reserves its own container slice in the bar.
+	reserve(RES_DASH, Dash.DASH_COST if player.has_effect(Player.ABILITY_DASH) else 0.0)
+	reserve(RES_DOUBLE_JUMP, DoubleJump.DOUBLE_JUMP_COST if player.has_effect(Player.ABILITY_DOUBLE_JUMP) else 0.0)
 
 func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():

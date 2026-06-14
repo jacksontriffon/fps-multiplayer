@@ -43,6 +43,14 @@ var _pulse := 0.0
 # Kept as the last child of the Lives box; shown only for the infinite-hearts effect.
 var _infinity_label: Label
 
+# Ability container cells in the stamina bar, one per unlockable movement ability. Each
+# is a coloured slice sized to the ability's cost (so it lines up with the stamina the
+# bar reserves for it), bright when armed and dim when there isn't enough to fire it.
+# Hidden with zero width until an AbilityOrb grants the ability.
+var _ability_defs: Array = []
+var _ability_cells: Array[Panel] = []
+var _ability_styles: Array[StyleBoxFlat] = []
+
 # Slot panel styles: the active slot gets a brighter border so it reads as selected.
 var _slot_normal: StyleBoxFlat
 var _slot_active: StyleBoxFlat
@@ -67,6 +75,7 @@ func _ready() -> void:
 	_infinity_label.visible = false
 	lives_box.add_child(_infinity_label)
 	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
+	_build_ability_cells()
 	_build_previews()
 
 func _process(delta: float) -> void:
@@ -119,6 +128,7 @@ func _update_bar(id: int) -> void:
 
 func _update_stamina() -> void:
 	var player := _local_player()
+	_update_ability_cells(player)
 	if player == null:
 		stamina_bar.visible = false
 		return
@@ -130,6 +140,54 @@ func _update_stamina() -> void:
 	stamina_bar.value = player.stamina.amount
 	var low := cap > 0.0 and player.stamina.amount <= cap * 0.3
 	stamina_bar.self_modulate = Color(1, 0.55, 0.25) if low else Color.WHITE
+
+# One container cell per unlockable ability, inserted just after the stamina fill so the
+# order reads [fill][dash][double jump][hearts][∞]. The fill (which expands) shrinks by
+# each owned ability's reserved slice, so the cells slot in flush with no width math here.
+func _build_ability_cells() -> void:
+	_ability_defs = [
+		{"effect": Player.ABILITY_DASH, "cost": Dash.DASH_COST, "glyph": "»", "color": Color(0.25, 0.7, 1.0)},
+		{"effect": Player.ABILITY_DOUBLE_JUMP, "cost": DoubleJump.DOUBLE_JUMP_COST, "glyph": "↟", "color": Color(0.75, 0.45, 1.0)},
+	]
+	for i in _ability_defs.size():
+		var style := StyleBoxFlat.new()
+		style.corner_radius_top_left = 3
+		style.corner_radius_top_right = 3
+		style.corner_radius_bottom_right = 3
+		style.corner_radius_bottom_left = 3
+		var cell := Panel.new()
+		cell.custom_minimum_size = Vector2(0, 0)
+		cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.visible = false
+		cell.add_theme_stylebox_override("panel", style)
+		var label := Label.new()
+		label.text = _ability_defs[i].glyph
+		label.set_anchors_preset(Control.PRESET_FULL_RECT)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.add_theme_font_size_override("font_size", 15)
+		cell.add_child(label)
+		lives_box.add_child(cell)
+		lives_box.move_child(cell, 1 + i)  # right after the stamina fill (child 0)
+		_ability_cells.append(cell)
+		_ability_styles.append(style)
+
+func _update_ability_cells(player: Player) -> void:
+	for i in _ability_defs.size():
+		var cell := _ability_cells[i]
+		var owned := player != null and player.has_effect(_ability_defs[i].effect)
+		if not owned:
+			cell.visible = false
+			cell.custom_minimum_size.x = 0.0
+			continue
+		var cost: float = _ability_defs[i].cost
+		var color: Color = _ability_defs[i].color
+		var armed: bool = player.stamina.amount >= cost
+		cell.visible = true
+		cell.custom_minimum_size.x = cost * STAMINA_PX_PER_UNIT
+		_ability_styles[i].bg_color = color if armed else Color(color.r, color.g, color.b, 0.3)
+		(cell.get_child(0) as Label).modulate = Color.WHITE if armed else Color(1, 1, 1, 0.5)
 
 func _local_player() -> Player:
 	for p in get_tree().get_nodes_in_group("players"):

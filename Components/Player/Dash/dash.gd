@@ -12,7 +12,9 @@ class_name Dash
 # dialled back down if air dashes ever need reining in.
 const DASH_IMPULSE := 3.0
 const DASH_IMPULSE_AIR := 3.0
-const DASH_COST := 40.0
+# Drained on each dash and reserved by Stamina as this ability's container slice in the
+# bar, so it stays affordable alongside hearts and the double-jump container.
+const DASH_COST := 18.0
 const DASH_COOLDOWN := 1.2
 
 @export var player: Player
@@ -25,6 +27,8 @@ func _physics_process(delta: float) -> void:
 		return
 	_cooldown = maxf(_cooldown - delta, 0.0)
 	if Global.is_input_blocked() or not player.controllable():
+		return
+	if not player.has_effect(Player.ABILITY_DASH):
 		return
 	if Input.is_action_just_pressed("dash") and _cooldown == 0.0 and player.stamina.amount >= DASH_COST:
 		# Burst toward the move input, or our facing direction when standing still.

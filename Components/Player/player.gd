@@ -143,6 +143,12 @@ var _spectator_cam: Camera3D
 # reads has_effect(INFINITE_HEARTS) to swap the heart row for a single heart + ∞.
 const INFINITE_HEARTS := &"infinite_hearts"
 
+# Movement abilities are off until an AbilityOrb grants them. The Dash/DoubleJump nodes
+# gate on these, the Stamina node reserves each owned ability's cost as a container slice,
+# and the HUD draws that container in the bar.
+const ABILITY_DASH := &"ability_dash"
+const ABILITY_DOUBLE_JUMP := &"ability_double_jump"
+
 var _effects := {}
 
 func has_effect(id: StringName) -> bool:
