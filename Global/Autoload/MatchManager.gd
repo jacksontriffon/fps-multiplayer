@@ -46,14 +46,31 @@ const MAP_CHOICES := [
 	{"name": "Pirate Ship", "path": "res://Screens/Maps/PirateShipSandbox.tscn"},
 ]
 
+# Classic mode is a Team-Battle tournament: TOURNAMENT_MAPS maps drawn at random from this
+# pool, played back to back. The team that wins the most maps wins the tournament.
+const CLASSIC_MAP_POOL := [
+	"res://Screens/Maps/ColosseumMap.tscn",
+	"res://Screens/Maps/HungerGamesSandbox.tscn",
+	"res://Screens/Maps/PirateShipSandbox.tscn",
+]
+const TOURNAMENT_MAPS := 3
+
 var state: int = State.WAITING
 var team_scores := [0, 0]
 var lives := {}
 var round_num := 0
 var status_text := ""
-# Which mode the active match is running. Values are Pedestal.GameMode; the starting
-# pedestal picks it. Replicated so every peer (and the CTF arena) knows the mode.
+# Which mode the active match is running. Values are Pedestal.GameMode; the lobby menu picks
+# it (Classic forces Team Battle). Replicated so every peer (and the CTF arena) knows the mode.
 var game_mode: int = Pedestal.GameMode.TEAM
+
+# Classic tournament progress. is_tournament marks a Classic run; the rest track which map of
+# the series we're on and how many maps each team has banked. Replicated so the HUD can show
+# the series score.
+var is_tournament := false
+var tournament_maps: Array = []
+var tournament_index := 0
+var tournament_wins := [0, 0]
 
 # Server-authoritative match rules. Only the host reads these (it owns hit
 # detection and scoring), so they don't need replicating. Defaults mirror
@@ -87,6 +104,7 @@ func request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String = "") ->
 func server_request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String = "") -> void:
 	if not multiplayer.is_server() or not can_start():
 		return
+	is_tournament = false
 	game_mode = mode
 	team_scores = [0, 0]
 	round_num = 0
@@ -116,6 +134,35 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String =
 			_start_battle_royale()
 		_:
 			_start_round()
+
+# Classic tournament: a Team-Battle series across TOURNAMENT_MAPS random maps from the pool.
+# Any player at the podium can kick it off; the server owns the flow.
+@rpc("any_peer", "reliable")
+func request_start_tournament() -> void:
+	server_request_start_tournament()
+
+func server_request_start_tournament() -> void:
+	if not multiplayer.is_server() or not can_start():
+		return
+	var pool: Array = CLASSIC_MAP_POOL.duplicate()
+	pool.shuffle()
+	tournament_maps = pool.slice(0, TOURNAMENT_MAPS)
+	tournament_index = 0
+	tournament_wins = [0, 0]
+	is_tournament = true
+	game_mode = Pedestal.GameMode.TEAM
+	team_scores = [0, 0]
+	round_num = 0
+	_assign_teams()
+	await _load_map_for(tournament_maps[0])
+	if not _enough_players_present():
+		is_tournament = false
+		await _to_lobby()
+		state = State.WAITING
+		status_text = ""
+		_broadcast()
+		return
+	_start_round()
 
 func can_start() -> bool:
 	return state == State.WAITING and _team_of.size() >= MIN_PLAYERS
@@ -216,7 +263,7 @@ func _start_round() -> void:
 		return
 	round_num += 1
 	state = State.PLAYING
-	status_text = "Round %d" % round_num
+	status_text = _round_status()
 	for ball in get_tree().get_nodes_in_group("grabbable"):
 		if ball.has_method("server_reset"):
 			ball.server_reset()
@@ -300,9 +347,58 @@ func _end_round(winner: int) -> void:
 		status_text = "Draw!"
 	_broadcast()
 	if winner >= 0 and team_scores[winner] >= WIN_SCORE:
-		_end_match(winner)
+		if is_tournament:
+			_win_tournament_map(winner)
+		else:
+			_end_match(winner)
 	else:
 		_schedule(_start_round, ROUND_RESET_DELAY)
+
+# A team reached WIN_SCORE on the current tournament map: bank the map win, then either
+# advance to the next map or, once a team has clinched the series (or all maps are played),
+# crown the champion.
+func _win_tournament_map(winner: int) -> void:
+	tournament_wins[winner] += 1
+	var clinched: bool = tournament_wins[winner] > tournament_maps.size() / 2
+	var last_map: bool = tournament_index >= tournament_maps.size() - 1
+	if clinched or last_map:
+		_end_tournament()
+		return
+	status_text = "%s takes the map!  Series %d–%d" % [TEAM_NAMES[winner], tournament_wins[0], tournament_wins[1]]
+	_broadcast()
+	_schedule(_next_tournament_map, MATCH_RESET_DELAY)
+
+# Load the next map in the series (teams carry over) and start a fresh first-to-WIN_SCORE match.
+func _next_tournament_map() -> void:
+	tournament_index += 1
+	team_scores = [0, 0]
+	round_num = 0
+	await _load_map_for(tournament_maps[tournament_index])
+	if not _enough_players_present():
+		_end_tournament()
+		return
+	_start_round()
+
+func _end_tournament() -> void:
+	state = State.MATCH_OVER
+	var champ := -1
+	if tournament_wins[0] > tournament_wins[1]:
+		champ = 0
+	elif tournament_wins[1] > tournament_wins[0]:
+		champ = 1
+	if champ >= 0:
+		status_text = "%s wins the tournament!  (%d–%d)" % [TEAM_NAMES[champ], tournament_wins[0], tournament_wins[1]]
+	else:
+		status_text = "Tournament drawn!  (%d–%d)" % [tournament_wins[0], tournament_wins[1]]
+	is_tournament = false
+	_broadcast()
+	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
+
+# Round banner: in a tournament it carries the map number so players know where they are.
+func _round_status() -> String:
+	if is_tournament:
+		return "Map %d/%d · Round %d" % [tournament_index + 1, tournament_maps.size(), round_num]
+	return "Round %d" % round_num
 
 func _end_match(winner: int) -> void:
 	state = State.MATCH_OVER
@@ -329,6 +425,10 @@ func _end_match_br(winner_id: int) -> void:
 func _reset_to_waiting() -> void:
 	team_scores = [0, 0]
 	round_num = 0
+	is_tournament = false
+	tournament_wins = [0, 0]
+	tournament_index = 0
+	tournament_maps = []
 	state = State.WAITING
 	status_text = ""
 	await _to_lobby()
@@ -487,10 +587,10 @@ func _schedule(cb: Callable, delay: float) -> void:
 func _broadcast() -> void:
 	if not multiplayer.is_server():
 		return
-	_sync.rpc(state, team_scores, lives, _team_of, round_num, status_text, game_mode)
+	_sync.rpc(state, team_scores, lives, _team_of, round_num, status_text, game_mode, is_tournament, tournament_wins)
 
 @rpc("authority", "call_remote", "reliable")
-func _sync(s: int, scores: Array, lv: Dictionary, teams: Dictionary, rnd: int, txt: String, mode: int) -> void:
+func _sync(s: int, scores: Array, lv: Dictionary, teams: Dictionary, rnd: int, txt: String, mode: int, tourney: bool, twins: Array) -> void:
 	state = s
 	team_scores = scores
 	lives = lv
@@ -498,3 +598,5 @@ func _sync(s: int, scores: Array, lv: Dictionary, teams: Dictionary, rnd: int, t
 	round_num = rnd
 	status_text = txt
 	game_mode = mode
+	is_tournament = tourney
+	tournament_wins = twins

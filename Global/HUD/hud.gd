@@ -304,7 +304,11 @@ func _update_score() -> void:
 		return
 	var r: int = MatchManager.team_scores[0]
 	var b: int = MatchManager.team_scores[1]
-	score_label.text = "%s  %d  —  %d  %s" % [TEAM_NAMES[0], r, b, TEAM_NAMES[1]]
+	var text := "%s  %d  —  %d  %s" % [TEAM_NAMES[0], r, b, TEAM_NAMES[1]]
+	# In a Classic tournament, append the maps-won series tally above the per-map round score.
+	if MatchManager.is_tournament:
+		text += "    (Series %d–%d)" % [MatchManager.tournament_wins[0], MatchManager.tournament_wins[1]]
+	score_label.text = text
 
 # Death cam / spectator status, sourced from the local player's own spectator state.
 func _update_spectate() -> void:

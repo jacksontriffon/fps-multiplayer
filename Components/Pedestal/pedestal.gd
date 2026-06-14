@@ -107,17 +107,18 @@ func _process(delta: float) -> void:
 	prompt.modulate.a = a
 	prompt.outline_modulate.a = a
 
-	# Interacting opens the pre-match Map Select menu (mode, map pick, player list); the
-	# match itself starts from there. Open even without enough players so you can see who's
-	# waiting — the menu's Start button stays disabled until the lobby is full enough.
+	# Interacting opens the lobby menu: a big START for the Classic tournament plus a Customise
+	# view (mode, map pick, player list). The match itself starts from there. Open even without
+	# enough players so you can see who's waiting — the Start buttons stay disabled until the
+	# lobby is full enough.
 	if near and not Global.is_input_blocked() and Input.is_action_just_pressed("interaction"):
-		MapSelect.open(game_mode)
+		MapSelect.open()
 
 # Empty when the prompt shouldn't show; the billboard Label3D renders whatever this returns.
 func prompt_text() -> String:
 	if MatchManager.state != MatchManager.State.WAITING or not _local_near():
 		return ""
-	return "Interact to set up %s" % MODE_NAMES[game_mode]
+	return "Interact to play"
 
 func _local_near() -> bool:
 	var p := _local_player()
