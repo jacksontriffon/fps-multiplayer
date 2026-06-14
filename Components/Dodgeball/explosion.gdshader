@@ -1,7 +1,7 @@
 shader_type spatial;
 render_mode blend_add, unshaded, cull_disabled, depth_draw_never, shadows_disabled;
 
-// Both driven per-explosion from exploding_dodgeball.gd.
+// Both driven per-explosion from explosive.gd.
 instance uniform float progress : hint_range(0.0, 1.0) = 0.0;
 instance uniform float blast_radius = 6.0;
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" path="res://Components/BombUpgradeStation/bomb_upgrade_station.gd" id="1_script"]
+[ext_resource type="Script" path="res://Components/AbilityOrb/ability_orb.gd" id="1_script"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_body"]
 radius = 0.35
@@ -25,17 +25,19 @@ albedo_color = Color(0.25, 0.18, 0.1, 1)
 [sub_resource type="BoxShape3D" id="Box_area"]
 size = Vector3(3, 3, 3)
 
-[node name="BombUpgradeStation" type="Node3D"]
+[node name="AbilityOrb" type="Node3D"]
 script = ExtResource("1_script")
 
 [node name="Object" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 
-[node name="Body" type="MeshInstance3D" parent="Object"]
+[node name="Bomb" type="Node3D" parent="Object"]
+
+[node name="Body" type="MeshInstance3D" parent="Object/Bomb"]
 mesh = SubResource("SphereMesh_body")
 surface_material_override/0 = SubResource("Mat_body")
 
-[node name="Fuse" type="MeshInstance3D" parent="Object"]
+[node name="Fuse" type="MeshInstance3D" parent="Object/Bomb"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42, 0)
 mesh = SubResource("Cyl_fuse")
 surface_material_override/0 = SubResource("Mat_fuse")

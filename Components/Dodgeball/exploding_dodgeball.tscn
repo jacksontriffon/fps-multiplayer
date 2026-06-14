@@ -1,8 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="1_base"]
-[ext_resource type="Script" path="res://Components/Dodgeball/exploding_dodgeball.gd" id="2_script"]
 
 [node name="ExplodingDodgeball" instance=ExtResource("1_base")]
-script = ExtResource("2_script")
+
+[node name="Explosive" parent="."]
 permanent_armed = true

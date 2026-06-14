@@ -165,6 +165,14 @@ func server_reset() -> void:
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
 
+# Drop the ball back at its authored spawn and let it simulate again. Used by behaviour
+# components (e.g. Explosive) that take the ball out of play and later return it.
+func respawn_at_spawn() -> void:
+	global_transform = _spawn_transform
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+	freeze = false
+
 # Streamed by the holding client each frame while charging. Server-authoritative.
 @rpc("any_peer", "unreliable_ordered")
 func _set_charge(value: float) -> void:
