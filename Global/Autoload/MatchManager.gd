@@ -45,6 +45,7 @@ const MAP_CHOICES := [
 	{"name": "Hunger Games", "path": "res://Screens/Maps/HungerGamesSandbox.tscn"},
 	{"name": "Pirate Ship", "path": "res://Screens/Maps/PirateShipSandbox.tscn"},
 	{"name": "Office", "path": "res://Screens/Maps/Office.tscn"},
+	{"name": "Hedge Maze", "path": "res://Screens/Maps/HedgeMaze.tscn"},
 ]
 
 var state: int = State.WAITING
