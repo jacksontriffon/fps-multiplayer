@@ -12,10 +12,10 @@ const CTF_CAPTURE_LIMIT := 3
 # briefly, then respawn at full hearts to keep the capture race going.
 const CTF_RESPAWN_DELAY := 3.0
 const TEAM_COUNT := 2
-const MIN_PER_TEAM := 1
 # Teams aren't decided in the lobby — players gather teamless and are split into teams only
-# when a match starts (see _assign_teams). So starting just needs enough bodies present.
-const MIN_PLAYERS := 2
+# when a match starts (see _assign_teams). One player is enough to start so you can load into
+# a map and test solo; with only one player present a round won't auto-end (see _is_contested).
+const MIN_PLAYERS := 1
 const ROUND_RESET_DELAY := 3.0
 const MATCH_RESET_DELAY := 6.0
 const TEAM_NAMES := ["Red", "Blue"]
@@ -256,7 +256,7 @@ func is_mode_active(mode: int) -> bool:
 	return state != State.WAITING and game_mode == mode
 
 func _start_round() -> void:
-	if not _both_teams_present():
+	if not _enough_players_present():
 		state = State.WAITING
 		status_text = ""
 		_broadcast()
@@ -276,7 +276,7 @@ func _start_round() -> void:
 # reaches CTF_CAPTURE_LIMIT captures. Hits cost hearts like any mode, but a knockout here
 # only benches the player for CTF_RESPAWN_DELAY before they respawn (see _ctf_knockout).
 func _start_ctf() -> void:
-	if not _both_teams_present():
+	if not _enough_players_present():
 		state = State.WAITING
 		status_text = ""
 		_broadcast()
@@ -321,6 +321,10 @@ func server_on_flag_capture(scoring_team: int) -> void:
 
 func _check_round_end() -> void:
 	if state != State.PLAYING:
+		return
+	# Solo testing: with only one player there's no opponent to eliminate, so don't auto-end the
+	# round/match — let them roam the arena until someone joins or they leave.
+	if not _is_contested():
 		return
 	# Battle royale ends when one player is left; CTF ends on captures, not eliminations.
 	if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
@@ -453,27 +457,15 @@ func _clear_teams() -> void:
 	for id in _team_of:
 		_team_of[id] = -1
 
-func _both_teams_present() -> bool:
-	var counts := _team_player_counts()
-	for t in range(TEAM_COUNT):
-		if counts[t] < MIN_PER_TEAM:
-			return false
-	return true
-
-# Whether the roster still supports the active mode: battle royale just needs bodies,
-# team modes need at least one player per side.
+# Enough bodies to start/keep a match: a single player is allowed (solo testing). Teams are
+# auto-split on start, so 2+ players always means both sides are filled.
 func _enough_players_present() -> bool:
-	if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
-		return _team_of.size() >= MIN_PLAYERS
-	return _both_teams_present()
+	return _team_of.size() >= MIN_PLAYERS
 
-func _team_player_counts() -> Array:
-	var counts := [0, 0]
-	for id in _team_of:
-		var t: int = _team_of[id]
-		if t >= 0 and t < TEAM_COUNT:
-			counts[t] += 1
-	return counts
+# Whether a match can be decided by play: needs a real opponent. Below this, elimination and
+# last-standing checks are skipped so a solo player isn't instantly declared the winner.
+func _is_contested() -> bool:
+	return _team_of.size() >= 2
 
 func _living_counts() -> Array:
 	var counts := [0, 0]
