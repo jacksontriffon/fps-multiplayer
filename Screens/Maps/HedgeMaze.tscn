@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dhedgemaze0001"]
+[gd_scene load_steps=9 format=3 uid="uid://5w2u1jxldism"]
 
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="1_ball"]
 [ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="2_spawn"]

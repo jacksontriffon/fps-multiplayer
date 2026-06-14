@@ -6,6 +6,7 @@
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_game")
+net_mode = 1
 player_scene = ExtResource("2_player")
 
 [node name="UILayer" type="CanvasLayer" parent="."]
