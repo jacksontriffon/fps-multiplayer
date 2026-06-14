@@ -18,6 +18,13 @@ extends CanvasLayer
 @onready var custom_start_button: Button = %CustomStartButton
 @onready var customise_back_button: Button = %CustomiseBackButton
 @onready var hint: Label = %Hint
+@onready var net_row: Control = %NetRow
+@onready var local_button: Button = %LocalButton
+@onready var steam_button: Button = %SteamButton
+
+# game.gd NetMode values, mirrored here so the toggle can read/set the host's transport.
+const NET_STEAM := 0
+const NET_LOCAL := 1
 
 var _mode: int = Pedestal.GameMode.TEAM
 var _selected_map: String = ""
@@ -39,6 +46,11 @@ func _ready() -> void:
 	custom_start_button.pressed.connect(_on_start_custom)
 	customise_back_button.pressed.connect(_show_main)
 	close_button.pressed.connect(close)
+	var net_group := ButtonGroup.new()
+	local_button.button_group = net_group
+	steam_button.button_group = net_group
+	local_button.pressed.connect(_on_net_mode.bind(NET_LOCAL))
+	steam_button.pressed.connect(_on_net_mode.bind(NET_STEAM))
 
 func open() -> void:
 	_select_default_mode()
@@ -46,6 +58,7 @@ func open() -> void:
 	_roster_sig = ""
 	_refresh_players()
 	_update_start_state()
+	_refresh_net_mode()
 	_show_main()
 	_saved_mouse_mode = Input.get_mouse_mode()
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -176,3 +189,25 @@ func _on_start_custom() -> void:
 	else:
 		MatchManager.request_start.rpc_id(1, _mode, _selected_map)
 	close()
+
+# The Local/Steam toggle only makes sense for the host (it owns the transport), so it's hidden
+# for clients. Reflects the session's current mode.
+func _refresh_net_mode() -> void:
+	var root := get_tree().get_first_node_in_group("game_root")
+	var is_host := multiplayer.has_multiplayer_peer() and multiplayer.is_server()
+	net_row.visible = is_host and root != null
+	if root == null:
+		return
+	if root.net_mode == NET_LOCAL:
+		local_button.button_pressed = true
+	else:
+		steam_button.button_pressed = true
+
+# Switching transport re-hosts the session, so close the menu (its player is about to respawn)
+# and hand off to the game root. No-op if the chosen mode is already active.
+func _on_net_mode(mode: int) -> void:
+	var root := get_tree().get_first_node_in_group("game_root")
+	if root == null or root.net_mode == mode:
+		return
+	close()
+	root.switch_net_mode(mode)

@@ -440,6 +440,23 @@ func _reset_to_waiting() -> void:
 	await _to_lobby()
 	_broadcast()
 
+# Wipe all match state for a clean re-host (transport switch, see game.gd switch_net_mode).
+# No peer exists at this point, so this just clears local state; the fresh session repopulates
+# the roster as players register via server_player_ready.
+func reset_for_rehost() -> void:
+	state = State.WAITING
+	team_scores = [0, 0]
+	lives = {}
+	round_num = 0
+	status_text = ""
+	game_mode = Pedestal.GameMode.TEAM
+	is_tournament = false
+	tournament_maps = []
+	tournament_index = 0
+	tournament_wins = [0, 0]
+	_team_of = {}
+	_reset_token += 1
+
 # Return to the lobby map and drop teams: everyone is teamless again until the next match.
 func _to_lobby() -> void:
 	await _load_map_for(LOBBY_MAP)

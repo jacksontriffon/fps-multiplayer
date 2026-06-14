@@ -212,3 +212,30 @@ theme_override_colors/font_color = Color(1, 0.78, 0.4, 1)
 theme_override_font_sizes/font_size = 16
 text = ""
 horizontal_alignment = 1
+
+[node name="NetRow" type="HBoxContainer" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="NetLabel" type="Label" parent="Center/Panel/VBox/NetRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 16
+text = "Network:"
+vertical_alignment = 1
+
+[node name="LocalButton" type="Button" parent="Center/Panel/VBox/NetRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 36)
+layout_mode = 2
+toggle_mode = true
+text = "Local"
+
+[node name="SteamButton" type="Button" parent="Center/Panel/VBox/NetRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 36)
+layout_mode = 2
+toggle_mode = true
+text = "Steam"
