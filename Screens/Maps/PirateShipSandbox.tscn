@@ -1,8 +1,9 @@
-[gd_scene load_steps=35 format=3 uid="uid://b0oj7lssgjnqm"]
+[gd_scene load_steps=36 format=3 uid="uid://b0oj7lssgjnqm"]
 
 [ext_resource type="Shader" uid="uid://dexlnknk1olyb" path="res://sky.gdshader" id="1_akk43"]
 [ext_resource type="Shader" uid="uid://cli3w3hjnm7bd" path="res://Screens/Maps/WindWakerWater.gdshader" id="1_f5ste"]
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="2_ball"]
+[ext_resource type="PackedScene" uid="uid://dballspawner01" path="res://Components/BallSpawner/BallSpawner.tscn" id="99_bspawn"]
 [ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="3_spawn"]
 [ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="4_sp"]
 [ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="5_base"]
@@ -1062,6 +1063,26 @@ use_collision = true
 radius = 0.6
 height = 1.5
 material = SubResource("Material_darkwood")
+
+[node name="BallSpawners" type="Node3D" parent="."]
+
+[node name="BallSpawner1" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, -2.5)
+
+[node name="BallSpawner2" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, 2.5)
+
+[node name="BallSpawner3" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2.3, 0)
+
+[node name="BallSpawner4" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 2.3, 0)
+
+[node name="BallSpawner5" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -4.2)
+
+[node name="BallSpawner6" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 4.2)
 
 [node name="Dodgeball" parent="Arena" instance=ExtResource("2_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, -2.5)

@@ -1,8 +1,9 @@
-[gd_scene load_steps=13 format=3 uid="uid://blg2uymfm5m1u"]
+[gd_scene load_steps=14 format=3 uid="uid://blg2uymfm5m1u"]
 
 [ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
 [ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="3_ball"]
+[ext_resource type="PackedScene" uid="uid://dballspawner01" path="res://Components/BallSpawner/BallSpawner.tscn" id="99_bspawn"]
 [ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="4_spawn"]
 [ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="5_sp"]
 [ext_resource type="PackedScene" uid="uid://c60hxnsma28oh" path="res://Components/Pedestal/pedestal.tscn" id="6_ped"]
@@ -63,6 +64,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5341797, -12.2987385)
 use_collision = true
 size = Vector3(19.10254, 4.0683594, 1)
 material = ExtResource("2_grid2")
+
+[node name="BallSpawners" type="Node3D" parent="."]
+
+[node name="BallSpawner1" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.99360275, 0.26177016, -2.3973625)
+
+[node name="BallSpawner2" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2891388, 0.26177016, -3.331491)
+
+[node name="BallSpawner3" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7926931, 0.26177016, -2.3606162)
 
 [node name="Dodgeball" parent="LobbyTerrain" instance=ExtResource("3_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.99360275, 0.26177016, -2.3973625)
