@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dhng3rgmsandbx"]
+[gd_scene load_steps=15 format=3 uid="uid://dhng3rgmsandbx"]
 
 [ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
 [ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="5_sp"]
 [ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="6_base"]
 [ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="7_flag"]
+[ext_resource type="PackedScene" uid="uid://dballspawner01" path="res://Components/BallSpawner/BallSpawner.tscn" id="8_bspawn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
 sky_top_color = Color(0.38, 0.6, 0.86, 1)
@@ -658,6 +659,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.5, -2)
 
 [node name="Ball9" parent="Dodgeballs" instance=ExtResource("3_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, -2)
+
+[node name="BallSpawners" type="Node3D" parent="."]
+
+[node name="BallSpawner1" parent="BallSpawners" instance=ExtResource("8_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="BallSpawner2" parent="BallSpawners" instance=ExtResource("8_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.5, 0)
+
+[node name="BallSpawner3" parent="BallSpawners" instance=ExtResource("8_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0.5, 0)
 
 [node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("6_base")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.8, 0)
