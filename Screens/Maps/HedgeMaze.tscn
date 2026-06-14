@@ -1,0 +1,94 @@
+[gd_scene load_steps=9 format=3 uid="uid://dhedgemaze0001"]
+
+[ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="1_ball"]
+[ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="2_spawn"]
+[ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="3_sp"]
+[ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="4_base"]
+[ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="5_flag"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hedge"]
+
+[sub_resource type="Sky" id="Sky_hedge"]
+sky_material = SubResource("ProceduralSkyMaterial_hedge")
+
+[sub_resource type="Environment" id="Environment_hedge"]
+background_mode = 2
+sky = SubResource("Sky_hedge")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="GroundMaterial_hedge"]
+albedo_color = Color(0.286, 0.451, 0.243, 1)
+
+[node name="HedgeMaze" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_hedge")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 12, 0)
+shadow_enabled = true
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(60, 1, 60)
+material = SubResource("GroundMaterial_hedge")
+
+[node name="Dodgeball" parent="." instance=ExtResource("1_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.3, 0)
+
+[node name="Dodgeball2" parent="." instance=ExtResource("1_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.3, 0)
+
+[node name="Dodgeball3" parent="." instance=ExtResource("1_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -6)
+
+[node name="Dodgeball4" parent="." instance=ExtResource("1_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 6)
+
+[node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("4_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -24)
+flag = NodePath("../RedFlag")
+
+[node name="BlueBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("4_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 24)
+team = 1
+flag = NodePath("../BlueFlag")
+
+[node name="RedFlag" parent="." instance=ExtResource("5_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -24)
+
+[node name="BlueFlag" parent="." instance=ExtResource("5_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 24)
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+script = ExtResource("2_spawn")
+
+[node name="Red1" parent="SpawnPoints" instance=ExtResource("3_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0.1, -27)
+
+[node name="Red2" parent="SpawnPoints" instance=ExtResource("3_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.1, -27)
+
+[node name="Red3" parent="SpawnPoints" instance=ExtResource("3_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.1, -27)
+
+[node name="Red4" parent="SpawnPoints" instance=ExtResource("3_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0.1, -27)
+
+[node name="Blue1" parent="SpawnPoints" instance=ExtResource("3_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -9, 0.1, 27)
+team = 1
+
+[node name="Blue2" parent="SpawnPoints" instance=ExtResource("3_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -3, 0.1, 27)
+team = 1
+
+[node name="Blue3" parent="SpawnPoints" instance=ExtResource("3_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 3, 0.1, 27)
+team = 1
+
+[node name="Blue4" parent="SpawnPoints" instance=ExtResource("3_sp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 9, 0.1, 27)
+team = 1
