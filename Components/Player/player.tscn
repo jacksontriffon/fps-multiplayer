@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://cxhwx6l78bddc" path="res://Components/Player/Stamina/stamina.gd" id="4_stmna"]
 [ext_resource type="Script" uid="uid://d281gvnn52dcj" path="res://Components/Player/DoubleJump/double_jump.gd" id="5_djump"]
 [ext_resource type="Script" uid="uid://cw5prans3kt8r" path="res://Components/Player/Dash/dash.gd" id="6_dash"]
+[ext_resource type="Script" uid="uid://b7kqx2mfcrh8c" path="res://Components/Player/Crouch/crouch.gd" id="7_crouch"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_y2flf"]
 
@@ -33,6 +34,9 @@ properties/4/replication_mode = 2
 properties/5/path = NodePath(".:rotation")
 properties/5/spawn = true
 properties/5/replication_mode = 1
+properties/6/path = NodePath(".:crouching")
+properties/6/spawn = true
+properties/6/replication_mode = 2
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_1xasy")
@@ -121,6 +125,13 @@ player = NodePath("..")
 script = ExtResource("6_dash")
 player = NodePath("..")
 head = NodePath("../Head")
+
+[node name="Crouch" type="Node" parent="." node_paths=PackedStringArray("player", "head", "mesh", "collision_shape")]
+script = ExtResource("7_crouch")
+player = NodePath("..")
+head = NodePath("../Head")
+mesh = NodePath("../MeshInstance3D")
+collision_shape = NodePath("../CollisionShape3D")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_1xasy")
