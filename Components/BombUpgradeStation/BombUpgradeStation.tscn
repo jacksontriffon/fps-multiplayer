@@ -1,0 +1,57 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://Components/BombUpgradeStation/bomb_upgrade_station.gd" id="1_script"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_body"]
+radius = 0.35
+height = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Mat_body"]
+albedo_color = Color(0.1, 0.1, 0.12, 1)
+metallic = 0.5
+roughness = 0.35
+emission_enabled = true
+emission = Color(1, 0.3, 0.05, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="CylinderMesh" id="Cyl_fuse"]
+top_radius = 0.04
+bottom_radius = 0.06
+height = 0.22
+
+[sub_resource type="StandardMaterial3D" id="Mat_fuse"]
+albedo_color = Color(0.25, 0.18, 0.1, 1)
+
+[sub_resource type="BoxShape3D" id="Box_area"]
+size = Vector3(3, 3, 3)
+
+[node name="BombUpgradeStation" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Object" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+
+[node name="Body" type="MeshInstance3D" parent="Object"]
+mesh = SubResource("SphereMesh_body")
+surface_material_override/0 = SubResource("Mat_body")
+
+[node name="Fuse" type="MeshInstance3D" parent="Object"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42, 0)
+mesh = SubResource("Cyl_fuse")
+surface_material_override/0 = SubResource("Mat_fuse")
+
+[node name="Prompt" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+billboard = 1
+modulate = Color(1, 1, 1, 0)
+outline_modulate = Color(0, 0, 0, 0)
+pixel_size = 0.006
+text = "Interact for the Explosion upgrade"
+font_size = 64
+outline_size = 12
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("Box_area")

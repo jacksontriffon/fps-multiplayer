@@ -15,6 +15,11 @@ const REGEN_DELAY := 0.6
 
 # Reservation source ids. Add more (debuffs, abilities) and they shrink the pool the same way.
 const RES_HEARTS := &"hearts"
+const RES_BOMBS := &"bombs"
+
+# A "bomb container": carrying the explosion upgrade reserves this slice of the pool, the
+# same way each heart reserves PER_HEART.
+const PER_BOMB := 24.0
 
 @export var player: Player
 
@@ -62,6 +67,9 @@ func _refresh_reservations() -> void:
 	elif MatchManager.state != MatchManager.State.WAITING:
 		hearts = maxi(MatchManager.lives.get(player.name.to_int(), 0), 0)
 	reserve(RES_HEARTS, float(hearts) * PER_HEART)
+	# The explosion upgrade carries a bomb container that claims its own slice of the pool.
+	var bombs := 1 if player.has_effect(Player.BOMB_CONTAINER) else 0
+	reserve(RES_BOMBS, float(bombs) * PER_BOMB)
 
 func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():

@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://c60hxnsma28oh" path="res://Components/Pedestal/pedestal.tscn" id="6_ped"]
 [ext_resource type="Script" uid="uid://crd0u7gufnfiq" path="res://Components/InfiniteHeartZone/infinite_heart_zone.gd" id="7_infzone"]
 [ext_resource type="PackedScene" path="res://Components/Dodgeball/exploding_dodgeball.tscn" id="8_xball"]
+[ext_resource type="PackedScene" path="res://Components/BombUpgradeStation/BombUpgradeStation.tscn" id="9_bomb"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lm"]
 
@@ -1770,6 +1771,9 @@ game_mode = 1
 [node name="PedestalBR" parent="." instance=ExtResource("6_ped")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 0, -11)
 game_mode = 2
+
+[node name="BombUpgradeStation" parent="." instance=ExtResource("9_bomb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 0, -11)
 
 [node name="InfiniteHeartZone" type="Area3D" parent="."]
 script = ExtResource("7_infzone")

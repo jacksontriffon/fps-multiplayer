@@ -143,10 +143,22 @@ var _spectator_cam: Camera3D
 # reads has_effect(INFINITE_HEARTS) to swap the heart row for a single heart + ∞.
 const INFINITE_HEARTS := &"infinite_hearts"
 
+# The explosion upgrade: while held, every dodgeball this player grabs is armed as a live
+# bomb (see Dodgeball.grab), and a bomb container reserves part of the stamina pool
+# (see Stamina.RES_BOMBS). Granted at the bomb upgrade station.
+const BOMB_CONTAINER := &"bomb_container"
+
 var _effects := {}
 
 func has_effect(id: StringName) -> bool:
 	return _effects.has(id)
+
+# Networked set_effect: an interactable (e.g. the bomb upgrade station) is driven by the
+# local peer, but effects must agree everywhere — the player's own peer reads them for
+# stamina, the server reads them to arm grabbed balls. Broadcast so every copy matches.
+@rpc("any_peer", "call_local", "reliable")
+func set_effect_remote(id: StringName, active: bool, source: StringName) -> void:
+	set_effect(id, active, source)
 
 func set_effect(id: StringName, active: bool, source: StringName = &"default") -> void:
 	var sources: Dictionary = _effects.get(id, {})

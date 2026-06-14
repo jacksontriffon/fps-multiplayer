@@ -15,6 +15,9 @@ const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 # reserves and the fill lines up flush with the hearts.
 const STAMINA_PX_PER_UNIT := 2.0
 const HEART_WIDTH := Stamina.PER_HEART * STAMINA_PX_PER_UNIT
+const BOMB_FULL := preload("res://Assets/Textures/UI/bomb.svg")
+# The bomb container claims its own slice of the bar, same scale as a heart cell.
+const BOMB_WIDTH := Stamina.PER_BOMB * STAMINA_PX_PER_UNIT
 const BALL_ICON := preload("res://Assets/Textures/UI/dodgeball.svg")
 const PREVIEW_SIZE := Vector2i(96, 96)
 const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
@@ -43,6 +46,10 @@ var _pulse := 0.0
 # Kept as the last child of the Lives box; shown only for the infinite-hearts effect.
 var _infinity_label: Label
 
+# A bomb-container cell in the Lives box; shown only while the explosion upgrade is held.
+# Lives right of the hearts (before ∞) and reserves its slice like a heart cell does.
+var _bomb_rect: TextureRect
+
 # Slot panel styles: the active slot gets a brighter border so it reads as selected.
 var _slot_normal: StyleBoxFlat
 var _slot_active: StyleBoxFlat
@@ -66,6 +73,14 @@ func _ready() -> void:
 	_infinity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_infinity_label.visible = false
 	lives_box.add_child(_infinity_label)
+	_bomb_rect = TextureRect.new()
+	_bomb_rect.texture = BOMB_FULL
+	_bomb_rect.custom_minimum_size = Vector2(BOMB_WIDTH, 0)
+	_bomb_rect.size_flags_vertical = Control.SIZE_FILL
+	_bomb_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_bomb_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_bomb_rect.visible = false
+	lives_box.add_child(_bomb_rect)
 	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
 	_build_previews()
 
@@ -114,8 +129,14 @@ func _update_bar(id: int) -> void:
 		_update_lives_infinite()
 	else:
 		_update_lives(MatchManager.lives[id])
+	_update_bomb_container()
 	_update_stamina()
 	_update_slots(id)
+
+# Show the bomb-container cell while the local player carries the explosion upgrade.
+func _update_bomb_container() -> void:
+	var player := _local_player()
+	_bomb_rect.visible = player != null and player.has_effect(Player.BOMB_CONTAINER)
 
 func _update_stamina() -> void:
 	var player := _local_player()
@@ -157,7 +178,7 @@ func _update_lives_infinite() -> void:
 func _heart_rects() -> Array:
 	var hearts := []
 	for child in lives_box.get_children():
-		if child is TextureRect:
+		if child is TextureRect and child != _bomb_rect:
 			hearts.append(child)
 	return hearts
 
@@ -170,10 +191,12 @@ func _ensure_hearts(count: int) -> void:
 		heart.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		heart.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		lives_box.add_child(heart)
-		lives_box.move_child(heart, lives_box.get_child_count() - 2)  # hearts sit right of the fill, before ∞
 		hearts.append(heart)
 	while hearts.size() > count:
 		hearts.pop_back().free()
+	# Keep the trailing cells right of the hearts: ... hearts, bomb, ∞.
+	lives_box.move_child(_bomb_rect, lives_box.get_child_count() - 1)
+	lives_box.move_child(_infinity_label, lives_box.get_child_count() - 1)
 
 # Mirror the local player's inventory: each occupied slot shows its item (a live 3D
 # preview by default, or the item's flat item_ui texture when it has one) and the

@@ -45,6 +45,9 @@ properties/4/replication_mode = 2
 properties/5/path = NodePath(".:live_team")
 properties/5/spawn = true
 properties/5/replication_mode = 2
+properties/6/path = NodePath(".:armed")
+properties/6/spawn = true
+properties/6/replication_mode = 2
 
 [node name="Dodgeball" type="RigidBody3D"]
 physics_material_override = SubResource("PhysicsMaterial_3lprl")
