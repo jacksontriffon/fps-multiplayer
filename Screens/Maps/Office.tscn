@@ -1,0 +1,92 @@
+[gd_scene load_steps=9 format=3 uid="uid://doffice0000001"]
+
+[ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
+[ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="2_ball"]
+[ext_resource type="Script" path="res://Components/SpawnPoints/spawn_points.gd" id="3_spawn"]
+[ext_resource type="PackedScene" uid="uid://dspwnpt0point1" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="4_sp"]
+[ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="5_base"]
+[ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="6_flag"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_office"]
+
+[sub_resource type="Sky" id="Sky_office"]
+sky_material = SubResource("ProceduralSkyMaterial_office")
+
+[sub_resource type="Environment" id="Environment_office"]
+background_mode = 2
+sky = SubResource("Sky_office")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="Office" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_office")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 12, 0)
+shadow_enabled = true
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(80, 1, 50)
+material = ExtResource("1_grid")
+
+[node name="Dodgeball" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.3, 0)
+
+[node name="Dodgeball2" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.3, 0)
+
+[node name="Dodgeball3" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -12)
+
+[node name="Dodgeball4" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 12)
+
+[node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("5_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 0)
+flag = NodePath("../RedFlag")
+
+[node name="BlueBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("5_base")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 0)
+team = 1
+flag = NodePath("../BlueFlag")
+
+[node name="RedFlag" parent="." instance=ExtResource("6_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 1, 0)
+
+[node name="BlueFlag" parent="." instance=ExtResource("6_flag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 1, 0)
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+script = ExtResource("3_spawn")
+
+[node name="Red1" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -36, 0.1, -9)
+
+[node name="Red2" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -36, 0.1, -3)
+
+[node name="Red3" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -36, 0.1, 3)
+
+[node name="Red4" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -36, 0.1, 9)
+
+[node name="Blue1" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 36, 0.1, -9)
+team = 1
+
+[node name="Blue2" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 36, 0.1, -3)
+team = 1
+
+[node name="Blue3" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 36, 0.1, 3)
+team = 1
+
+[node name="Blue4" parent="SpawnPoints" instance=ExtResource("4_sp")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 36, 0.1, 9)
+team = 1
