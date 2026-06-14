@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://dballspawner01"]
+
+[ext_resource type="Script" path="res://Components/BallSpawner/ball_spawner.gd" id="1_bs"]
+
+[node name="BallSpawner" type="Node3D"]
+script = ExtResource("1_bs")
+
+[node name="Balls" type="Node3D" parent="."]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://1xfx84i2ndhj")
+spawn_path = NodePath("../Balls")
