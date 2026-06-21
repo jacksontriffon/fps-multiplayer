@@ -72,6 +72,7 @@ func _physics_process(delta: float) -> void:
 		return
 	update_highlight()
 	update_interactable_highlight()
+	_update_interact_prompt()
 	# No grabbing or throwing while the pause overlay is up.
 	if not Global.is_input_blocked():
 		_handle_interaction_input()
@@ -123,6 +124,27 @@ func _handle_interaction_input() -> void:
 		else:
 			_try_interact(me)
 		_charge = 0.0
+
+# Drive the HUD's crosshair prompt to whatever a click would act on right now, mirroring
+# _try_interact's priority: a free ball, then the rope, then a world interactable.
+func _update_interact_prompt() -> void:
+	var me := _get_player()
+	if me == null or not me.controllable() or Global.is_input_blocked():
+		HUD.hide_interact_prompt()
+		return
+	var target: Object = null
+	if _equipped_ball_of(me) == null and highlighted != null:
+		target = highlighted
+	elif me.can_grab_climb():
+		target = me.current_climb_zone()
+	elif highlighted_interactable != null and is_instance_valid(highlighted_interactable):
+		target = highlighted_interactable
+	if target == null:
+		HUD.hide_interact_prompt()
+		return
+	var obj_name: String = target.interact_name() if target.has_method("interact_name") else "Object"
+	var verb: String = target.interact_action() if target.has_method("interact_action") else "use"
+	HUD.show_interact_prompt(obj_name, &"interaction", verb)
 
 # Fire the highest-priority instant interaction in reach. Returns true if one ran.
 func _try_interact(me: Player) -> bool:
@@ -271,8 +293,8 @@ func update_highlight() -> void:
 		target.toggle_highlight(true)
 	highlighted = target
 
-# Highlight the interactable on the crosshair (swells it + fades in its prompt). Skipped
-# while a grabbable ball is already targeted so the two never fight over one click.
+# Highlight the interactable on the crosshair (swells it). Skipped while a grabbable ball
+# is already targeted so the two never fight over one click.
 func update_interactable_highlight() -> void:
 	var target: Node3D = null
 	if highlighted == null:

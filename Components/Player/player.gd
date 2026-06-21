@@ -466,6 +466,10 @@ func set_climb_zone(zone: Climbable, inside: bool) -> void:
 func can_grab_climb() -> bool:
 	return _climb_zone != null and not _climbing and _climb_regrab_lock <= 0.0
 
+# The rope currently in reach (or null), so the HUD prompt can read its name/action.
+func current_climb_zone() -> Climbable:
+	return _climb_zone
+
 # Latch onto the rope we're standing in. From here up/down climbs and jump leaps off.
 func grab_climb() -> void:
 	if can_grab_climb():

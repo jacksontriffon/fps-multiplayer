@@ -275,6 +275,13 @@ func required_mode() -> int:
 func _mode_active() -> bool:
 	return required_mode() < 0 or MatchManager.is_mode_active(required_mode())
 
+# Crosshair prompt: single-word name and the verb for grabbing it. Subclasses override.
+func interact_name() -> String:
+	return "Ball"
+
+func interact_action() -> String:
+	return "grab"
+
 # Overridden by subclasses that have a highlight visual.
 func toggle_highlight(_is_highlighted: bool) -> void:
 	pass
