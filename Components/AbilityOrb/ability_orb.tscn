@@ -6,8 +6,8 @@
 radius = 0.8
 
 [sub_resource type="SphereMesh" id="SphereMesh_core"]
-radius = 0.22
-height = 0.44
+radius = 0.12
+height = 0.24
 
 [sub_resource type="TorusMesh" id="TorusMesh_ring"]
 inner_radius = 0.5
@@ -35,3 +35,22 @@ mesh = SubResource("SphereMesh_core")
 [node name="OmniLight3D" type="OmniLight3D" parent="Bob"]
 light_energy = 2.5
 omni_range = 4.0
+
+[node name="Icon" type="Sprite3D" parent="Bob"]
+pixel_size = 0.0085
+billboard = 1
+shaded = false
+no_depth_test = true
+texture_filter = 5
+
+[node name="NameLabel" type="Label3D" parent="Bob"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.66, 0)
+visible = false
+billboard = 1
+no_depth_test = true
+pixel_size = 0.004
+font_size = 64
+outline_size = 14
+modulate = Color(1, 1, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.7)
+text = "Dash"
