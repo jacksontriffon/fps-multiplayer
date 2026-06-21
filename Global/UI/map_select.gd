@@ -18,6 +18,14 @@ extends CanvasLayer
 @onready var custom_start_button: Button = %CustomStartButton
 @onready var customise_back_button: Button = %CustomiseBackButton
 @onready var hint: Label = %Hint
+@onready var net_row: Control = %NetRow
+@onready var local_button: Button = %LocalButton
+@onready var steam_button: Button = %SteamButton
+@onready var error_label: Label = %ErrorLabel
+
+# game.gd NetMode values, mirrored here so the toggle can read/set the host's transport.
+const NET_STEAM := 0
+const NET_LOCAL := 1
 
 var _mode: int = Pedestal.GameMode.TEAM
 var _selected_map: String = ""
@@ -39,13 +47,20 @@ func _ready() -> void:
 	custom_start_button.pressed.connect(_on_start_custom)
 	customise_back_button.pressed.connect(_show_main)
 	close_button.pressed.connect(close)
+	var net_group := ButtonGroup.new()
+	local_button.button_group = net_group
+	steam_button.button_group = net_group
+	local_button.pressed.connect(_on_net_mode.bind(NET_LOCAL))
+	steam_button.pressed.connect(_on_net_mode.bind(NET_STEAM))
 
 func open() -> void:
 	_select_default_mode()
 	_select_default_map()
 	_roster_sig = ""
+	_clear_error()
 	_refresh_players()
 	_update_start_state()
+	_refresh_net_mode()
 	_show_main()
 	_saved_mouse_mode = Input.get_mouse_mode()
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -176,3 +191,38 @@ func _on_start_custom() -> void:
 	else:
 		MatchManager.request_start.rpc_id(1, _mode, _selected_map)
 	close()
+
+# The Local/Steam toggle only makes sense for the host (it owns the transport), so it's hidden
+# for clients. Reflects the session's current mode.
+func _refresh_net_mode() -> void:
+	var root := get_tree().get_first_node_in_group("game_root")
+	var is_host := multiplayer.has_multiplayer_peer() and multiplayer.is_server()
+	net_row.visible = is_host and root != null
+	if root == null:
+		return
+	if root.net_mode == NET_LOCAL:
+		local_button.button_pressed = true
+	else:
+		steam_button.button_pressed = true
+
+# Switching transport re-hosts the session. On success the menu closes (its player is about to
+# respawn); on failure the session is untouched, so keep the menu open and show why.
+func _on_net_mode(mode: int) -> void:
+	var root := get_tree().get_first_node_in_group("game_root")
+	if root == null or root.net_mode == mode:
+		return
+	_clear_error()
+	var err: String = root.switch_net_mode(mode)
+	if err != "":
+		_show_error(err)
+		_refresh_net_mode()  # re-sync the toggle to the mode that's actually active
+		return
+	close()
+
+func _show_error(text: String) -> void:
+	error_label.text = text
+	error_label.visible = true
+
+func _clear_error() -> void:
+	error_label.text = ""
+	error_label.visible = false

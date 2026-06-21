@@ -24,6 +24,8 @@ var lobby_id: int = 0
 var peer: MultiplayerPeer
 var is_host: bool = false
 var is_joining: bool = false
+# Steam is initialised lazily so a session that boots in LOCAL can still switch to STEAM later.
+var _steam_ready: bool = false
 # The map currently loaded under MapContainer. On the server this is the source of truth a
 # late-joiner pulls so it loads the live arena instead of the lobby.
 var current_map_path: String = LOBBY_MAP
@@ -42,22 +44,72 @@ func _ready() -> void:
 	if map_container.get_child_count() == 0:
 		load_map(LOBBY_MAP)
 
+	_apply_net_mode_ui()
+	host_game_button.grab_focus()
+
+# Bring the chosen transport online and refresh the start menu's Host/Join buttons. STEAM needs
+# a successful init; LOCAL is always ready. Called on boot and after a runtime mode switch.
+func _apply_net_mode_ui() -> void:
 	if net_mode == NetMode.STEAM:
-		var init := Steam.steamInitEx(480, true)
-		print("Steam init: ", init)
-		if init["status"] != Steam.STEAM_API_INIT_RESULT_OK:
-			push_error("Steam init failed (%d): %s" % [init["status"], init["verbal"]])
+		if not _ensure_steam_init():
 			host_game_button.disabled = true
 			join_game_button.disabled = true
 			return
-		Steam.initRelayNetworkAccess()
-		Steam.lobby_created.connect(_on_lobby_created)
-		Steam.lobby_joined.connect(_on_lobby_joined)
+		host_game_button.disabled = false
+		join_game_button.disabled = line_edit.text.is_empty()
 	else:
 		print("Network mode: LOCAL (ENet %s:%d)" % [local_address, local_port])
+		host_game_button.disabled = false
 		join_game_button.disabled = false
 
-	host_game_button.grab_focus()
+# Initialise Steam once, wiring the lobby callbacks a single time. Returns false on failure so
+# callers can fall back. Safe to call repeatedly.
+func _ensure_steam_init() -> bool:
+	if _steam_ready:
+		return true
+	var init := Steam.steamInitEx(480, true)
+	print("Steam init: ", init)
+	if init["status"] != Steam.STEAM_API_INIT_RESULT_OK:
+		push_error("Steam init failed (%d): %s" % [init["status"], init["verbal"]])
+		return false
+	Steam.initRelayNetworkAccess()
+	Steam.lobby_created.connect(_on_lobby_created)
+	Steam.lobby_joined.connect(_on_lobby_joined)
+	_steam_ready = true
+	return true
+
+# --- Runtime transport switch ----------------------------------------------
+
+# Re-host in a different transport without restarting the app. Host-only and destructive: the
+# current session is torn down (any connected clients drop) and a fresh lobby is hosted in the
+# chosen mode. Driven by the lobby pedestal menu — typically the host flipping Local <-> Steam
+# while testing. Returns "" on success or a player-facing error the menu can surface; on a
+# pre-host failure (e.g. Steam unavailable) the current session is left untouched.
+func switch_net_mode(mode: NetMode) -> String:
+	if not multiplayer.is_server():
+		return "Only the host can change the network mode."
+	if mode == net_mode and multiplayer.has_multiplayer_peer():
+		return ""
+	if mode == NetMode.STEAM and not _ensure_steam_init():
+		return "Steam isn't available. Is the Steam client running?"
+	_teardown_session()
+	net_mode = mode
+	return host_lobby()
+
+# Drop every spawned player, reset match state and close the peer, leaving a bare lobby ready
+# to be re-hosted.
+func _teardown_session() -> void:
+	for child in get_children():
+		if str(child.name).is_valid_int():  # player nodes are named by peer id
+			child.free()
+	if multiplayer.multiplayer_peer != null:
+		multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = null
+	is_host = false
+	lobby_id = 0
+	current_map_path = LOBBY_MAP
+	MatchManager.reset_for_rehost()
+	load_map(LOBBY_MAP)
 
 
 # --- Map swapping ----------------------------------------------------------
@@ -87,12 +139,14 @@ func _on_connected_to_server() -> void:
 
 # --- Hosting ---------------------------------------------------------------
 
-func host_lobby():
+# Returns "" on success or a player-facing error. Steam hosting is async (the lobby arrives via
+# _on_lobby_created), so it can only report the synchronous failures here; ENet reports inline.
+func host_lobby() -> String:
 	is_host = true
 	if net_mode == NetMode.STEAM:
 		Steam.createLobby(Steam.LobbyType.LOBBY_TYPE_PUBLIC, 16)
-	else:
-		_host_enet()
+		return ""
+	return _host_enet()
 
 func _on_lobby_created(result: int, new_lobby_id: int):
 	if result == Steam.Result.RESULT_OK:
@@ -105,21 +159,24 @@ func _on_lobby_created(result: int, new_lobby_id: int):
 
 		print("Lobby created: ID #", lobby_id)
 
-func _host_enet():
+func _host_enet() -> String:
 	var enet_peer := ENetMultiplayerPeer.new()
 	var err := enet_peer.create_server(local_port)
 	if err != OK:
 		push_error("Failed to create ENet server on port %d (error %d)" % [local_port, err])
-		return
+		return "Couldn't host locally. Port %d may be in use (error %d)." % [local_port, err]
 	_start_host(enet_peer)
 	print("ENet server listening on port ", local_port)
+	return ""
 
 # Shared host setup for either transport.
 func _start_host(new_peer: MultiplayerPeer):
 	peer = new_peer
 	multiplayer.multiplayer_peer = peer
-	multiplayer.peer_connected.connect(_add_player)
-	multiplayer.peer_disconnected.connect(_remove_player)
+	if not multiplayer.peer_connected.is_connected(_add_player):
+		multiplayer.peer_connected.connect(_add_player)
+	if not multiplayer.peer_disconnected.is_connected(_remove_player):
+		multiplayer.peer_disconnected.connect(_remove_player)
 	_add_player()
 
 
