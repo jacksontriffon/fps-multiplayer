@@ -15,11 +15,14 @@ const REGEN_DELAY := 0.6
 
 # Reservation source ids. Add more (debuffs, abilities) and they shrink the pool the same way.
 const RES_HEARTS := &"hearts"
-const RES_BOMBS := &"bombs"
-
-# A "bomb container": carrying the explosion upgrade reserves this slice of the pool, the
-# same way each heart reserves PER_HEART.
-const PER_BOMB := 24.0
+# Owned abilities each carve a container slice the width of their cost — the HUD draws it
+# as a cell and the player spends from the pool to fire the ability.
+const RES_DASH := &"dash"
+const RES_DOUBLE_JUMP := &"double_jump"
+const RES_BOMB := &"bomb"
+# Unlike dash/double-jump, the explosion upgrade doesn't drain per use — carrying it is the
+# whole cost, so its container reserves a fixed slice the size of one heart.
+const BOMB_COST := PER_HEART
 
 @export var player: Player
 
@@ -67,9 +70,10 @@ func _refresh_reservations() -> void:
 	elif MatchManager.state != MatchManager.State.WAITING:
 		hearts = maxi(MatchManager.lives.get(player.name.to_int(), 0), 0)
 	reserve(RES_HEARTS, float(hearts) * PER_HEART)
-	# The explosion upgrade carries a bomb container that claims its own slice of the pool.
-	var bombs := 1 if player.has_effect(Player.BOMB_CONTAINER) else 0
-	reserve(RES_BOMBS, float(bombs) * PER_BOMB)
+	# Each unlocked ability reserves its own container slice in the bar.
+	reserve(RES_DASH, Dash.DASH_COST if player.has_effect(Player.ABILITY_DASH) else 0.0)
+	reserve(RES_DOUBLE_JUMP, DoubleJump.DOUBLE_JUMP_COST if player.has_effect(Player.ABILITY_DOUBLE_JUMP) else 0.0)
+	reserve(RES_BOMB, BOMB_COST if player.has_effect(Player.ABILITY_BOMB) else 0.0)
 
 func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():

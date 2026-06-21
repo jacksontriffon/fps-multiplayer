@@ -1,187 +1,134 @@
-@tool
-extends Node3D
+extends Area3D
 class_name AbilityOrb
 
-# A floating orb you interact with to gain an ability. Pick the ability with the `ability`
-# export; each maps to a Player effect that's granted (broadcast) on pickup, plus a label
-# for the prompt and the name of the visual to show. Single use: taking it consumes the orb
-# with a fade-out, broadcast so it vanishes for everyone.
-#
-# Add an ability by extending the enum + ABILITIES table and adding a visual child under
-# Object named to match (e.g. "Bomb"). If no visual matches, every visual is shown so a new
-# type is never invisible.
-
-enum Ability { BOMB }
-
-const ABILITIES := {
-	Ability.BOMB: {"effect": Player.BOMB_CONTAINER, "label": "Explosion", "visual": "Bomb"},
-}
+# A floating, glowing orb resting on the floor that permanently grants one ability —
+# dash, double jump, or the explosion upgrade — to the first player who touches it.
+# Mirrors InfiniteHeartZone: the grant runs on every peer off body_entered (player
+# bodies replicate identically, so the overlap fires the same everywhere), which keeps
+# the pickup deterministic with no extra RPCs. Unlike the zone, the grant is permanent —
+# we never revoke it on exit — so the ability is kept for the rest of the run.
 
 const SOURCE := &"ability_orb"
 
-# Floating-object highlight: rests at its authored scale, swells when you're in range.
-const IDLE_SCALE := 1.0
-const HIGHLIGHT_SCALE := 1.18
-const SCALE_LERP := 12.0
+enum Ability { DASH, DOUBLE_JUMP, BOMB }
 
-# Quick fade for the billboard prompt as you enter/leave range.
-const PROMPT_LERP := 16.0
+const EFFECTS := {
+	Ability.DASH: Player.ABILITY_DASH,
+	Ability.DOUBLE_JUMP: Player.ABILITY_DOUBLE_JUMP,
+	Ability.BOMB: Player.ABILITY_BOMB,
+}
 
-# Gentle idle bob + slow spin of the object (local visual only).
-const BOB_AMPLITUDE := 0.12
-const BOB_SPEED := 1.6
-const SPIN_SPEED := 1.2
+const COLORS := {
+	Ability.DASH: Color(0.25, 0.7, 1.0),
+	Ability.DOUBLE_JUMP: Color(0.75, 0.45, 1.0),
+	Ability.BOMB: Color(1.0, 0.45, 0.1),
+}
 
-# Consume animation: the orb floats up, shrinks and fades away.
-const FADE_TIME := 0.7
-const FADE_RISE := 0.8
-const FADE_END_SCALE := 0.2
-const FADE_SPIN := 6.0
+# Billboard icon (two chevrons for dash, wings for double jump, a bomb for the explosion
+# upgrade) and the name shown above it. The icons are white so modulate tints them.
+const ICONS := {
+	Ability.DASH: preload("res://Assets/Textures/UI/ability_dash.svg"),
+	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_double_jump.svg"),
+	Ability.BOMB: preload("res://Assets/Textures/UI/ability_bomb.svg"),
+}
+const NAMES := {
+	Ability.DASH: "Dash",
+	Ability.DOUBLE_JUMP: "Double Jump",
+	Ability.BOMB: "Explosion",
+}
 
-@export var ability: Ability = Ability.BOMB:
-	set(value):
-		ability = value
-		_apply_ability_visual()
+# How close the local player must be for the floating name to fade in.
+const NAME_SHOW_DISTANCE := 6.0
+const NAME_FADE_SPEED := 6.0
 
-@onready var prompt: Label3D = $Prompt
-@onready var area: Area3D = $Area3D
-@onready var object: Node3D = $Object
+@export var ability: Ability = Ability.DASH
 
-var _object_base_y := 0.0
-var _object_base_scale := Vector3.ONE
-var _bob_time := 0.0
+# Bob/spin feel for the floating core (purely visual, runs on every peer).
+@export var bob_height := 0.18
+@export var bob_speed := 2.0
+@export var spin_speed := 1.2
 
-# Set once the orb is taken; stops interaction and runs the fade-out.
-var _consumed := false
-var _fade_mats: Array[StandardMaterial3D] = []
-var _fade_emission: Array[float] = []
+@onready var _bob: Node3D = $Bob
+@onready var _core: MeshInstance3D = $Bob/Core
+@onready var _light: OmniLight3D = $Bob/OmniLight3D
+@onready var _ring: MeshInstance3D = $FloorRing
+@onready var _icon: Sprite3D = $Bob/Icon
+@onready var _name_label: Label3D = $Bob/NameLabel
+
+var _base_y := 0.0
+var _t := 0.0
+var _name_alpha := 0.0
+var _collected := false
 
 func _ready() -> void:
-	_apply_ability_visual()
-	if Engine.is_editor_hint():
-		return
-	add_to_group("ability_orb")
-	_object_base_y = object.position.y
-	_object_base_scale = object.scale
-	prompt.modulate.a = 0.0
-	prompt.outline_modulate.a = 0.0
+	_base_y = _bob.position.y
+	body_entered.connect(_on_body_entered)
+	_apply_color()
 
 func _process(delta: float) -> void:
-	if Engine.is_editor_hint():
+	if _collected:
 		return
-	if _consumed:
-		_fade_prompt(delta, "")
-		return
+	_t += delta
+	_bob.position.y = _base_y + sin(_t * bob_speed) * bob_height
+	_core.rotate_y(delta * spin_speed)  # only the nucleus spins; the billboards stay put
+	_update_name(delta)
 
-	var near := _local_near()
-
-	# Bob, spin, and swell toward the highlight scale when you're in range.
-	_bob_time += delta
-	object.position.y = _object_base_y + sin(_bob_time * BOB_SPEED) * BOB_AMPLITUDE
-	object.rotate_y(delta * SPIN_SPEED)
-	var target: float = HIGHLIGHT_SCALE if near else IDLE_SCALE
-	object.scale = object.scale.lerp(_object_base_scale * target, delta * SCALE_LERP)
-
-	_fade_prompt(delta, _prompt_text())
-
-	# Interact to take the ability: grant it and consume the orb, both broadcast so every
-	# peer agrees on the effect and sees the orb vanish.
-	if near and not Global.is_input_blocked() and Input.is_action_just_pressed("interaction"):
-		var p := _local_player()
-		var effect: StringName = _info()["effect"]
-		if p and not p.has_effect(effect):
-			p.set_effect_remote.rpc(effect, true, SOURCE)
-			consume.rpc()
-
-func _info() -> Dictionary:
-	return ABILITIES[ability]
-
-# Show the visual child whose name matches the ability; hide the others. Falls back to
-# showing everything if nothing matches, so a new ability is never invisible.
-func _apply_ability_visual() -> void:
-	var obj := get_node_or_null("Object")
-	if obj == null:
-		return
-	var want: String = ABILITIES.get(ability, {}).get("visual", "")
-	var matched := false
-	for child in obj.get_children():
-		if child is Node3D and child.name == want:
-			matched = true
-	for child in obj.get_children():
-		if child is Node3D:
-			child.visible = (not matched) or child.name == want
-
-# Quick fade for the prompt; keep the last text on screen while it fades out.
-func _fade_prompt(delta: float, text: String) -> void:
-	if text != "":
-		prompt.text = text
-	var a := lerpf(prompt.modulate.a, 1.0 if text != "" else 0.0, delta * PROMPT_LERP)
-	prompt.modulate.a = a
-	prompt.outline_modulate.a = a
-
-# Empty when the prompt shouldn't show; the billboard Label3D renders whatever this returns.
-func _prompt_text() -> String:
-	if _consumed or not _local_near():
-		return ""
-	var label: String = _info()["label"]
-	var p := _local_player()
-	if p and p.has_effect(_info()["effect"]):
-		return "%s upgrade active" % label
-	return "Interact for the %s upgrade" % label
-
-# Take the orb out of play and play the fade-out on every peer.
-@rpc("any_peer", "call_local", "reliable")
-func consume() -> void:
-	if _consumed:
-		return
-	_consumed = true
-	area.monitoring = false
-	_begin_fade()
-
-func _begin_fade() -> void:
-	# Switch to per-instance transparent materials so we can fade alpha + emission out.
-	for m in _visual_meshes():
-		var src := m.get_active_material(0)
-		var mat: StandardMaterial3D = src.duplicate() if src is StandardMaterial3D else StandardMaterial3D.new()
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		m.material_override = mat
-		_fade_mats.append(mat)
-		_fade_emission.append(mat.emission_energy_multiplier if mat.emission_enabled else 0.0)
-	var tw := create_tween()
-	tw.set_parallel(true)
-	tw.tween_method(_apply_fade, 1.0, 0.0, FADE_TIME).set_ease(Tween.EASE_IN)
-	tw.tween_property(object, "scale", _object_base_scale * FADE_END_SCALE, FADE_TIME).set_ease(Tween.EASE_IN)
-	tw.tween_property(object, "position:y", _object_base_y + FADE_RISE, FADE_TIME)
-	tw.tween_property(object, "rotation:y", object.rotation.y + FADE_SPIN, FADE_TIME)
-	tw.chain().tween_callback(func() -> void: object.visible = false)
-
-func _apply_fade(t: float) -> void:
-	for i in _fade_mats.size():
-		var mat := _fade_mats[i]
-		var c := mat.albedo_color
-		c.a = t
-		mat.albedo_color = c
-		if mat.emission_enabled:
-			mat.emission_energy_multiplier = _fade_emission[i] * t
-
-# Every MeshInstance3D under the floating object (the visuals fade together).
-func _visual_meshes() -> Array[MeshInstance3D]:
-	var out: Array[MeshInstance3D] = []
-	var stack: Array[Node] = [object]
-	while not stack.is_empty():
-		var n: Node = stack.pop_back()
-		if n is MeshInstance3D:
-			out.append(n)
-		stack.append_array(n.get_children())
-	return out
-
-func _local_near() -> bool:
-	if _consumed:
-		return false
-	var p := _local_player()
-	return p != null and p in area.get_overlapping_bodies()
+# Fade the floating name in while the local player stands near the orb. Distance is to
+# the local (viewing) player, so each client shows the prompt for its own approach.
+func _update_name(delta: float) -> void:
+	var near := false
+	var player := _local_player()
+	if player != null:
+		near = global_position.distance_to(player.global_position) <= NAME_SHOW_DISTANCE
+	_name_alpha = clampf(_name_alpha + (1.0 if near else -1.0) * NAME_FADE_SPEED * delta, 0.0, 1.0)
+	_name_label.visible = _name_alpha > 0.0
+	if _name_label.visible:
+		_name_label.modulate.a = _name_alpha
+		_name_label.outline_modulate.a = _name_alpha * 0.7
 
 func _local_player() -> Player:
-	if not multiplayer.has_multiplayer_peer():
-		return null
-	return get_tree().current_scene.get_node_or_null(str(multiplayer.get_unique_id())) as Player
+	for p in get_tree().get_nodes_in_group("players"):
+		if p is Player and p.is_multiplayer_authority():
+			return p
+	return null
+
+func _effect_id() -> StringName:
+	return EFFECTS[ability]
+
+func _on_body_entered(body: Node3D) -> void:
+	if _collected or not (body is Player):
+		return
+	_collected = true
+	body.set_effect(_effect_id(), true, SOURCE)
+	_consume()
+
+# Tint the core, glow and floor ring to the ability's colour so the orb reads at a
+# glance and matches the matching container in the stamina bar.
+func _apply_color() -> void:
+	var col: Color = COLORS[ability]
+	_light.light_color = col
+	_core.material_override = _emissive(col, 0.9)
+	_ring.material_override = _emissive(col, 0.7)
+	_icon.texture = ICONS[ability]
+	# Push the tint past white (HDR) so the billboard icon reads as glowing like the core.
+	_icon.modulate = col * 1.6
+	_name_label.text = NAMES[ability]
+	_name_label.modulate = Color(col.r, col.g, col.b, 0.0)
+
+func _emissive(col: Color, alpha: float) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(col.r, col.g, col.b, alpha)
+	mat.emission_enabled = true
+	mat.emission = col
+	mat.emission_energy_multiplier = 2.5
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if alpha < 1.0 else BaseMaterial3D.TRANSPARENCY_DISABLED
+	return mat
+
+# Hide the orb once taken. Kept (not freed) so the deterministic overlap can't re-fire
+# a grant, and so any late body_entered on another peer still finds it inert.
+func _consume() -> void:
+	monitoring = false
+	_bob.visible = false
+	_ring.visible = false
+	_name_label.visible = false
+	set_process(false)

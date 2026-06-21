@@ -2,8 +2,8 @@ extends Node3D
 class_name Explosive
 
 # Makes the Grabbable it hangs under detonate like a grenade after a fuse and/or on impact
-# while "armed". A ball is armed at grab time when its grabber carries the bomb upgrade
-# (Player.BOMB_CONTAINER), or permanently for an authored bomb pickup (permanent_armed).
+# while "armed". A ball is armed at grab time when its grabber carries the explosion upgrade
+# (Player.ABILITY_BOMB), or permanently for an authored bomb pickup (permanent_armed).
 #
 # All explosion behaviour lives here: the host ball forwards its grab/throw/reset/hit
 # lifecycle through the on_* / suppresses_normal_hit hooks and reads the armed look back
@@ -84,11 +84,11 @@ func _physics_process(delta: float) -> void:
 
 # --- Lifecycle hooks, called by the host Dodgeball ---------------------------
 
-# A grabber carrying the bomb upgrade arms whatever they pick up.
+# A grabber carrying the explosion upgrade arms whatever they pick up.
 func on_grabbed(peer_id: int) -> void:
 	if not armed:
 		var holder := get_tree().current_scene.get_node_or_null(str(peer_id)) as Player
-		if holder and holder.has_effect(Player.BOMB_CONTAINER):
+		if holder and holder.has_effect(Player.ABILITY_BOMB):
 			armed = true
 	if armed:
 		_impact_armed = false  # caught — but a lit fuse keeps burning

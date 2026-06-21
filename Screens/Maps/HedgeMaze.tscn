@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://5w2u1jxldism"]
+[gd_scene load_steps=10 format=3 uid="uid://5w2u1jxldism"]
 
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="1_ball"]
+[ext_resource type="PackedScene" uid="uid://dballspawner01" path="res://Components/BallSpawner/BallSpawner.tscn" id="99_bspawn"]
 [ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="2_spawn"]
 [ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="3_sp"]
 [ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="4_base"]
@@ -34,6 +35,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 use_collision = true
 size = Vector3(60, 1, 60)
 material = SubResource("GroundMaterial_hedge")
+
+[node name="BallSpawners" type="Node3D" parent="."]
+
+[node name="BallSpawner1" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.3, 0)
+
+[node name="BallSpawner2" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.3, 0)
+
+[node name="BallSpawner3" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -6)
+
+[node name="BallSpawner4" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 6)
 
 [node name="Dodgeball" parent="." instance=ExtResource("1_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.3, 0)

@@ -52,9 +52,10 @@ inner_radius = 0.18
 outer_radius = 0.32
 material = SubResource("StandardMaterial3D_brcrown")
 
-[node name="Area3D" type="Area3D" parent="."]
+[node name="InteractArea" type="Area3D" parent="."]
+monitoring = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3373108, 0)
 shape = SubResource("CylinderShape3D_wxhbb")
 

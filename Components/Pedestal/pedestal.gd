@@ -2,9 +2,9 @@
 extends Node3D
 class_name Pedestal
 
-# Lobby start pedestal: step into range and interact to start the match. The floating
-# object bobs and grows while you're near, and a 3D prompt fades in telling you whether a
-# match can start yet.
+# Lobby start pedestal: aim at it and click to start the match. The floating object bobs
+# and grows while you have it on your crosshair (inside your interaction reach), and a 3D
+# prompt fades in telling you whether a match can start yet.
 #
 # Each pedestal starts a specific game mode (set game_mode in the inspector) and shows the
 # matching floating object: team_object, ctf_object or br_object. All are plain Node3D
@@ -55,7 +55,6 @@ const BOB_SPEED := 1.6
 		_apply_mode_visuals()
 
 @onready var prompt: Label3D = $Prompt
-@onready var area: Area3D = $Area3D
 
 # The object for the active mode; the other is hidden.
 var object: Node3D
@@ -63,11 +62,16 @@ var _object_base_y := 0.0
 var _object_base_scale := Vector3.ONE
 var _bob_time := 0.0
 
+# Set by the local player's Hands when this pedestal is the crosshair-targeted interactable.
+var _targeted := false
+
 func _ready() -> void:
 	_apply_mode_visuals()
 	if Engine.is_editor_hint():
 		return
 	add_to_group("pedestal")
+	# Picked up by the player's interaction area (Hands.GrabbableArea) and clicked via the crosshair.
+	add_to_group("interactable")
 	if object:
 		_object_base_y = object.position.y
 		_object_base_scale = object.scale
@@ -90,12 +94,11 @@ func _apply_mode_visuals() -> void:
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
-	var near := _local_near()
 	if object:
-		# Bob, and swell toward the highlight scale when you're in range.
+		# Bob, and swell toward the highlight scale while you're aiming at it.
 		_bob_time += delta
 		object.position.y = _object_base_y + sin(_bob_time * BOB_SPEED) * BOB_AMPLITUDE
-		var target: float = HIGHLIGHT_SCALE if near else IDLE_SCALE
+		var target: float = HIGHLIGHT_SCALE if _targeted else IDLE_SCALE
 		object.scale = object.scale.lerp(_object_base_scale * target, delta * SCALE_LERP)
 
 	# Quick fade for the prompt; keep the last text on screen while it fades out.
@@ -107,23 +110,30 @@ func _process(delta: float) -> void:
 	prompt.modulate.a = a
 	prompt.outline_modulate.a = a
 
-	# Interacting opens the pre-match Map Select menu (mode, map pick, player list); the
-	# match itself starts from there. Open even without enough players so you can see who's
-	# waiting — the menu's Start button stays disabled until the lobby is full enough.
-	if near and not Global.is_input_blocked() and Input.is_action_just_pressed("interaction"):
-		MapSelect.open(game_mode)
-
 # Empty when the prompt shouldn't show; the billboard Label3D renders whatever this returns.
 func prompt_text() -> String:
-	if MatchManager.state != MatchManager.State.WAITING or not _local_near():
+	if not _targeted or not can_interact():
 		return ""
-	return "Interact to set up %s" % MODE_NAMES[game_mode]
+	return "Interact to play"
 
-func _local_near() -> bool:
-	var p := _local_player()
-	return p != null and p in area.get_overlapping_bodies()
+# --- Interactable (driven by the local player's Hands) ----------------------
 
-func _local_player() -> Node3D:
-	if not multiplayer.has_multiplayer_peer():
-		return null
-	return get_tree().current_scene.get_node_or_null(str(multiplayer.get_unique_id()))
+# Only offer the pedestal between matches, while the lobby is waiting to start.
+func can_interact() -> bool:
+	return MatchManager.state == MatchManager.State.WAITING
+
+# Clicked on the crosshair: open the lobby menu — a big START for the Classic tournament plus
+# a Customise view (mode, map pick, player list). The match starts from there; the Start
+# buttons stay disabled until the lobby has enough players.
+func interact() -> void:
+	if can_interact():
+		MapSelect.open()
+
+func set_targeted(value: bool) -> void:
+	_targeted = value
+
+# Where the crosshair should land to count as aiming at this pedestal: the floating object.
+func interact_point() -> Vector3:
+	if object and is_instance_valid(object):
+		return object.global_position
+	return global_position

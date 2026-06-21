@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7ni5ee7dqdx5"
-path="res://.godot/imported/bomb.svg-11b88d95043fae3a24220ffac16238c3.ctex"
+uid="uid://uh5t22o08tfa"
+path="res://.godot/imported/ability_dash.svg-d683602a29b93d1ce3e313f88cdb983d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Textures/UI/bomb.svg"
-dest_files=["res://.godot/imported/bomb.svg-11b88d95043fae3a24220ffac16238c3.ctex"]
+source_file="res://Assets/Textures/UI/ability_dash.svg"
+dest_files=["res://.godot/imported/ability_dash.svg-d683602a29b93d1ce3e313f88cdb983d.ctex"]
 
 [params]
 

@@ -15,9 +15,6 @@ const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 # reserves and the fill lines up flush with the hearts.
 const STAMINA_PX_PER_UNIT := 2.0
 const HEART_WIDTH := Stamina.PER_HEART * STAMINA_PX_PER_UNIT
-const BOMB_FULL := preload("res://Assets/Textures/UI/bomb.svg")
-# The bomb container claims its own slice of the bar, same scale as a heart cell.
-const BOMB_WIDTH := Stamina.PER_BOMB * STAMINA_PX_PER_UNIT
 const BALL_ICON := preload("res://Assets/Textures/UI/dodgeball.svg")
 const PREVIEW_SIZE := Vector2i(96, 96)
 const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
@@ -46,9 +43,13 @@ var _pulse := 0.0
 # Kept as the last child of the Lives box; shown only for the infinite-hearts effect.
 var _infinity_label: Label
 
-# A bomb-container cell in the Lives box; shown only while the explosion upgrade is held.
-# Lives right of the hearts (before ∞) and reserves its slice like a heart cell does.
-var _bomb_rect: TextureRect
+# Ability container cells in the stamina bar, one per unlockable movement ability. Each
+# is a coloured slice sized to the ability's cost (so it lines up with the stamina the
+# bar reserves for it), bright when armed and dim when there isn't enough to fire it.
+# Hidden with zero width until an AbilityOrb grants the ability.
+var _ability_defs: Array = []
+var _ability_cells: Array[Panel] = []
+var _ability_styles: Array[StyleBoxFlat] = []
 
 # Slot panel styles: the active slot gets a brighter border so it reads as selected.
 var _slot_normal: StyleBoxFlat
@@ -73,15 +74,8 @@ func _ready() -> void:
 	_infinity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_infinity_label.visible = false
 	lives_box.add_child(_infinity_label)
-	_bomb_rect = TextureRect.new()
-	_bomb_rect.texture = BOMB_FULL
-	_bomb_rect.custom_minimum_size = Vector2(BOMB_WIDTH, 0)
-	_bomb_rect.size_flags_vertical = Control.SIZE_FILL
-	_bomb_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_bomb_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_bomb_rect.visible = false
-	lives_box.add_child(_bomb_rect)
 	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
+	_build_ability_cells()
 	_build_previews()
 
 func _process(delta: float) -> void:
@@ -129,17 +123,12 @@ func _update_bar(id: int) -> void:
 		_update_lives_infinite()
 	else:
 		_update_lives(MatchManager.lives[id])
-	_update_bomb_container()
 	_update_stamina()
 	_update_slots(id)
 
-# Show the bomb-container cell while the local player carries the explosion upgrade.
-func _update_bomb_container() -> void:
-	var player := _local_player()
-	_bomb_rect.visible = player != null and player.has_effect(Player.BOMB_CONTAINER)
-
 func _update_stamina() -> void:
 	var player := _local_player()
+	_update_ability_cells(player)
 	if player == null:
 		stamina_bar.visible = false
 		return
@@ -151,6 +140,55 @@ func _update_stamina() -> void:
 	stamina_bar.value = player.stamina.amount
 	var low := cap > 0.0 and player.stamina.amount <= cap * 0.3
 	stamina_bar.self_modulate = Color(1, 0.55, 0.25) if low else Color.WHITE
+
+# One container cell per unlockable ability, inserted just after the stamina fill so the
+# order reads [fill][dash][double jump][hearts][∞]. The fill (which expands) shrinks by
+# each owned ability's reserved slice, so the cells slot in flush with no width math here.
+func _build_ability_cells() -> void:
+	_ability_defs = [
+		{"effect": Player.ABILITY_DASH, "cost": Dash.DASH_COST, "glyph": "»", "color": Color(0.25, 0.7, 1.0)},
+		{"effect": Player.ABILITY_DOUBLE_JUMP, "cost": DoubleJump.DOUBLE_JUMP_COST, "glyph": "↟", "color": Color(0.75, 0.45, 1.0)},
+		{"effect": Player.ABILITY_BOMB, "cost": Stamina.BOMB_COST, "glyph": "✸", "color": Color(1.0, 0.45, 0.1)},
+	]
+	for i in _ability_defs.size():
+		var style := StyleBoxFlat.new()
+		style.corner_radius_top_left = 3
+		style.corner_radius_top_right = 3
+		style.corner_radius_bottom_right = 3
+		style.corner_radius_bottom_left = 3
+		var cell := Panel.new()
+		cell.custom_minimum_size = Vector2(0, 0)
+		cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.visible = false
+		cell.add_theme_stylebox_override("panel", style)
+		var label := Label.new()
+		label.text = _ability_defs[i].glyph
+		label.set_anchors_preset(Control.PRESET_FULL_RECT)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.add_theme_font_size_override("font_size", 15)
+		cell.add_child(label)
+		lives_box.add_child(cell)
+		lives_box.move_child(cell, 1 + i)  # right after the stamina fill (child 0)
+		_ability_cells.append(cell)
+		_ability_styles.append(style)
+
+func _update_ability_cells(player: Player) -> void:
+	for i in _ability_defs.size():
+		var cell := _ability_cells[i]
+		var owned := player != null and player.has_effect(_ability_defs[i].effect)
+		if not owned:
+			cell.visible = false
+			cell.custom_minimum_size.x = 0.0
+			continue
+		var cost: float = _ability_defs[i].cost
+		var color: Color = _ability_defs[i].color
+		var armed: bool = player.stamina.amount >= cost
+		cell.visible = true
+		cell.custom_minimum_size.x = cost * STAMINA_PX_PER_UNIT
+		_ability_styles[i].bg_color = color if armed else Color(color.r, color.g, color.b, 0.3)
+		(cell.get_child(0) as Label).modulate = Color.WHITE if armed else Color(1, 1, 1, 0.5)
 
 func _local_player() -> Player:
 	for p in get_tree().get_nodes_in_group("players"):
@@ -178,7 +216,7 @@ func _update_lives_infinite() -> void:
 func _heart_rects() -> Array:
 	var hearts := []
 	for child in lives_box.get_children():
-		if child is TextureRect and child != _bomb_rect:
+		if child is TextureRect:
 			hearts.append(child)
 	return hearts
 
@@ -191,12 +229,10 @@ func _ensure_hearts(count: int) -> void:
 		heart.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		heart.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		lives_box.add_child(heart)
+		lives_box.move_child(heart, lives_box.get_child_count() - 2)  # hearts sit right of the fill, before ∞
 		hearts.append(heart)
 	while hearts.size() > count:
 		hearts.pop_back().free()
-	# Keep the trailing cells right of the hearts: ... hearts, bomb, ∞.
-	lives_box.move_child(_bomb_rect, lives_box.get_child_count() - 1)
-	lives_box.move_child(_infinity_label, lives_box.get_child_count() - 1)
 
 # Mirror the local player's inventory: each occupied slot shows its item (a live 3D
 # preview by default, or the item's flat item_ui texture when it has one) and the
@@ -327,7 +363,11 @@ func _update_score() -> void:
 		return
 	var r: int = MatchManager.team_scores[0]
 	var b: int = MatchManager.team_scores[1]
-	score_label.text = "%s  %d  —  %d  %s" % [TEAM_NAMES[0], r, b, TEAM_NAMES[1]]
+	var text := "%s  %d  —  %d  %s" % [TEAM_NAMES[0], r, b, TEAM_NAMES[1]]
+	# In a Classic tournament, append the maps-won series tally above the per-map round score.
+	if MatchManager.is_tournament:
+		text += "    (Series %d–%d)" % [MatchManager.tournament_wins[0], MatchManager.tournament_wins[1]]
+	score_label.text = text
 
 # Death cam / spectator status, sourced from the local player's own spectator state.
 func _update_spectate() -> void:
