@@ -1,31 +1,40 @@
 extends Area3D
 class_name AbilityOrb
 
-# A floating, glowing orb resting on the floor that permanently grants one movement
-# ability (dash or double jump) to the first player who touches it. Mirrors
-# InfiniteHeartZone: the grant runs on every peer off body_entered (player bodies
-# replicate identically, so the overlap fires the same everywhere), which keeps the
-# pickup deterministic with no extra RPCs. Unlike the zone, the grant is permanent —
+# A floating, glowing orb resting on the floor that permanently grants one ability —
+# dash, double jump, or the explosion upgrade — to the first player who touches it.
+# Mirrors InfiniteHeartZone: the grant runs on every peer off body_entered (player
+# bodies replicate identically, so the overlap fires the same everywhere), which keeps
+# the pickup deterministic with no extra RPCs. Unlike the zone, the grant is permanent —
 # we never revoke it on exit — so the ability is kept for the rest of the run.
 
 const SOURCE := &"ability_orb"
 
-enum Ability { DASH, DOUBLE_JUMP }
+enum Ability { DASH, DOUBLE_JUMP, BOMB }
+
+const EFFECTS := {
+	Ability.DASH: Player.ABILITY_DASH,
+	Ability.DOUBLE_JUMP: Player.ABILITY_DOUBLE_JUMP,
+	Ability.BOMB: Player.ABILITY_BOMB,
+}
 
 const COLORS := {
 	Ability.DASH: Color(0.25, 0.7, 1.0),
 	Ability.DOUBLE_JUMP: Color(0.75, 0.45, 1.0),
+	Ability.BOMB: Color(1.0, 0.45, 0.1),
 }
 
-# Billboard icon (two chevrons for dash, wings for double jump) and the name shown
-# above it. The icons are white so the modulate tints them to the ability colour.
+# Billboard icon (two chevrons for dash, wings for double jump, a bomb for the explosion
+# upgrade) and the name shown above it. The icons are white so modulate tints them.
 const ICONS := {
 	Ability.DASH: preload("res://Assets/Textures/UI/ability_dash.svg"),
 	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_double_jump.svg"),
+	Ability.BOMB: preload("res://Assets/Textures/UI/ability_bomb.svg"),
 }
 const NAMES := {
 	Ability.DASH: "Dash",
 	Ability.DOUBLE_JUMP: "Double Jump",
+	Ability.BOMB: "Explosion",
 }
 
 # How close the local player must be for the floating name to fade in.
@@ -84,7 +93,7 @@ func _local_player() -> Player:
 	return null
 
 func _effect_id() -> StringName:
-	return Player.ABILITY_DASH if ability == Ability.DASH else Player.ABILITY_DOUBLE_JUMP
+	return EFFECTS[ability]
 
 func _on_body_entered(body: Node3D) -> void:
 	if _collected or not (body is Player):

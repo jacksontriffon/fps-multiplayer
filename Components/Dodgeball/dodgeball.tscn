@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=4 uid="uid://1xfx84i2ndhj"]
+[gd_scene load_steps=9 format=4 uid="uid://1xfx84i2ndhj"]
 
 [ext_resource type="Script" uid="uid://cb2ovuepby4ha" path="res://Components/Dodgeball/dodgeball.gd" id="1_3lprl"]
+[ext_resource type="Script" path="res://Components/Dodgeball/explosive.gd" id="2_expl"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_3lprl"]
 friction = 0.5
@@ -45,6 +46,9 @@ properties/4/replication_mode = 2
 properties/5/path = NodePath(".:live_team")
 properties/5/spawn = true
 properties/5/replication_mode = 2
+properties/6/path = NodePath("Explosive:armed")
+properties/6/spawn = true
+properties/6/replication_mode = 2
 
 [node name="Dodgeball" type="RigidBody3D"]
 physics_material_override = SubResource("PhysicsMaterial_3lprl")
@@ -65,3 +69,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_u5hmv")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_ball")
+
+[node name="Explosive" type="Node3D" parent="."]
+script = ExtResource("2_expl")

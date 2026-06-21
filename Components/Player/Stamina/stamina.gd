@@ -19,6 +19,10 @@ const RES_HEARTS := &"hearts"
 # as a cell and the player spends from the pool to fire the ability.
 const RES_DASH := &"dash"
 const RES_DOUBLE_JUMP := &"double_jump"
+const RES_BOMB := &"bomb"
+# Unlike dash/double-jump, the explosion upgrade doesn't drain per use — carrying it is the
+# whole cost, so its container reserves a fixed slice the size of one heart.
+const BOMB_COST := PER_HEART
 
 @export var player: Player
 
@@ -69,6 +73,7 @@ func _refresh_reservations() -> void:
 	# Each unlocked ability reserves its own container slice in the bar.
 	reserve(RES_DASH, Dash.DASH_COST if player.has_effect(Player.ABILITY_DASH) else 0.0)
 	reserve(RES_DOUBLE_JUMP, DoubleJump.DOUBLE_JUMP_COST if player.has_effect(Player.ABILITY_DOUBLE_JUMP) else 0.0)
+	reserve(RES_BOMB, BOMB_COST if player.has_effect(Player.ABILITY_BOMB) else 0.0)
 
 func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():

@@ -143,11 +143,13 @@ var _spectator_cam: Camera3D
 # reads has_effect(INFINITE_HEARTS) to swap the heart row for a single heart + ∞.
 const INFINITE_HEARTS := &"infinite_hearts"
 
-# Movement abilities are off until an AbilityOrb grants them. The Dash/DoubleJump nodes
-# gate on these, the Stamina node reserves each owned ability's cost as a container slice,
-# and the HUD draws that container in the bar.
+# Abilities are off until an AbilityOrb grants them. The Dash/DoubleJump nodes gate on
+# these, the Explosive ball component arms grabbed balls while the holder has ABILITY_BOMB,
+# the Stamina node reserves each owned ability's cost as a container slice, and the HUD
+# draws that container in the bar.
 const ABILITY_DASH := &"ability_dash"
 const ABILITY_DOUBLE_JUMP := &"ability_double_jump"
+const ABILITY_BOMB := &"ability_bomb"
 
 var _effects := {}
 
