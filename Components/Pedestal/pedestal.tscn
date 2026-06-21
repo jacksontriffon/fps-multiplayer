@@ -58,11 +58,3 @@ monitoring = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3373108, 0)
 shape = SubResource("CylinderShape3D_wxhbb")
-
-[node name="Prompt" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, 0)
-pixel_size = 0.0007
-billboard = 1
-fixed_size = true
-font_size = 96
-outline_size = 28

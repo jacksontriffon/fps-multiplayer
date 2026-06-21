@@ -30,10 +30,38 @@ const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
 @onready var hurt_overlay: ColorRect = %HurtOverlay
 @onready var damage_indicator: Control = %DamageIndicator
 @onready var spectate_text: Label = %SpectateText
+@onready var interact_prompt: VBoxContainer = %InteractPrompt
+@onready var interact_name: Label = %Name
+@onready var interact_action: Label = %Action
 
 # world_dir points from the player toward where the hit came from.
 func hit_from(world_dir: Vector3) -> void:
 	damage_indicator.register_hit(world_dir)
+
+# Crosshair interaction prompt, driven by the local player's Hands: the targeted object's
+# name on top, the bound key plus the action verb under it (e.g. "Rope" / "(LMB) grab").
+func show_interact_prompt(obj_name: String, input_action: StringName, verb: String) -> void:
+	interact_name.text = obj_name
+	interact_action.text = "(%s) %s" % [_key_label(input_action), verb]
+	interact_prompt.visible = true
+
+func hide_interact_prompt() -> void:
+	interact_prompt.visible = false
+
+# Human-readable label for an action's first bound key/button (mouse buttons take priority
+# so the common "(LMB)" wins over a joypad axis also mapped to the same action).
+func _key_label(action: StringName) -> String:
+	var fallback := "?"
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventMouseButton:
+			match ev.button_index:
+				MOUSE_BUTTON_LEFT: return "LMB"
+				MOUSE_BUTTON_RIGHT: return "RMB"
+				MOUSE_BUTTON_MIDDLE: return "MMB"
+				_: return "Mouse %d" % ev.button_index
+		elif ev is InputEventKey and fallback == "?":
+			fallback = OS.get_keycode_string(ev.physical_keycode if ev.physical_keycode != 0 else ev.keycode)
+	return fallback
 
 var _last_banner_text := ""
 var _banner_age := 0.0

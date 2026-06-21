@@ -53,6 +53,13 @@ func _server_check_hit(delta: float) -> void:
 
 # --- Base-class hooks --------------------------------------------------------
 
+# A grounded armed bomb reads as "Bomb" / use; any other ball is a plain "Ball" / grab.
+func interact_name() -> String:
+	return "Bomb" if _explosive and _explosive.armed else "Ball"
+
+func interact_action() -> String:
+	return "use" if _explosive and _explosive.armed else "grab"
+
 func toggle_highlight(is_highlighted: bool) -> void:
 	outline_mesh.visible = is_highlighted
 

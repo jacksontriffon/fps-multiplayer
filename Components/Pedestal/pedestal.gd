@@ -3,8 +3,8 @@ extends Node3D
 class_name Pedestal
 
 # Lobby start pedestal: aim at it and click to start the match. The floating object bobs
-# and grows while you have it on your crosshair (inside your interaction reach), and a 3D
-# prompt fades in telling you whether a match can start yet.
+# and grows while you have it on your crosshair (inside your interaction reach); the HUD
+# shows the interaction prompt under the crosshair while it's targeted.
 #
 # Each pedestal starts a specific game mode (set game_mode in the inspector) and shows the
 # matching floating object: team_object, ctf_object or br_object. All are plain Node3D
@@ -23,9 +23,6 @@ const MODE_NAMES := {
 const IDLE_SCALE := 1.0
 const HIGHLIGHT_SCALE := 1.18
 const SCALE_LERP := 12.0
-
-# Quick fade for the billboard prompt as you enter/leave range.
-const PROMPT_LERP := 16.0
 
 # Gentle idle bob of the object (local visual; eased by the sine itself).
 const BOB_AMPLITUDE := 0.09
@@ -54,8 +51,6 @@ const BOB_SPEED := 1.6
 		br_object = value
 		_apply_mode_visuals()
 
-@onready var prompt: Label3D = $Prompt
-
 # The object for the active mode; the other is hidden.
 var object: Node3D
 var _object_base_y := 0.0
@@ -75,8 +70,6 @@ func _ready() -> void:
 	if object:
 		_object_base_y = object.position.y
 		_object_base_scale = object.scale
-	prompt.modulate.a = 0.0
-	prompt.outline_modulate.a = 0.0
 
 # Show the object that matches the mode and hide the others. Null-safe and editor-safe.
 func _apply_mode_visuals() -> void:
@@ -101,22 +94,14 @@ func _process(delta: float) -> void:
 		var target: float = HIGHLIGHT_SCALE if _targeted else IDLE_SCALE
 		object.scale = object.scale.lerp(_object_base_scale * target, delta * SCALE_LERP)
 
-	# Quick fade for the prompt; keep the last text on screen while it fades out.
-	var text := prompt_text()
-	if text != "":
-		prompt.text = text
-	# Fade fill and outline together — Label3D renders the outline separately.
-	var a := lerpf(prompt.modulate.a, 1.0 if text != "" else 0.0, delta * PROMPT_LERP)
-	prompt.modulate.a = a
-	prompt.outline_modulate.a = a
-
-# Empty when the prompt shouldn't show; the billboard Label3D renders whatever this returns.
-func prompt_text() -> String:
-	if not _targeted or not can_interact():
-		return ""
-	return "Interact to play"
-
 # --- Interactable (driven by the local player's Hands) ----------------------
+
+# Crosshair prompt fields, read by the HUD while this pedestal is targeted.
+func interact_name() -> String:
+	return "Match"
+
+func interact_action() -> String:
+	return "start"
 
 # Only offer the pedestal between matches, while the lobby is waiting to start.
 func can_interact() -> bool:
