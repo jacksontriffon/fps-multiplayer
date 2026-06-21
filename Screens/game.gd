@@ -83,18 +83,18 @@ func _ensure_steam_init() -> bool:
 # Re-host in a different transport without restarting the app. Host-only and destructive: the
 # current session is torn down (any connected clients drop) and a fresh lobby is hosted in the
 # chosen mode. Driven by the lobby pedestal menu — typically the host flipping Local <-> Steam
-# while testing.
-func switch_net_mode(mode: NetMode) -> void:
+# while testing. Returns "" on success or a player-facing error the menu can surface; on a
+# pre-host failure (e.g. Steam unavailable) the current session is left untouched.
+func switch_net_mode(mode: NetMode) -> String:
 	if not multiplayer.is_server():
-		return  # only the host owns the transport
+		return "Only the host can change the network mode."
 	if mode == net_mode and multiplayer.has_multiplayer_peer():
-		return
+		return ""
 	if mode == NetMode.STEAM and not _ensure_steam_init():
-		push_error("Can't switch to Steam: init failed")
-		return
+		return "Steam isn't available — is the Steam client running?"
 	_teardown_session()
 	net_mode = mode
-	host_lobby()
+	return host_lobby()
 
 # Drop every spawned player, reset match state and close the peer, leaving a bare lobby ready
 # to be re-hosted.
@@ -139,12 +139,14 @@ func _on_connected_to_server() -> void:
 
 # --- Hosting ---------------------------------------------------------------
 
-func host_lobby():
+# Returns "" on success or a player-facing error. Steam hosting is async (the lobby arrives via
+# _on_lobby_created), so it can only report the synchronous failures here; ENet reports inline.
+func host_lobby() -> String:
 	is_host = true
 	if net_mode == NetMode.STEAM:
 		Steam.createLobby(Steam.LobbyType.LOBBY_TYPE_PUBLIC, 16)
-	else:
-		_host_enet()
+		return ""
+	return _host_enet()
 
 func _on_lobby_created(result: int, new_lobby_id: int):
 	if result == Steam.Result.RESULT_OK:
@@ -157,14 +159,15 @@ func _on_lobby_created(result: int, new_lobby_id: int):
 
 		print("Lobby created: ID #", lobby_id)
 
-func _host_enet():
+func _host_enet() -> String:
 	var enet_peer := ENetMultiplayerPeer.new()
 	var err := enet_peer.create_server(local_port)
 	if err != OK:
 		push_error("Failed to create ENet server on port %d (error %d)" % [local_port, err])
-		return
+		return "Couldn't host locally — port %d may be in use (error %d)." % [local_port, err]
 	_start_host(enet_peer)
 	print("ENet server listening on port ", local_port)
+	return ""
 
 # Shared host setup for either transport.
 func _start_host(new_peer: MultiplayerPeer):

@@ -21,6 +21,7 @@ extends CanvasLayer
 @onready var net_row: Control = %NetRow
 @onready var local_button: Button = %LocalButton
 @onready var steam_button: Button = %SteamButton
+@onready var error_label: Label = %ErrorLabel
 
 # game.gd NetMode values, mirrored here so the toggle can read/set the host's transport.
 const NET_STEAM := 0
@@ -56,6 +57,7 @@ func open() -> void:
 	_select_default_mode()
 	_select_default_map()
 	_roster_sig = ""
+	_clear_error()
 	_refresh_players()
 	_update_start_state()
 	_refresh_net_mode()
@@ -203,11 +205,24 @@ func _refresh_net_mode() -> void:
 	else:
 		steam_button.button_pressed = true
 
-# Switching transport re-hosts the session, so close the menu (its player is about to respawn)
-# and hand off to the game root. No-op if the chosen mode is already active.
+# Switching transport re-hosts the session. On success the menu closes (its player is about to
+# respawn); on failure the session is untouched, so keep the menu open and show why.
 func _on_net_mode(mode: int) -> void:
 	var root := get_tree().get_first_node_in_group("game_root")
 	if root == null or root.net_mode == mode:
 		return
+	_clear_error()
+	var err: String = root.switch_net_mode(mode)
+	if err != "":
+		_show_error(err)
+		_refresh_net_mode()  # re-sync the toggle to the mode that's actually active
+		return
 	close()
-	root.switch_net_mode(mode)
+
+func _show_error(text: String) -> void:
+	error_label.text = text
+	error_label.visible = true
+
+func _clear_error() -> void:
+	error_label.text = ""
+	error_label.visible = false
