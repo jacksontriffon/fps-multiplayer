@@ -91,7 +91,7 @@ func switch_net_mode(mode: NetMode) -> String:
 	if mode == net_mode and multiplayer.has_multiplayer_peer():
 		return ""
 	if mode == NetMode.STEAM and not _ensure_steam_init():
-		return "Steam isn't available — is the Steam client running?"
+		return "Steam isn't available. Is the Steam client running?"
 	_teardown_session()
 	net_mode = mode
 	return host_lobby()
@@ -164,7 +164,7 @@ func _host_enet() -> String:
 	var err := enet_peer.create_server(local_port)
 	if err != OK:
 		push_error("Failed to create ENet server on port %d (error %d)" % [local_port, err])
-		return "Couldn't host locally — port %d may be in use (error %d)." % [local_port, err]
+		return "Couldn't host locally. Port %d may be in use (error %d)." % [local_port, err]
 	_start_host(enet_peer)
 	print("ENet server listening on port ", local_port)
 	return ""
