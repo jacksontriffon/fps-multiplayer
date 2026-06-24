@@ -153,8 +153,11 @@ const ABILITY_BOMB := &"ability_bomb"
 
 # Timed power-up: while held, the BallSpawner keeps the active slot stocked, so you never
 # run out of dodgeballs (and they auto-arm if you also carry ABILITY_BOMB). Granted with a
-# duration by the orb and ticked down on every peer (see _tick_timed_effects).
+# duration by the orb and ticked down on every peer (see _tick_timed_effects). The Stamina
+# node reads the remaining fraction to reserve a slice that's biggest on pickup and shrinks
+# away as the buff runs down, so the free ammo costs you stamina up front.
 const INFINITE_AMMO := &"infinite_ammo"
+const INFINITE_AMMO_DURATION := 12.0
 
 var _effects := {}
 

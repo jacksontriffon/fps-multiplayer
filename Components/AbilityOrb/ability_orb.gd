@@ -46,7 +46,7 @@ const NAMES := {
 # Abilities listed here are timed buffs (seconds), not permanent unlocks; the orb respawns
 # RESPAWN_DELAY seconds after such a pickup. Anything absent is a permanent one-shot grant.
 const DURATIONS := {
-	Ability.INFINITE_AMMO: 12.0,
+	Ability.INFINITE_AMMO: Player.INFINITE_AMMO_DURATION,
 }
 const RESPAWN_DELAY := 15.0
 

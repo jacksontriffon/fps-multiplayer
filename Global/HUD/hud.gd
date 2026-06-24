@@ -73,8 +73,10 @@ var _pulse := 0.0
 # Kept as the last child of the Lives box; shown only for the infinite-hearts effect.
 var _infinity_label: Label
 
-# Sits left of the inventory slots; shown with a countdown while the infinite-ammo buff is up.
-var _ammo_buff_label: Label
+# Gold container slice in the stamina bar for the infinite-ammo buff. Sized to the stamina
+# it currently reserves, so it's widest on pickup and shrinks to nothing as the buff expires.
+var _ammo_cell: Panel
+var _ammo_style: StyleBoxFlat
 
 # Ability container cells in the stamina bar, one per unlockable movement ability. Each
 # is a coloured slice sized to the ability's cost (so it lines up with the stamina the
@@ -107,20 +109,9 @@ func _ready() -> void:
 	_infinity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_infinity_label.visible = false
 	lives_box.add_child(_infinity_label)
-	_ammo_buff_label = Label.new()
-	_ammo_buff_label.add_theme_font_size_override("font_size", 20)
-	_ammo_buff_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_ammo_buff_label.modulate = COLORS_AMMO
-	_ammo_buff_label.visible = false
-	_ammo_buff_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Float it just above the bottom bar (overlay on Root), clear of the slot containers.
-	var root: Control = bottom_bar.get_parent().get_parent()
-	root.add_child(_ammo_buff_label)
-	_ammo_buff_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	_ammo_buff_label.offset_top = -96.0
-	_ammo_buff_label.offset_bottom = -72.0
 	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
 	_build_ability_cells()
+	_build_ammo_cell()
 	_build_previews()
 
 func _process(delta: float) -> void:
@@ -173,11 +164,11 @@ func _update_bar(id: int) -> void:
 		_update_lives(0)  # buff shown outside a match — no hearts to draw
 	_update_stamina()
 	_update_slots(id)
-	_update_ammo_buff(player)
 
 func _update_stamina() -> void:
 	var player := _local_player()
 	_update_ability_cells(player)
+	_update_ammo_cell(player)
 	if player == null:
 		stamina_bar.visible = false
 		return
@@ -307,12 +298,36 @@ func _ball_in_slot(peer_id: int, slot: int) -> Grabbable:
 			return b
 	return null
 
-# "∞ Ns" beside the slots while the infinite-ammo buff is up, counting down its remaining time.
-func _update_ammo_buff(player: Player) -> void:
-	var active := player != null and player.has_effect(Player.INFINITE_AMMO)
-	_ammo_buff_label.visible = active
-	if active:
-		_ammo_buff_label.text = "∞ %ds" % int(ceil(player.effect_time_left(Player.INFINITE_AMMO)))
+# A gold ∞ slice in the stamina bar, built like the ability cells and dropped in right after
+# the fill so it lines up flush with the stamina it reserves.
+func _build_ammo_cell() -> void:
+	_ammo_style = StyleBoxFlat.new()
+	_ammo_style.corner_radius_top_left = 3
+	_ammo_style.corner_radius_top_right = 3
+	_ammo_style.corner_radius_bottom_right = 3
+	_ammo_style.corner_radius_bottom_left = 3
+	_ammo_style.bg_color = COLORS_AMMO
+	_ammo_cell = Panel.new()
+	_ammo_cell.custom_minimum_size = Vector2(0, 0)
+	_ammo_cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ammo_cell.visible = false
+	_ammo_cell.add_theme_stylebox_override("panel", _ammo_style)
+	var label := Label.new()
+	label.text = "∞"
+	label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_size_override("font_size", 18)
+	_ammo_cell.add_child(label)
+	lives_box.add_child(_ammo_cell)
+	lives_box.move_child(_ammo_cell, 1)  # right after the stamina fill (child 0)
+
+# Size the cell to the stamina the buff currently reserves, so it shrinks as the buff expires.
+func _update_ammo_cell(player: Player) -> void:
+	var amount := player.stamina.reserved(Stamina.RES_INFINITE_AMMO) if player else 0.0
+	_ammo_cell.visible = amount > 0.0
+	_ammo_cell.custom_minimum_size.x = amount * STAMINA_PX_PER_UNIT
 
 func _show_empty(i: int, icon: TextureRect) -> void:
 	icon.visible = false

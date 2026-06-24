@@ -23,6 +23,12 @@ const RES_BOMB := &"bomb"
 # Unlike dash/double-jump, the explosion upgrade doesn't drain per use — carrying it is the
 # whole cost, so its container reserves a fixed slice the size of one heart.
 const BOMB_COST := PER_HEART
+# The infinite-ammo buff reserves a slice scaled by its remaining time: AMMO_MAX_RESERVE at
+# pickup, shrinking to nothing as it expires. Capped so a sliver of pool always survives —
+# you still need a little stamina to charge a throw with all that free ammo.
+const RES_INFINITE_AMMO := &"infinite_ammo"
+const AMMO_MAX_RESERVE := 100.0
+const AMMO_MIN_CAPACITY := 25.0
 
 @export var player: Player
 
@@ -52,6 +58,10 @@ func reserve(source: StringName, value: float) -> void:
 	else:
 		_reservations.erase(source)
 
+# How much a given source currently reserves (0 if none). Read by the HUD to size its cells.
+func reserved(source: StringName) -> float:
+	return _reservations.get(source, 0.0)
+
 # Usable max: the pool minus everything reserved (never below zero).
 func capacity() -> float:
 	var reserved := 0.0
@@ -74,6 +84,13 @@ func _refresh_reservations() -> void:
 	reserve(RES_DASH, Dash.DASH_COST if player.has_effect(Player.ABILITY_DASH) else 0.0)
 	reserve(RES_DOUBLE_JUMP, DoubleJump.DOUBLE_JUMP_COST if player.has_effect(Player.ABILITY_DOUBLE_JUMP) else 0.0)
 	reserve(RES_BOMB, BOMB_COST if player.has_effect(Player.ABILITY_BOMB) else 0.0)
+	# Infinite ammo: a big slice up front that shrinks with the buff's remaining time. Cleared
+	# first so the cap below sees only the other reservations, then capped to leave AMMO_MIN_CAPACITY.
+	reserve(RES_INFINITE_AMMO, 0.0)
+	if player.has_effect(Player.INFINITE_AMMO) and Player.INFINITE_AMMO_DURATION > 0.0:
+		var frac := clampf(player.effect_time_left(Player.INFINITE_AMMO) / Player.INFINITE_AMMO_DURATION, 0.0, 1.0)
+		var max_allowed := maxf(capacity() - AMMO_MIN_CAPACITY, 0.0)
+		reserve(RES_INFINITE_AMMO, minf(frac * AMMO_MAX_RESERVE, max_allowed))
 
 func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():
