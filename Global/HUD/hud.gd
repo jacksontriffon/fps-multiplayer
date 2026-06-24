@@ -16,6 +16,8 @@ const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 const STAMINA_PX_PER_UNIT := 2.0
 const HEART_WIDTH := Stamina.PER_HEART * STAMINA_PX_PER_UNIT
 const BALL_ICON := preload("res://Assets/Textures/UI/dodgeball.svg")
+# Gold, matching the infinite-ammo orb, for the buff countdown shown by the slots.
+const COLORS_AMMO := Color(1.0, 0.82, 0.2)
 const PREVIEW_SIZE := Vector2i(96, 96)
 const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
 
@@ -71,6 +73,9 @@ var _pulse := 0.0
 # Kept as the last child of the Lives box; shown only for the infinite-hearts effect.
 var _infinity_label: Label
 
+# Sits left of the inventory slots; shown with a countdown while the infinite-ammo buff is up.
+var _ammo_buff_label: Label
+
 # Ability container cells in the stamina bar, one per unlockable movement ability. Each
 # is a coloured slice sized to the ability's cost (so it lines up with the stamina the
 # bar reserves for it), bright when armed and dim when there isn't enough to fire it.
@@ -102,6 +107,18 @@ func _ready() -> void:
 	_infinity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_infinity_label.visible = false
 	lives_box.add_child(_infinity_label)
+	_ammo_buff_label = Label.new()
+	_ammo_buff_label.add_theme_font_size_override("font_size", 20)
+	_ammo_buff_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_ammo_buff_label.modulate = COLORS_AMMO
+	_ammo_buff_label.visible = false
+	_ammo_buff_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Float it just above the bottom bar (overlay on Root), clear of the slot containers.
+	var root: Control = bottom_bar.get_parent().get_parent()
+	root.add_child(_ammo_buff_label)
+	_ammo_buff_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	_ammo_buff_label.offset_top = -96.0
+	_ammo_buff_label.offset_bottom = -72.0
 	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
 	_build_ability_cells()
 	_build_previews()
@@ -125,17 +142,18 @@ func _process(delta: float) -> void:
 func _update_bar(id: int) -> void:
 	var player := _local_player()
 	var infinite := player != null and player.has_effect(Player.INFINITE_HEARTS)
-	# Show the bar during a match, or whenever the local player carries the
-	# infinite-hearts effect (e.g. standing in the lobby zone).
+	var infinite_ammo := player != null and player.has_effect(Player.INFINITE_AMMO)
+	# Show the bar during a match, or whenever the local player carries a lobby buff
+	# (infinite hearts in the zone, or the infinite-ammo pickup) so its slots/timer read.
 	var playing := MatchManager.state != MatchManager.State.WAITING and MatchManager.lives.has(id)
-	var show := playing or infinite
+	var show := playing or infinite or infinite_ammo
 	bottom_bar.visible = show
 	if not show:
 		for i in _preview_viewports.size():
 			_disable_preview(i)
 		return
-	# Eliminated (elimination modes only): swap the whole bar for the ELIMINATED label.
-	var eliminated: bool = not infinite \
+	# Eliminated (elimination modes only, mid-match): swap the whole bar for the ELIMINATED label.
+	var eliminated: bool = playing and not infinite \
 		and MatchManager.game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG \
 		and int(MatchManager.lives.get(id, 0)) <= 0
 	if eliminated:
@@ -149,10 +167,13 @@ func _update_bar(id: int) -> void:
 	lives_text.visible = false
 	if infinite:
 		_update_lives_infinite()
-	else:
+	elif MatchManager.lives.has(id):
 		_update_lives(MatchManager.lives[id])
+	else:
+		_update_lives(0)  # buff shown outside a match — no hearts to draw
 	_update_stamina()
 	_update_slots(id)
+	_update_ammo_buff(player)
 
 func _update_stamina() -> void:
 	var player := _local_player()
@@ -285,6 +306,13 @@ func _ball_in_slot(peer_id: int, slot: int) -> Grabbable:
 		if b is Grabbable and b.held_by == peer_id and b.held_slot == slot:
 			return b
 	return null
+
+# "∞ Ns" beside the slots while the infinite-ammo buff is up, counting down its remaining time.
+func _update_ammo_buff(player: Player) -> void:
+	var active := player != null and player.has_effect(Player.INFINITE_AMMO)
+	_ammo_buff_label.visible = active
+	if active:
+		_ammo_buff_label.text = "∞ %ds" % int(ceil(player.effect_time_left(Player.INFINITE_AMMO)))
 
 func _show_empty(i: int, icon: TextureRect) -> void:
 	icon.visible = false

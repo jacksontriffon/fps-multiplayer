@@ -151,7 +151,17 @@ const ABILITY_DASH := &"ability_dash"
 const ABILITY_DOUBLE_JUMP := &"ability_double_jump"
 const ABILITY_BOMB := &"ability_bomb"
 
+# Timed power-up: while held, the BallSpawner keeps the active slot stocked, so you never
+# run out of dodgeballs (and they auto-arm if you also carry ABILITY_BOMB). Granted with a
+# duration by the orb and ticked down on every peer (see _tick_timed_effects).
+const INFINITE_AMMO := &"infinite_ammo"
+
 var _effects := {}
+
+# Effect id -> {"left": seconds, "source": StringName} for effects that auto-expire. Ticked
+# on every peer (the grant fires identically everywhere), so it clears itself in step with
+# no extra RPC — same deterministic model the granting orb relies on.
+var _timed_effects := {}
 
 func has_effect(id: StringName) -> bool:
 	return _effects.has(id)
@@ -165,6 +175,23 @@ func set_effect(id: StringName, active: bool, source: StringName = &"default") -
 		sources.erase(source)
 		if sources.is_empty():
 			_effects.erase(id)
+
+# Grant a self-expiring effect; re-granting keeps whichever runs longest. Runs on every peer.
+func grant_timed_effect(id: StringName, duration: float, source: StringName = &"default") -> void:
+	set_effect(id, true, source)
+	var prev: float = _timed_effects.get(id, {}).get("left", 0.0)
+	_timed_effects[id] = {"left": maxf(prev, duration), "source": source}
+
+func effect_time_left(id: StringName) -> float:
+	return _timed_effects.get(id, {}).get("left", 0.0)
+
+func _tick_timed_effects(delta: float) -> void:
+	for id in _timed_effects.keys():
+		var entry: Dictionary = _timed_effects[id]
+		entry["left"] -= delta
+		if entry["left"] <= 0.0:
+			_timed_effects.erase(id)
+			set_effect(id, false, entry["source"])
 
 # True while the player can move, look, grab and throw — false when dead or stunned.
 func controllable() -> bool:
@@ -295,6 +322,8 @@ func _apply_spawn(pos: Vector3, yaw: float, t: int) -> void:
 func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer():
 		return
+	# Every peer ages timed effects so the buff lifts in step (the grant fired everywhere).
+	_tick_timed_effects(delta)
 	if not is_multiplayer_authority():
 		return
 
