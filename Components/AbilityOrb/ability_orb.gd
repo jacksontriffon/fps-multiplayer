@@ -1,41 +1,54 @@
 extends Area3D
 class_name AbilityOrb
 
-# A floating, glowing orb resting on the floor that permanently grants one ability —
-# dash, double jump, or the explosion upgrade — to the first player who touches it.
-# Mirrors InfiniteHeartZone: the grant runs on every peer off body_entered (player
-# bodies replicate identically, so the overlap fires the same everywhere), which keeps
-# the pickup deterministic with no extra RPCs. Unlike the zone, the grant is permanent —
-# we never revoke it on exit — so the ability is kept for the rest of the run.
+# A floating, glowing orb resting on the floor that grants one upgrade — dash, double jump,
+# the explosion upgrade, or a timed infinite-ammo buff — to the first player who touches it.
+# Mirrors InfiniteHeartZone: the grant runs on every peer off body_entered (player bodies
+# replicate identically, so the overlap fires the same everywhere), which keeps the pickup
+# deterministic with no extra RPCs. The ability grants are permanent (kept for the rest of
+# the run); a timed grant (see DURATIONS) instead self-expires on the player and the orb
+# fades out, then deterministically respawns after RESPAWN_DELAY so it can be grabbed again.
 
 const SOURCE := &"ability_orb"
 
-enum Ability { DASH, DOUBLE_JUMP, BOMB }
+enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO }
 
 const EFFECTS := {
 	Ability.DASH: Player.ABILITY_DASH,
 	Ability.DOUBLE_JUMP: Player.ABILITY_DOUBLE_JUMP,
 	Ability.BOMB: Player.ABILITY_BOMB,
+	Ability.INFINITE_AMMO: Player.INFINITE_AMMO,
 }
 
 const COLORS := {
 	Ability.DASH: Color(0.25, 0.7, 1.0),
 	Ability.DOUBLE_JUMP: Color(0.75, 0.45, 1.0),
 	Ability.BOMB: Color(1.0, 0.45, 0.1),
+	Ability.INFINITE_AMMO: Color(1.0, 0.82, 0.2),
 }
 
 # Billboard icon (two chevrons for dash, wings for double jump, a bomb for the explosion
-# upgrade) and the name shown above it. The icons are white so modulate tints them.
+# upgrade, an infinity loop for infinite ammo) and the name shown above it. The icons are
+# white so modulate tints them.
 const ICONS := {
 	Ability.DASH: preload("res://Assets/Textures/UI/ability_dash.svg"),
 	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_double_jump.svg"),
 	Ability.BOMB: preload("res://Assets/Textures/UI/ability_bomb.svg"),
+	Ability.INFINITE_AMMO: preload("res://Assets/Textures/UI/ability_infinite.svg"),
 }
 const NAMES := {
 	Ability.DASH: "Dash",
 	Ability.DOUBLE_JUMP: "Double Jump",
 	Ability.BOMB: "Explosion",
+	Ability.INFINITE_AMMO: "Infinite Ammo",
 }
+
+# Abilities listed here are timed buffs (seconds), not permanent unlocks; the orb respawns
+# RESPAWN_DELAY seconds after such a pickup. Anything absent is a permanent one-shot grant.
+const DURATIONS := {
+	Ability.INFINITE_AMMO: Player.INFINITE_AMMO_DURATION,
+}
+const RESPAWN_DELAY := 15.0
 
 # How close the local player must be for the floating name to fade in.
 const NAME_SHOW_DISTANCE := 6.0
@@ -59,6 +72,7 @@ var _base_y := 0.0
 var _t := 0.0
 var _name_alpha := 0.0
 var _collected := false
+var _respawn_left := 0.0
 
 func _ready() -> void:
 	_base_y = _bob.position.y
@@ -67,6 +81,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _collected:
+		_tick_respawn(delta)
 		return
 	_t += delta
 	_bob.position.y = _base_y + sin(_t * bob_speed) * bob_height
@@ -99,8 +114,15 @@ func _on_body_entered(body: Node3D) -> void:
 	if _collected or not (body is Player):
 		return
 	_collected = true
-	body.set_effect(_effect_id(), true, SOURCE)
-	_consume()
+	var duration: float = DURATIONS.get(ability, 0.0)
+	if duration > 0.0:
+		# Timed buff: grant it (it self-expires on the player) and hide the orb until it respawns.
+		body.grant_timed_effect(_effect_id(), duration, SOURCE)
+		_hide_collected()
+		_respawn_left = RESPAWN_DELAY
+	else:
+		body.set_effect(_effect_id(), true, SOURCE)
+		_consume()
 
 # Tint the core, glow and floor ring to the ability's colour so the orb reads at a
 # glance and matches the matching container in the stamina bar.
@@ -124,11 +146,33 @@ func _emissive(col: Color, alpha: float) -> StandardMaterial3D:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if alpha < 1.0 else BaseMaterial3D.TRANSPARENCY_DISABLED
 	return mat
 
-# Hide the orb once taken. Kept (not freed) so the deterministic overlap can't re-fire
-# a grant, and so any late body_entered on another peer still finds it inert.
-func _consume() -> void:
+# Hide the orb's visuals and stop it detecting pickups. Shared by the permanent consume and
+# the timed-buff fade-out; only the former also halts processing for good.
+func _hide_collected() -> void:
 	monitoring = false
 	_bob.visible = false
 	_ring.visible = false
 	_name_label.visible = false
+
+# Permanently take the orb. Kept (not freed) so the deterministic overlap can't re-fire a
+# grant, and so any late body_entered on another peer still finds it inert.
+func _consume() -> void:
+	_hide_collected()
 	set_process(false)
+
+# Timed-buff orbs only: count down the cooldown (in step on every peer) and pop back.
+func _tick_respawn(delta: float) -> void:
+	if _respawn_left <= 0.0:
+		return
+	_respawn_left -= delta
+	if _respawn_left <= 0.0:
+		_restore()
+
+# Re-arm the orb. monitoring=true re-detects any body still standing on it, re-firing
+# body_entered identically on every peer — so a camper just refreshes the buff.
+func _restore() -> void:
+	_collected = false
+	_name_alpha = 0.0
+	_bob.visible = true
+	_ring.visible = true
+	monitoring = true

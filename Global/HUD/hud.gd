@@ -13,6 +13,8 @@ const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 # reserves and the fill lines up flush with the hearts.
 const STAMINA_PX_PER_UNIT := 3.0
 const HEART_WIDTH := Stamina.PER_HEART * STAMINA_PX_PER_UNIT
+# Gold, matching the infinite-ammo orb, for the buff's cell in the stamina bar.
+const COLORS_AMMO := Color(1.0, 0.82, 0.2)
 
 @onready var bottom_bar: HBoxContainer = %BottomBar
 @onready var stamina_panel: Panel = %StaminaBar
@@ -65,6 +67,11 @@ var _pulse := 0.0
 # Kept as the last child of the Lives box; shown only for the infinite-hearts effect.
 var _infinity_label: Label
 
+# Gold container slice in the stamina bar for the infinite-ammo buff. Sized to the stamina
+# it currently reserves, so it's widest on pickup and shrinks to nothing as the buff expires.
+var _ammo_cell: Panel
+var _ammo_style: StyleBoxFlat
+
 # Ability container cells in the stamina bar, one per unlockable movement ability. Each
 # is a coloured slice sized to the ability's cost (so it lines up with the stamina the
 # bar reserves for it), bright when armed and dim when there isn't enough to fire it.
@@ -82,6 +89,7 @@ func _ready() -> void:
 	lives_box.add_child(_infinity_label)
 	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
 	_build_ability_cells()
+	_build_ammo_cell()
 
 func _process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer():
@@ -98,15 +106,16 @@ func _process(delta: float) -> void:
 func _update_bar(id: int) -> void:
 	var player := _local_player()
 	var infinite := player != null and player.has_effect(Player.INFINITE_HEARTS)
-	# Show the bar during a match, or whenever the local player carries the
-	# infinite-hearts effect (e.g. standing in the lobby zone).
+	var infinite_ammo := player != null and player.has_effect(Player.INFINITE_AMMO)
+	# Show the bar during a match, or whenever the local player carries a lobby buff
+	# (infinite hearts in the zone, or the infinite-ammo pickup) so its slots/timer read.
 	var playing := MatchManager.state != MatchManager.State.WAITING and MatchManager.lives.has(id)
-	var show := playing or infinite
+	var show := playing or infinite or infinite_ammo
 	bottom_bar.visible = show
 	if not show:
 		return
-	# Eliminated (elimination modes only): swap the whole bar for the ELIMINATED label.
-	var eliminated: bool = not infinite \
+	# Eliminated (elimination modes only, mid-match): swap the whole bar for the ELIMINATED label.
+	var eliminated: bool = playing and not infinite \
 		and MatchManager.game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG \
 		and int(MatchManager.lives.get(id, 0)) <= 0
 	if eliminated:
@@ -119,13 +128,16 @@ func _update_bar(id: int) -> void:
 	lives_text.visible = false
 	if infinite:
 		_update_lives_infinite()
-	else:
+	elif MatchManager.lives.has(id):
 		_update_lives(MatchManager.lives[id])
+	else:
+		_update_lives(0)  # buff shown outside a match — no hearts to draw
 	_update_stamina()
 
 func _update_stamina() -> void:
 	var player := _local_player()
 	_update_ability_cells(player)
+	_update_ammo_cell(player)
 	if player == null:
 		stamina_bar.visible = false
 		return
@@ -230,6 +242,37 @@ func _ensure_hearts(count: int) -> void:
 		hearts.append(heart)
 	while hearts.size() > count:
 		hearts.pop_back().free()
+
+# A gold ∞ slice in the stamina bar, built like the ability cells and dropped in right after
+# the fill so it lines up flush with the stamina it reserves.
+func _build_ammo_cell() -> void:
+	_ammo_style = StyleBoxFlat.new()
+	_ammo_style.corner_radius_top_left = 3
+	_ammo_style.corner_radius_top_right = 3
+	_ammo_style.corner_radius_bottom_right = 3
+	_ammo_style.corner_radius_bottom_left = 3
+	_ammo_style.bg_color = COLORS_AMMO
+	_ammo_cell = Panel.new()
+	_ammo_cell.custom_minimum_size = Vector2(0, 0)
+	_ammo_cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ammo_cell.visible = false
+	_ammo_cell.add_theme_stylebox_override("panel", _ammo_style)
+	var label := Label.new()
+	label.text = "∞"
+	label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_size_override("font_size", 18)
+	_ammo_cell.add_child(label)
+	lives_box.add_child(_ammo_cell)
+	lives_box.move_child(_ammo_cell, 1)  # right after the stamina fill (child 0)
+
+# Size the cell to the stamina the buff currently reserves, so it shrinks as the buff expires.
+func _update_ammo_cell(player: Player) -> void:
+	var amount := player.stamina.reserved(Stamina.RES_INFINITE_AMMO) if player else 0.0
+	_ammo_cell.visible = amount > 0.0
+	_ammo_cell.custom_minimum_size.x = amount * STAMINA_PX_PER_UNIT
 
 func _update_hurt(delta: float, id: int) -> void:
 	var n: int = MatchManager.lives.get(id, -1)

@@ -50,6 +50,14 @@ const GLOW_FALL = 6.0
 var thrower_id := 0
 var _hit_cooldown := 0.0
 
+# Conjured by the infinite-ammo buff rather than authored into the map: such a ball despawns
+# once it's spent EPHEMERAL_LIFETIME seconds loose in the world, so the buff doesn't litter
+# the arena. The clock only runs while the ball is free and live (not held, not frozen), and
+# a fresh grab resets it, so a ball can't vanish out of someone's hand.
+const EPHEMERAL_LIFETIME := 6.0
+var ephemeral := false
+var _ephemeral_left := EPHEMERAL_LIFETIME
+
 var _spawn_transform := Transform3D.IDENTITY
 # True while gamemode-gated off (see required_mode): hidden, frozen and non-colliding.
 var _mode_inactive := false
@@ -99,6 +107,12 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if held_by == 0:
+		# An ephemeral buff ball that's settled into play counts down to despawn.
+		if ephemeral and not freeze:
+			_ephemeral_left -= delta
+			if _ephemeral_left <= 0.0:
+				queue_free()
+				return
 		# Free ball: the server simulates it and checks whether it has struck a player.
 		_server_check_hit(delta)
 		return
@@ -125,6 +139,7 @@ func grab(peer_id: int) -> bool:
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
 	held_by = peer_id  # setter disables collision on every peer
+	_ephemeral_left = EPHEMERAL_LIFETIME  # held balls never despawn; the clock restarts on release
 	return true
 
 # power is the 0..1 charge from the thrower (0 = quick click, 1 = full charge).
