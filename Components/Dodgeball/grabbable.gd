@@ -43,14 +43,6 @@ const GLOW_FALL = 6.0
 ## Charge 0..1 while held; server-authoritative, replicated so every peer can redden the ball.
 @export var charge: float = 0.0
 
-## Which of the holder's 3 inventory slots this ball occupies (0..2), or -1 when free.
-## Replicated so every peer can tell which held ball is the holder's equipped one.
-@export var held_slot: int = -1
-
-## Optional flat icon for the inventory slot. When set, the slot shows this texture
-## instead of the default live 3D preview. Authored per item; left null until art exists.
-@export var item_ui: Texture2D
-
 ## Thrower's team while this ball is live (thrown + fast); -1 otherwise. Replicated for the glow.
 @export var live_team: int = -1
 
@@ -111,23 +103,20 @@ func _physics_process(delta: float) -> void:
 		_server_check_hit(delta)
 		return
 
-	# Held: only the ball in the holder's active slot is equipped and snaps to the
-	# hand; balls in the holder's other slots stay stowed (hidden, parked) until
-	# selected. Position only — the hand marker carries a large baked scale.
+	# Held: the ball snaps to the holder's hand. Position only — the hand marker
+	# carries a large baked scale.
 	var holder := _holder()
 	if holder == null:
 		release()  # holder disconnected — drop the ball
 		return
-	if held_slot == holder.active_slot:
-		var marker := _hand_marker_of(held_by)
-		if marker:
-			global_position = marker.global_position
+	var marker := _hand_marker_of(held_by)
+	if marker:
+		global_position = marker.global_position
 
 # --- Authority-only state changes ------------------------------------------
 
-## Returns true if the grab succeeded (ball was free). slot is the holder's
-## inventory slot (0..2) this ball lands in.
-func grab(peer_id: int, slot: int) -> bool:
+## Returns true if the grab succeeded (ball was free).
+func grab(peer_id: int) -> bool:
 	if not _mode_active():
 		return false  # gamemode-gated off — not grabbable
 	if held_by != 0:
@@ -135,7 +124,6 @@ func grab(peer_id: int, slot: int) -> bool:
 	freeze = true
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
-	held_slot = slot
 	held_by = peer_id  # setter disables collision on every peer
 	return true
 
@@ -151,7 +139,6 @@ func throw(direction: Vector3, power: float = 1.0) -> void:
 
 func release() -> void:
 	held_by = 0  # setter re-enables collision on every peer
-	held_slot = -1
 	charge = 0.0  # stop reddening; observers fade their tint out
 	freeze = false
 
@@ -231,14 +218,9 @@ func _holder() -> Player:
 		return null
 	return get_tree().current_scene.get_node_or_null(str(held_by)) as Player
 
-# A free ball is always visible; a held ball shows only while it's the holder's
-# equipped (active-slot) ball, so balls stowed in other slots vanish from the world.
+# Both free and held balls are visible; a held ball rides the holder's hand.
 func _update_carry_visibility() -> void:
-	if held_by == 0:
-		visible = true
-		return
-	var holder := _holder()
-	visible = holder != null and holder.active_slot == held_slot
+	visible = true
 
 func _hand_marker_of(peer_id: int) -> Node3D:
 	var player := get_tree().current_scene.get_node_or_null(str(peer_id))
@@ -289,11 +271,6 @@ func toggle_highlight(_is_highlighted: bool) -> void:
 # Overridden by subclasses to tint the ball by charge (0..1).
 func set_charge_visual(_tint_amount: float) -> void:
 	pass
-
-# Returns a fresh, visual-only Node3D for the inventory's small 3D preview, or null
-# if the item has no previewable model. Subclasses override to supply their mesh.
-func get_preview_visual() -> Node3D:
-	return null
 
 # Overridden by subclasses to glow the ball its thrower's team colour while live.
 func set_live_glow(_team: int, _amount: float) -> void:

@@ -93,10 +93,6 @@ enum SpecPhase { DEATH_CAM, CHASE, FREE }
 		team = value
 		_apply_team_color()
 
-# Which of the 3 inventory slots is selected (0..2). Set by the controlling peer
-# via the number keys and replicated, so the server knows which held ball to equip.
-@export var active_slot: int = 0
-
 # Set by the Crouch component on the controlling peer and replicated, so every peer
 # ducks the body. Read here to cap movement speed and suppress sprint while crouched.
 @export var crouching: bool = false
@@ -310,9 +306,6 @@ func _physics_process(delta: float) -> void:
 		_process_knockdown(delta)
 		return
 
-	if not input_blocked:
-		_handle_slot_input()
-
 	# Undo last frame's dash before the movement math so it can't feed back into the
 	# inertia integrator (the air/standing lerps read velocity); it's re-added below.
 	velocity -= _dash_last
@@ -388,15 +381,6 @@ func _physics_process(delta: float) -> void:
 	camera.fov = lerp(camera.fov, target_fov, delta * 8.0)
 
 	move_and_slide()
-
-# Number keys 1/2/3 pick the active inventory slot, equipping that slot's held ball.
-func _handle_slot_input() -> void:
-	if Input.is_action_just_pressed("slot_1"):
-		active_slot = 0
-	elif Input.is_action_just_pressed("slot_2"):
-		active_slot = 1
-	elif Input.is_action_just_pressed("slot_3"):
-		active_slot = 2
 
 # --- Ragdoll ----------------------------------------------------------------
 
