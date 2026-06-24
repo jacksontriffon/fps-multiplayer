@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://b3hudmatch01a"]
+[gd_scene load_steps=8 format=3 uid="uid://b3hudmatch01a"]
 
 [ext_resource type="Script" uid="uid://c1oblsv1fyfqg" path="res://Global/HUD/hud.gd" id="1_hud"]
 [ext_resource type="Script" uid="uid://bpyg1482b2ose" path="res://Global/HUD/damage_indicator.gd" id="2_dmg"]
@@ -25,18 +25,6 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxEmpty" id="stamina_clear"]
-
-[sub_resource type="StyleBoxFlat" id="slot_empty"]
-bg_color = Color(0, 0, 0, 0.5)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 1, 1, 0.18)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -150,14 +138,11 @@ horizontal_alignment = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="Root"]
 layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
+anchors_preset = 12
 anchor_top = 1.0
-anchor_right = 0.5
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -168.0
 offset_top = -54.0
-offset_right = 168.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_constants/margin_bottom = 24
@@ -167,19 +152,19 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 160
+alignment = 1
 
 [node name="LivesSection" type="VBoxContainer" parent="Root/MarginContainer/BottomBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
+size_flags_horizontal = 4
 size_flags_vertical = 4
 mouse_filter = 2
 theme_override_constants/separation = 6
 
 [node name="StaminaBar" type="Panel" parent="Root/MarginContainer/BottomBar/LivesSection"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 26)
+custom_minimum_size = Vector2(450, 26)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("stamina_bg")
@@ -211,132 +196,3 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-
-[node name="Slots" type="HBoxContainer" parent="Root/MarginContainer/BottomBar"]
-unique_name_in_owner = true
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 10
-
-[node name="Slot0" type="Panel" parent="Root/MarginContainer/BottomBar/Slots"]
-custom_minimum_size = Vector2(54, 54)
-layout_mode = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("slot_empty")
-
-[node name="Icon" type="TextureRect" parent="Root/MarginContainer/BottomBar/Slots/Slot0"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Key" type="Label" parent="Root/MarginContainer/BottomBar/Slots/Slot0"]
-modulate = Color(1, 1, 1, 0.4)
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -16.0
-offset_top = -20.0
-offset_right = -4.0
-offset_bottom = -2.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_font_sizes/font_size = 13
-text = "1"
-horizontal_alignment = 2
-vertical_alignment = 2
-
-[node name="Slot1" type="Panel" parent="Root/MarginContainer/BottomBar/Slots"]
-custom_minimum_size = Vector2(54, 54)
-layout_mode = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("slot_empty")
-
-[node name="Icon" type="TextureRect" parent="Root/MarginContainer/BottomBar/Slots/Slot1"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Key" type="Label" parent="Root/MarginContainer/BottomBar/Slots/Slot1"]
-modulate = Color(1, 1, 1, 0.4)
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -16.0
-offset_top = -20.0
-offset_right = -4.0
-offset_bottom = -2.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_font_sizes/font_size = 13
-text = "2"
-horizontal_alignment = 2
-vertical_alignment = 2
-
-[node name="Slot2" type="Panel" parent="Root/MarginContainer/BottomBar/Slots"]
-custom_minimum_size = Vector2(54, 54)
-layout_mode = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("slot_empty")
-
-[node name="Icon" type="TextureRect" parent="Root/MarginContainer/BottomBar/Slots/Slot2"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Key" type="Label" parent="Root/MarginContainer/BottomBar/Slots/Slot2"]
-modulate = Color(1, 1, 1, 0.4)
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -16.0
-offset_top = -20.0
-offset_right = -4.0
-offset_bottom = -2.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_font_sizes/font_size = 13
-text = "3"
-horizontal_alignment = 2
-vertical_alignment = 2

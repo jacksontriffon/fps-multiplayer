@@ -93,10 +93,6 @@ enum SpecPhase { DEATH_CAM, CHASE, FREE }
 		team = value
 		_apply_team_color()
 
-# Which of the 3 inventory slots is selected (0..2). Set by the controlling peer
-# via the number keys and replicated, so the server knows which held ball to equip.
-@export var active_slot: int = 0
-
 # Set by the Crouch component on the controlling peer and replicated, so every peer
 # ducks the body. Read here to cap movement speed and suppress sprint while crouched.
 @export var crouching: bool = false
@@ -151,7 +147,7 @@ const ABILITY_DASH := &"ability_dash"
 const ABILITY_DOUBLE_JUMP := &"ability_double_jump"
 const ABILITY_BOMB := &"ability_bomb"
 
-# Timed power-up: while held, the BallSpawner keeps the active slot stocked, so you never
+# Timed power-up: while held, the BallSpawner keeps your hand stocked, so you never
 # run out of dodgeballs (and they auto-arm if you also carry ABILITY_BOMB). Granted with a
 # duration by the orb and ticked down on every peer (see _tick_timed_effects). The Stamina
 # node reads the remaining fraction to reserve a slice that's biggest on pickup and shrinks
@@ -342,9 +338,6 @@ func _physics_process(delta: float) -> void:
 		_process_knockdown(delta)
 		return
 
-	if not input_blocked:
-		_handle_slot_input()
-
 	# Undo last frame's dash before the movement math so it can't feed back into the
 	# inertia integrator (the air/standing lerps read velocity); it's re-added below.
 	velocity -= _dash_last
@@ -420,15 +413,6 @@ func _physics_process(delta: float) -> void:
 	camera.fov = lerp(camera.fov, target_fov, delta * 8.0)
 
 	move_and_slide()
-
-# Number keys 1/2/3 pick the active inventory slot, equipping that slot's held ball.
-func _handle_slot_input() -> void:
-	if Input.is_action_just_pressed("slot_1"):
-		active_slot = 0
-	elif Input.is_action_just_pressed("slot_2"):
-		active_slot = 1
-	elif Input.is_action_just_pressed("slot_3"):
-		active_slot = 2
 
 # --- Ragdoll ----------------------------------------------------------------
 

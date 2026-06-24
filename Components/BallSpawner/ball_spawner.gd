@@ -28,10 +28,10 @@ func _physics_process(delta: float) -> void:
 	if _space_clear():
 		_spawn_ball()
 
-# Keep every infinite-ammo holder's active slot stocked, so they can throw without ever
-# running dry. The grab() arms the fresh ball for ABILITY_BOMB carriers, so the buff carries
-# whatever upgrades the holder has. Idempotent: once a slot is filled the holder is skipped,
-# so several spawners in a map don't double up (grab() runs synchronously within the frame).
+# Keep every infinite-ammo holder's hand stocked, so they can throw without ever running
+# dry. The grab() arms the fresh ball for ABILITY_BOMB carriers, so the buff carries whatever
+# upgrades the holder has. Idempotent: once a holder is holding a ball they're skipped, so
+# several spawners in a map don't double up (grab() runs synchronously within the frame).
 func _refill_infinite_ammo() -> void:
 	for node in get_tree().get_nodes_in_group("players"):
 		var player := node as Player
@@ -39,14 +39,14 @@ func _refill_infinite_ammo() -> void:
 			continue
 		if not player.has_effect(Player.INFINITE_AMMO):
 			continue
-		if _equipped_ball(player) != null:
+		if _held_ball(player) != null:
 			continue
 		_spawn_into_hand(player)
 
-func _equipped_ball(player: Player) -> Grabbable:
+func _held_ball(player: Player) -> Grabbable:
 	var pid := player.name.to_int()
 	for b in get_tree().get_nodes_in_group("grabbable"):
-		if b is Grabbable and b.held_by == pid and b.held_slot == player.active_slot:
+		if b is Grabbable and b.held_by == pid:
 			return b
 	return null
 
@@ -54,7 +54,7 @@ func _spawn_into_hand(player: Player) -> void:
 	var ball := BALL_SCENE.instantiate()
 	ball.ephemeral = true
 	balls.add_child(ball)  # under the MultiplayerSpawner's path, so it replicates to every peer
-	if not ball.grab(player.name.to_int(), player.active_slot):
+	if not ball.grab(player.name.to_int()):
 		ball.queue_free()
 		return
 	var marker := player.get_node_or_null("Head/Camera3D/Hands/MeshInstance3D/RightHandMarker")
