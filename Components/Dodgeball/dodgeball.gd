@@ -29,8 +29,8 @@ func _ready() -> void:
 
 # --- Lifecycle, forwarded to behaviour components ----------------------------
 
-func grab(peer_id: int, slot: int) -> bool:
-	var grabbed := super(peer_id, slot)
+func grab(peer_id: int) -> bool:
+	var grabbed := super(peer_id)
 	if grabbed and _explosive:
 		_explosive.on_grabbed(peer_id)
 	return grabbed
@@ -68,15 +68,6 @@ func set_charge_visual(tint_amount: float) -> void:
 	if _ball_material:
 		var base := _explosive.base_albedo(_base_color) if _explosive else _base_color
 		_ball_material.albedo_color = base.lerp(CHARGE_COLOR, tint_amount)
-
-# Visual-only sphere (its own material, no outline/physics) for the inventory preview.
-func get_preview_visual() -> Node3D:
-	var preview := MeshInstance3D.new()
-	preview.mesh = ball_mesh.mesh
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = _explosive.base_albedo(_base_color) if _explosive else _base_color
-	preview.material_override = mat
-	return preview
 
 # Emission: a behaviour component (e.g. a lit/armed bomb) overrides it; otherwise the
 # team glow of a live thrown ball. Colour holds from the last live frame as it fades.
