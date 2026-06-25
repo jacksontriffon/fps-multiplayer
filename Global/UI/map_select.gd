@@ -54,6 +54,7 @@ func _ready() -> void:
 	steam_button.pressed.connect(_on_net_mode.bind(NET_STEAM))
 
 func open() -> void:
+	_build_map_buttons()  # rebuilt each open so freshly saved player maps show up
 	_select_default_mode()
 	_select_default_map()
 	_roster_sig = ""
@@ -125,24 +126,39 @@ func _select_default_mode() -> void:
 			return
 
 func _build_map_buttons() -> void:
+	for c in map_list.get_children():
+		c.free()
 	_map_group = ButtonGroup.new()
 	for choice in MatchManager.MAP_CHOICES:
-		var b := Button.new()
-		b.text = choice["name"]
-		b.toggle_mode = true
-		b.button_group = _map_group
-		b.custom_minimum_size = Vector2(220, 40)
-		b.set_meta("path", choice["path"])
-		b.pressed.connect(_on_map_pressed.bind(b))
-		map_list.add_child(b)
+		_add_map_button(choice["name"], choice["path"])
+	# Player maps built in creative mode (saved to user://) — selectable for local testing.
+	var player_maps: Array = CreativeManager.list_player_maps()
+	if not player_maps.is_empty():
+		var sep := HSeparator.new()
+		map_list.add_child(sep)
+		for choice in player_maps:
+			_add_map_button(choice["name"] + "  (custom)", choice["path"])
+
+func _add_map_button(label: String, path: String) -> void:
+	var b := Button.new()
+	b.text = label
+	b.toggle_mode = true
+	b.button_group = _map_group
+	b.custom_minimum_size = Vector2(220, 40)
+	b.set_meta("path", path)
+	b.pressed.connect(_on_map_pressed.bind(b))
+	map_list.add_child(b)
 
 func _on_map_pressed(b: Button) -> void:
 	_selected_map = b.get_meta("path")
 
-# Preselect the first map if nothing is chosen yet; keeps the player's pick across opens.
+# Re-press the current pick after a rebuild, or fall back to the first map. Keeps the player's
+# choice across opens even as the player-map list grows.
 func _select_default_map() -> void:
-	if _selected_map != "":
-		return
+	for b in map_list.get_children():
+		if b is Button and b.get_meta("path") == _selected_map:
+			b.button_pressed = true
+			return
 	for b in map_list.get_children():
 		if b is Button:
 			b.button_pressed = true

@@ -26,7 +26,7 @@ func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():
 		return
 	_cooldown = maxf(_cooldown - delta, 0.0)
-	if Global.is_input_blocked() or not player.controllable():
+	if Global.is_input_blocked() or not player.controllable() or player.is_creative():
 		return
 	if not player.has_effect(Player.ABILITY_DASH):
 		return

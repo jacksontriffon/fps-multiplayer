@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://dn5gm2e014upj"]
+[gd_scene load_steps=12 format=3 uid="uid://dn5gm2e014upj"]
 
 [ext_resource type="Script" uid="uid://b0dhcl4edi5pu" path="res://Components/Player/player.gd" id="1_1xasy"]
+[ext_resource type="Script" path="res://Components/Player/Creative/creative_mode.gd" id="8_creative"]
 [ext_resource type="PackedScene" uid="uid://br0nkwt1yd1i5" path="res://Components/Player/Hands/hands.tscn" id="2_1xasy"]
 [ext_resource type="Script" uid="uid://cp6no4h2gdagm" path="res://Components/Player/Head/head.gd" id="3_head"]
 [ext_resource type="Script" uid="uid://cxhwx6l78bddc" path="res://Components/Player/Stamina/stamina.gd" id="4_stmna"]
@@ -132,6 +133,11 @@ player = NodePath("..")
 head = NodePath("../Head")
 mesh = NodePath("../MeshInstance3D")
 collision_shape = NodePath("../CollisionShape3D")
+
+[node name="Creative" type="Node3D" parent="." node_paths=PackedStringArray("player", "camera")]
+script = ExtResource("8_creative")
+player = NodePath("..")
+camera = NodePath("../Head/Camera3D")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_1xasy")

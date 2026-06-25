@@ -48,6 +48,22 @@ func show_interact_prompt(obj_name: String, input_action: StringName, verb: Stri
 func hide_interact_prompt() -> void:
 	interact_prompt.visible = false
 
+# Top-of-screen banner shown while the local player is in creative map-building mode, listing the
+# controls. Driven by the player's Creative controller on toggle.
+func set_creative(active: bool) -> void:
+	if _creative_label:
+		_creative_label.visible = active
+
+func _build_creative_label() -> void:
+	_creative_label = Label.new()
+	_creative_label.visible = false
+	_creative_label.text = "CREATIVE MODE   ·   Hold RMB: fly   ·   LMB: grab/hold   ·   Q/E: rotate   ·   Wheel: distance   ·   F2: exit"
+	_creative_label.add_theme_font_size_override("font_size", 18)
+	_creative_label.add_theme_color_override("font_color", Color(0.6, 0.9, 1.0))
+	add_child(_creative_label)
+	_creative_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE)
+	_creative_label.position.y += 14
+
 # Human-readable label for an action's first bound key/button (mouse buttons take priority
 # so the common "(LMB)" wins over a joypad axis also mapped to the same action).
 func _key_label(action: StringName) -> String:
@@ -63,6 +79,7 @@ func _key_label(action: StringName) -> String:
 			fallback = OS.get_keycode_string(ev.physical_keycode if ev.physical_keycode != 0 else ev.keycode)
 	return fallback
 
+var _creative_label: Label
 var _last_banner_text := ""
 var _banner_age := 0.0
 var _last_lives := -1
@@ -105,6 +122,7 @@ func _ready() -> void:
 	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
 	_build_ability_cells()
 	_build_previews()
+	_build_creative_label()
 
 func _process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer():

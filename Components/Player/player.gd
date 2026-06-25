@@ -10,6 +10,11 @@ const SPRINT_SPEED = 7.0
 const CROUCH_SPEED = 2.5
 const JUMP_VELOCITY = 4.5
 
+# Creative-mode ghost flight (see Creative/creative_mode.gd): free noclip movement, sprint to
+# move faster, jump/crouch for straight up/down.
+const CREATIVE_FLY_SPEED = 12.0
+const CREATIVE_FLY_SPRINT = 2.2
+
 # Keep jumps reliable when sprinting flickers is_on_floor() off between floor
 # seams: buffer a press briefly and allow a short post-ledge coyote window.
 const JUMP_BUFFER := 0.12
@@ -87,6 +92,7 @@ enum SpecPhase { DEATH_CAM, CHASE, FREE }
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var ragdoll: RigidBody3D = $Ragdoll
 @onready var stamina: Stamina = $Stamina
+@onready var creative: CreativeMode = $Creative
 
 @export var team: int = 0:
 	set(value):
@@ -114,6 +120,10 @@ var dash_vel := Vector3.ZERO
 var _dash_last := Vector3.ZERO
 
 var alive := true
+
+# Set by the Creative controller while ghost-flying: _physics_process runs free noclip movement
+# instead of normal locomotion until it's cleared.
+var creative_flying := false
 
 # The Climbable (rope) we're currently inside, set by its Area3D on enter/exit. Only the
 # authority peer acts on it; position then replicates the climb like any other movement.
@@ -169,6 +179,32 @@ func set_effect(id: StringName, active: bool, source: StringName = &"default") -
 # True while the player can move, look, grab and throw — false when dead or stunned.
 func controllable() -> bool:
 	return alive and not _knocked_down
+
+# Creative map-building mode is on for this player. Combat input (throw/dash) defers to it.
+func is_creative() -> bool:
+	return creative != null and creative.active
+
+func creative_controller() -> CreativeMode:
+	return creative
+
+# Free noclip flight while creative ghost-fly is held: move where the camera looks (sprint to go
+# faster), jump/crouch for straight up/down. Position is set directly so walls are ignored.
+func _process_creative_fly(delta: float, input_blocked: bool) -> void:
+	velocity = Vector3.ZERO
+	if input_blocked:
+		return
+	var input_dir := Input.get_vector("left", "right", "up", "down")
+	var dir := camera.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)
+	if Input.is_action_pressed("jump"):
+		dir.y += 1.0
+	if Input.is_action_pressed("crouch"):
+		dir.y -= 1.0
+	if dir == Vector3.ZERO:
+		return
+	var speed := CREATIVE_FLY_SPEED
+	if Input.is_action_pressed("sprint"):
+		speed *= CREATIVE_FLY_SPRINT
+	global_position += dir.normalized() * speed * delta
 
 # Push this body around. Movement is simulated on this player's own authority peer,
 # so knockback must be applied there: the local throw recoil calls this directly,
@@ -301,6 +337,11 @@ func _physics_process(delta: float) -> void:
 	# While the pause overlay is up the player ignores control input but keeps
 	# simulating (gravity, knockback, collisions) so the world stays live behind it.
 	var input_blocked: bool = Global.is_input_blocked()
+
+	# Creative ghost flight overrides everything: free movement, no gravity, passes through walls.
+	if creative_flying:
+		_process_creative_fly(delta, input_blocked)
+		return
 
 	if not alive:
 		_process_spectate(delta, input_blocked)
