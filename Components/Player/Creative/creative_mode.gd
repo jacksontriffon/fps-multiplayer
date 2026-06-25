@@ -2,9 +2,10 @@ extends Node3D
 class_name CreativeMode
 
 # Authority-local map-building controller, one per player. Toggled with F2 or the pause menu when
-# CreativeManager.creative_allowed(). Two tools: ghost-fly (hold RMB — noclip through walls, release
-# returns to normal standing physics) and grab/move/rotate of any solid body in the map. Edits are
-# routed through CreativeManager so they replicate and persist; nothing here touches networked
+# CreativeManager.creative_allowed(). Two tools: ghost-fly/spectator (double-tap Space to toggle —
+# noclip through walls, double-tap again returns to normal standing physics) and grab/move/rotate of
+# any solid body in the map (LMB grab/hold, hold RMB + mouse to rotate, wheel for distance). Edits
+# are routed through CreativeManager so they replicate and persist; nothing here touches networked
 # state directly.
 
 const GRAB_MIN_DIST := 1.5
@@ -12,7 +13,8 @@ const GRAB_MIN_DIST := 1.5
 # and a held body stays within that reach (fly closer to move things further).
 const GRAB_MAX_DIST := Hands.INTERACT_REACH
 const GRAB_DIST_STEP := 0.5
-const ROTATE_SPEED := 1.6  # rad/sec while holding Q/E
+const ROTATE_MOUSE_SENS := 0.01  # rad per pixel of mouse motion while holding RMB
+const DOUBLE_TAP_MS := 300       # max gap between Space presses to count as a double-tap
 const HIGHLIGHT_GROW := 1.04
 const HIGHLIGHT_ALPHA := 0.25      # peak translucency of the highlight box
 const HIGHLIGHT_EMISSION := 0.6    # peak emission energy
@@ -26,7 +28,8 @@ var flying := false
 
 var _held: Node3D = null
 var _held_path := ""
-var _grab_yaw := 0.0       # extra yaw applied to the held node since grab
+var _grab_yaw := 0.0       # extra yaw applied to the held node, driven by RMB + mouse
+var _last_jump_ms := 0     # timestamp of the last Space press, for double-tap detection
 # The held body's pose captured in camera space at grab time, so it keeps the exact offset it had
 # (no snap-to-crosshair) and rides along as the camera looks/flies. Wheel scales _local_offset.
 var _local_offset := Vector3.ZERO
@@ -38,6 +41,17 @@ var _highlight_alpha := 0.0  # eased 0..1: drives the box's translucency so it f
 
 func _ready() -> void:
 	_build_highlight_box()
+
+# Rotate a held body by holding RMB and moving the mouse. Handled in _input (which runs before the
+# Head's _unhandled_input) and marked handled, so the camera look is suppressed while rotating.
+func _input(event: InputEvent) -> void:
+	if not active or not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():
+		return
+	if _held == null or Global.is_input_blocked():
+		return
+	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+		_grab_yaw -= event.relative.x * ROTATE_MOUSE_SENS
+		get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():
@@ -58,7 +72,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if not active:
 		return
-	_update_fly()
+	_update_fly_toggle()
 	if Global.is_input_blocked():
 		_set_highlight(null)
 		_update_highlight_fade(delta)
@@ -85,14 +99,23 @@ func set_active(value: bool) -> void:
 		_clear_highlight_now()
 	HUD.set_creative(active)
 
-# --- Ghost fly -------------------------------------------------------------
+# --- Ghost fly (spectator) -------------------------------------------------
 
-func _update_fly() -> void:
-	var want := Input.is_action_pressed("creative_fly") and not Global.is_input_blocked()
-	if want and not flying:
-		_start_fly()
-	elif not want and flying:
-		_stop_fly()
+# Double-tap Space to toggle ghost/spectator flight on or off.
+func _update_fly_toggle() -> void:
+	if Global.is_input_blocked():
+		return
+	if not Input.is_action_just_pressed("jump"):
+		return
+	var now := Time.get_ticks_msec()
+	if now - _last_jump_ms <= DOUBLE_TAP_MS:
+		_last_jump_ms = 0
+		if flying:
+			_stop_fly()
+		else:
+			_start_fly()
+	else:
+		_last_jump_ms = now
 
 func _start_fly() -> void:
 	flying = true
@@ -128,15 +151,12 @@ func _grab(node: Node3D) -> void:
 	_grab_yaw = 0.0
 	CreativeManager.begin_edit(_held_path)
 
-func _update_held(delta: float) -> void:
+func _update_held(_delta: float) -> void:
 	if not is_instance_valid(_held):
 		_held = null
 		return
-	if Input.is_action_pressed("creative_rotate_ccw"):
-		_grab_yaw += ROTATE_SPEED * delta
-	if Input.is_action_pressed("creative_rotate_cw"):
-		_grab_yaw -= ROTATE_SPEED * delta
-	# Re-project the captured camera-space pose through the live camera, then layer the extra yaw.
+	# Re-project the captured camera-space pose through the live camera, then layer the extra yaw
+	# (driven by RMB + mouse in _input).
 	var cam := camera.global_transform
 	var pos := cam * _local_offset
 	var basis := Basis(Vector3.UP, _grab_yaw) * (cam.basis * _local_basis)

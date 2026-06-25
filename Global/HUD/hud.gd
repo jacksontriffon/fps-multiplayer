@@ -53,7 +53,7 @@ func set_creative(active: bool) -> void:
 func _build_creative_label() -> void:
 	_creative_label = Label.new()
 	_creative_label.visible = false
-	_creative_label.text = "CREATIVE MODE   ·   Hold RMB: fly   ·   LMB: grab/hold   ·   Q/E: rotate   ·   Wheel: distance   ·   F2: exit"
+	_creative_label.text = "CREATIVE MODE   ·   Double-Space: fly   ·   LMB: grab/hold   ·   RMB + mouse: rotate   ·   Wheel: distance   ·   F2: exit"
 	_creative_label.add_theme_font_size_override("font_size", 18)
 	_creative_label.add_theme_color_override("font_color", Color(0.6, 0.9, 1.0))
 	add_child(_creative_label)
