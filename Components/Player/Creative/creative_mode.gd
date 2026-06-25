@@ -28,7 +28,6 @@ var flying := false
 
 var _held: Node3D = null
 var _held_path := ""
-var _grab_yaw := 0.0       # extra yaw applied to the held node, driven by RMB + mouse
 var _last_jump_ms := 0     # timestamp of the last Space press, for double-tap detection
 # The held body's pose captured in camera space at grab time, so it keeps the exact offset it had
 # (no snap-to-crosshair) and rides along as the camera looks/flies. Wheel scales _local_offset.
@@ -50,7 +49,12 @@ func _input(event: InputEvent) -> void:
 	if _held == null or Global.is_input_blocked():
 		return
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-		_grab_yaw -= event.relative.x * ROTATE_MOUSE_SENS
+		# Trackball rotate in camera space (the body is welded to the camera frame): horizontal drag
+		# spins around screen-up, vertical around screen-right. Combined drags reach any orientation.
+		var motion := event as InputEventMouseMotion
+		var yaw := -motion.relative.x * ROTATE_MOUSE_SENS
+		var pitch := -motion.relative.y * ROTATE_MOUSE_SENS
+		_local_basis = (Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, pitch) * _local_basis).orthonormalized()
 		get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -148,18 +152,17 @@ func _grab(node: Node3D) -> void:
 	var cam := camera.global_transform
 	_local_offset = cam.affine_inverse() * node.global_position
 	_local_basis = cam.basis.inverse() * node.global_transform.basis
-	_grab_yaw = 0.0
 	CreativeManager.begin_edit(_held_path)
 
 func _update_held(_delta: float) -> void:
 	if not is_instance_valid(_held):
 		_held = null
 		return
-	# Re-project the captured camera-space pose through the live camera, then layer the extra yaw
-	# (driven by RMB + mouse in _input).
+	# Re-project the captured camera-space pose (position + orientation, the latter spun by RMB +
+	# mouse in _input) through the live camera.
 	var cam := camera.global_transform
 	var pos := cam * _local_offset
-	var basis := Basis(Vector3.UP, _grab_yaw) * (cam.basis * _local_basis)
+	var basis := cam.basis * _local_basis
 	var xform := Transform3D(basis, pos)
 	_held.global_transform = xform  # apply locally for responsiveness; server echoes to all peers
 	CreativeManager.stream_transform(_held_path, xform)
