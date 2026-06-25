@@ -19,6 +19,9 @@ const LOBBY_MAP := "res://Screens/Maps/LobbyMap.tscn"
 @export var local_address: String = "127.0.0.1"
 @export var local_port: int = 7777
 @export var player_scene: PackedScene
+## Dev-only: unlocks creative map-building mode (F2 / pause-menu toggle). Off by default so
+## creative is never reachable in normal play; flip it on while building maps.
+@export var dev_mode: bool = false
 
 var lobby_id: int = 0
 var peer: MultiplayerPeer
@@ -121,9 +124,18 @@ func load_map(path: String) -> void:
 	current_map_path = path
 	for c in map_container.get_children():
 		c.free()  # immediate, not queue_free: never let two maps coexist for a frame
-	var inst := (load(path) as PackedScene).instantiate()
+	# A player map saved to user:// only exists on the host's machine, so a client can be asked
+	# to load a path it doesn't have — bail instead of crashing on a null scene.
+	var packed := load(path) as PackedScene
+	if packed == null:
+		push_error("Map not available on this peer: %s" % path)
+		return
+	var inst := packed.instantiate()
 	inst.name = "Map"
 	map_container.add_child(inst)
+	# Re-apply any saved creative edits for this map (host broadcasts them; a no-peer boot
+	# applies directly).
+	CreativeManager.notify_map_loaded(path)
 
 # Pull model for late joiners: a client asks once it is connected, the server replies with the
 # live map. Avoids a client receiving load_map before its MapContainer exists.
@@ -131,7 +143,10 @@ func load_map(path: String) -> void:
 func request_current_map() -> void:
 	if not multiplayer.is_server():
 		return
-	load_map.rpc_id(multiplayer.get_remote_sender_id(), current_map_path)
+	var joiner := multiplayer.get_remote_sender_id()
+	load_map.rpc_id(joiner, current_map_path)
+	# The joiner just loaded the bare map; catch them up to the current creative layout.
+	CreativeManager.send_overrides_to(joiner, current_map_path)
 
 func _on_connected_to_server() -> void:
 	request_current_map.rpc_id(1)

@@ -101,7 +101,7 @@ func _physics_process(delta: float) -> void:
 # Input.is_action_just_* edge-detects correctly for both buttons and axes.
 func _handle_interaction_input() -> void:
 	var me := _get_player()
-	if me == null or not me.controllable():
+	if me == null or not me.controllable() or me.is_creative():
 		return
 	# Empty hand: a click is a straight interaction (grab a ball you're aiming at, or
 	# grab the rope you're standing in) — there's nothing to charge.
@@ -129,7 +129,7 @@ func _handle_interaction_input() -> void:
 # _try_interact's priority: a free ball, then the rope, then a world interactable.
 func _update_interact_prompt() -> void:
 	var me := _get_player()
-	if me == null or not me.controllable() or Global.is_input_blocked():
+	if me == null or not me.controllable() or me.is_creative() or Global.is_input_blocked():
 		HUD.hide_interact_prompt()
 		return
 	var target: Object = null

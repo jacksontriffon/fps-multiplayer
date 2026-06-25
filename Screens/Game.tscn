@@ -8,6 +8,7 @@
 script = ExtResource("1_game")
 net_mode = 1
 player_scene = ExtResource("2_player")
+dev_mode = true
 
 [node name="UILayer" type="CanvasLayer" parent="."]
 
