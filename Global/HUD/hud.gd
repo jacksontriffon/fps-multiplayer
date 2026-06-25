@@ -1,9 +1,7 @@
 extends CanvasLayer
 
 # Reads mirrored MatchManager state plus the lobby podium each frame; never writes.
-# The bottom bar holds lives (left) and the 3 inventory slots (right). Each slot
-# mirrors the local player's held ball for that slot, and the active slot (picked
-# with the 1/2/3 keys) is highlighted.
+# The bottom bar holds the lives + stamina bar, centered along the bottom edge.
 
 const TEAM_NAMES := ["Red", "Blue"]
 const BANNER_HOLD := 2.5
@@ -13,18 +11,16 @@ const HEART_FULL := preload("res://Assets/Textures/UI/heart_full.svg")
 # Bar pixels per stamina point (visual scale only — gameplay numbers are unchanged). The bar
 # and each heart cell use the same scale, so a heart cell is exactly as wide as the stamina it
 # reserves and the fill lines up flush with the hearts.
-const STAMINA_PX_PER_UNIT := 2.0
+const STAMINA_PX_PER_UNIT := 3.0
 const HEART_WIDTH := Stamina.PER_HEART * STAMINA_PX_PER_UNIT
-const BALL_ICON := preload("res://Assets/Textures/UI/dodgeball.svg")
-const PREVIEW_SIZE := Vector2i(96, 96)
-const PREVIEW_SPIN := 0.9  # radians/sec for the slow item turntable
+# Gold, matching the infinite-ammo orb, for the buff's cell in the stamina bar.
+const COLORS_AMMO := Color(1.0, 0.82, 0.2)
 
 @onready var bottom_bar: HBoxContainer = %BottomBar
 @onready var stamina_panel: Panel = %StaminaBar
 @onready var lives_box: HBoxContainer = %Lives
 @onready var lives_text: Label = %LivesText
 @onready var stamina_bar: ProgressBar = %Stamina
-@onready var slots_box: HBoxContainer = %Slots
 @onready var score_label: Label = %Score
 @onready var banner_label: Label = %Banner
 @onready var hurt_overlay: ColorRect = %HurtOverlay
@@ -88,6 +84,11 @@ var _pulse := 0.0
 # Kept as the last child of the Lives box; shown only for the infinite-hearts effect.
 var _infinity_label: Label
 
+# Gold container slice in the stamina bar for the infinite-ammo buff. Sized to the stamina
+# it currently reserves, so it's widest on pickup and shrinks to nothing as the buff expires.
+var _ammo_cell: Panel
+var _ammo_style: StyleBoxFlat
+
 # Ability container cells in the stamina bar, one per unlockable movement ability. Each
 # is a coloured slice sized to the ability's cost (so it lines up with the stamina the
 # bar reserves for it), bright when armed and dim when there isn't enough to fire it.
@@ -96,23 +97,7 @@ var _ability_defs: Array = []
 var _ability_cells: Array[Panel] = []
 var _ability_styles: Array[StyleBoxFlat] = []
 
-# Slot panel styles: the active slot gets a brighter border so it reads as selected.
-var _slot_normal: StyleBoxFlat
-var _slot_active: StyleBoxFlat
-
-# One isolated 3D preview rig per slot (see _build_previews). _slot_keys tracks what
-# each slot currently shows so the 3D model is only rebuilt when the item changes.
-var _preview_viewports: Array[SubViewport] = []
-var _preview_pivots: Array[Node3D] = []
-var _preview_cams: Array[Camera3D] = []
-var _preview_active: Array[bool] = []
-var _slot_keys: Array[String] = []
-
 func _ready() -> void:
-	_slot_normal = slots_box.get_child(0).get_theme_stylebox("panel")
-	_slot_active = _slot_normal.duplicate()
-	_slot_active.border_color = Color(1, 1, 1, 0.9)
-	_slot_active.bg_color = Color(0, 0, 0, 0.65)
 	_infinity_label = Label.new()
 	_infinity_label.text = "∞"
 	_infinity_label.add_theme_font_size_override("font_size", 26)
@@ -121,7 +106,7 @@ func _ready() -> void:
 	lives_box.add_child(_infinity_label)
 	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
 	_build_ability_cells()
-	_build_previews()
+	_build_ammo_cell()
 	_build_creative_label()
 
 func _process(delta: float) -> void:
@@ -135,25 +120,20 @@ func _process(delta: float) -> void:
 	_update_score()
 	_update_banner(delta)
 	_update_spectate()
-	# Slowly turn the live item previews so they read as 3D.
-	for i in _preview_active.size():
-		if _preview_active[i]:
-			_preview_pivots[i].rotate_y(delta * PREVIEW_SPIN)
 
 func _update_bar(id: int) -> void:
 	var player := _local_player()
 	var infinite := player != null and player.has_effect(Player.INFINITE_HEARTS)
-	# Show the bar during a match, or whenever the local player carries the
-	# infinite-hearts effect (e.g. standing in the lobby zone).
+	var infinite_ammo := player != null and player.has_effect(Player.INFINITE_AMMO)
+	# Show the bar during a match, or whenever the local player carries a lobby buff
+	# (infinite hearts in the zone, or the infinite-ammo pickup) so its slots/timer read.
 	var playing := MatchManager.state != MatchManager.State.WAITING and MatchManager.lives.has(id)
-	var show := playing or infinite
+	var show := playing or infinite or infinite_ammo
 	bottom_bar.visible = show
 	if not show:
-		for i in _preview_viewports.size():
-			_disable_preview(i)
 		return
-	# Eliminated (elimination modes only): swap the whole bar for the ELIMINATED label.
-	var eliminated: bool = not infinite \
+	# Eliminated (elimination modes only, mid-match): swap the whole bar for the ELIMINATED label.
+	var eliminated: bool = playing and not infinite \
 		and MatchManager.game_mode != Pedestal.GameMode.CAPTURE_THE_FLAG \
 		and int(MatchManager.lives.get(id, 0)) <= 0
 	if eliminated:
@@ -161,20 +141,21 @@ func _update_bar(id: int) -> void:
 		lives_text.visible = true
 		lives_text.text = "ELIMINATED"
 		lives_text.modulate = Color(1, 1, 1, 0.7)
-		_update_slots(id)
 		return
 	stamina_panel.visible = true
 	lives_text.visible = false
 	if infinite:
 		_update_lives_infinite()
-	else:
+	elif MatchManager.lives.has(id):
 		_update_lives(MatchManager.lives[id])
+	else:
+		_update_lives(0)  # buff shown outside a match — no hearts to draw
 	_update_stamina()
-	_update_slots(id)
 
 func _update_stamina() -> void:
 	var player := _local_player()
 	_update_ability_cells(player)
+	_update_ammo_cell(player)
 	if player == null:
 		stamina_bar.visible = false
 		return
@@ -280,107 +261,36 @@ func _ensure_hearts(count: int) -> void:
 	while hearts.size() > count:
 		hearts.pop_back().free()
 
-# Mirror the local player's inventory: each occupied slot shows its item (a live 3D
-# preview by default, or the item's flat item_ui texture when it has one) and the
-# active slot is highlighted. Held balls carry the holder's peer id and slot index.
-func _update_slots(id: int) -> void:
-	var player := get_tree().current_scene.get_node_or_null(str(id)) as Player
-	var active: int = player.active_slot if player else 0
-	for i in slots_box.get_child_count():
-		var slot := slots_box.get_child(i) as Panel
-		var icon := slot.get_node("Icon") as TextureRect
-		var ball := _ball_in_slot(id, i)
-		if ball == null:
-			_show_empty(i, icon)
-		elif ball.item_ui != null:
-			_show_flat(i, icon, ball.item_ui)
-		else:
-			_show_preview(i, icon, ball)
-		slot.add_theme_stylebox_override("panel", _slot_active if i == active else _slot_normal)
+# A gold ∞ slice in the stamina bar, built like the ability cells and dropped in right after
+# the fill so it lines up flush with the stamina it reserves.
+func _build_ammo_cell() -> void:
+	_ammo_style = StyleBoxFlat.new()
+	_ammo_style.corner_radius_top_left = 3
+	_ammo_style.corner_radius_top_right = 3
+	_ammo_style.corner_radius_bottom_right = 3
+	_ammo_style.corner_radius_bottom_left = 3
+	_ammo_style.bg_color = COLORS_AMMO
+	_ammo_cell = Panel.new()
+	_ammo_cell.custom_minimum_size = Vector2(0, 0)
+	_ammo_cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ammo_cell.visible = false
+	_ammo_cell.add_theme_stylebox_override("panel", _ammo_style)
+	var label := Label.new()
+	label.text = "∞"
+	label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_size_override("font_size", 18)
+	_ammo_cell.add_child(label)
+	lives_box.add_child(_ammo_cell)
+	lives_box.move_child(_ammo_cell, 1)  # right after the stamina fill (child 0)
 
-func _ball_in_slot(peer_id: int, slot: int) -> Grabbable:
-	for b in get_tree().get_nodes_in_group("grabbable"):
-		if b is Grabbable and b.held_by == peer_id and b.held_slot == slot:
-			return b
-	return null
-
-func _show_empty(i: int, icon: TextureRect) -> void:
-	icon.visible = false
-	icon.texture = null
-	_disable_preview(i)
-	_slot_keys[i] = ""
-
-func _show_flat(i: int, icon: TextureRect, tex: Texture2D) -> void:
-	icon.texture = tex
-	icon.visible = true
-	_disable_preview(i)
-	_slot_keys[i] = "flat"
-
-# Renders the item's 3D model live in the slot's viewport. The model is rebuilt only
-# when the item type changes, so the turntable keeps spinning between frames.
-func _show_preview(i: int, icon: TextureRect, ball: Grabbable) -> void:
-	var key := ball.scene_file_path
-	if _slot_keys[i] != key:
-		var visual := ball.get_preview_visual()
-		if visual == null:
-			_show_flat(i, icon, BALL_ICON)  # item has no model — fall back to a flat icon
-			return
-		_mount_preview(i, visual)
-		_slot_keys[i] = key
-	icon.texture = _preview_viewports[i].get_texture()
-	icon.visible = true
-	_preview_active[i] = true
-	_preview_viewports[i].render_target_update_mode = SubViewport.UPDATE_ALWAYS
-
-# Builds one off-screen 3D viewport per slot: own world, a framing camera, key+fill
-# lights, and a pivot the item mounts under. The viewport's texture feeds the slot Icon.
-func _build_previews() -> void:
-	for _i in slots_box.get_child_count():
-		var sv := SubViewport.new()
-		sv.size = PREVIEW_SIZE
-		sv.transparent_bg = true
-		sv.own_world_3d = true
-		sv.render_target_update_mode = SubViewport.UPDATE_DISABLED
-		var cam := Camera3D.new()
-		cam.fov = 35.0
-		cam.current = true
-		sv.add_child(cam)
-		var key_light := DirectionalLight3D.new()
-		key_light.rotation_degrees = Vector3(-40, -30, 0)
-		key_light.light_energy = 1.2
-		sv.add_child(key_light)
-		var fill_light := DirectionalLight3D.new()
-		fill_light.rotation_degrees = Vector3(-10, 140, 0)
-		fill_light.light_energy = 0.5
-		sv.add_child(fill_light)
-		var pivot := Node3D.new()
-		sv.add_child(pivot)
-		add_child(sv)
-		_preview_viewports.append(sv)
-		_preview_cams.append(cam)
-		_preview_pivots.append(pivot)
-		_preview_active.append(false)
-		_slot_keys.append("")
-
-# Centers the item under the pivot and pulls the camera back to frame its bounds.
-func _mount_preview(i: int, visual: Node3D) -> void:
-	var pivot := _preview_pivots[i]
-	for child in pivot.get_children():
-		child.queue_free()
-	pivot.add_child(visual)
-	var bounds := AABB(Vector3(-0.5, -0.5, -0.5), Vector3.ONE)
-	if visual is VisualInstance3D:
-		bounds = (visual as VisualInstance3D).get_aabb()
-	visual.position = -bounds.get_center()
-	var radius: float = maxf(bounds.size.length() * 0.5, 0.1)
-	var cam := _preview_cams[i]
-	var dist: float = radius / sin(deg_to_rad(cam.fov * 0.5)) * 1.05
-	cam.position = Vector3(0, radius * 0.4, dist)
-	cam.look_at(Vector3.ZERO, Vector3.UP)
-
-func _disable_preview(i: int) -> void:
-	_preview_active[i] = false
-	_preview_viewports[i].render_target_update_mode = SubViewport.UPDATE_DISABLED
+# Size the cell to the stamina the buff currently reserves, so it shrinks as the buff expires.
+func _update_ammo_cell(player: Player) -> void:
+	var amount := player.stamina.reserved(Stamina.RES_INFINITE_AMMO) if player else 0.0
+	_ammo_cell.visible = amount > 0.0
+	_ammo_cell.custom_minimum_size.x = amount * STAMINA_PX_PER_UNIT
 
 func _update_hurt(delta: float, id: int) -> void:
 	var n: int = MatchManager.lives.get(id, -1)

@@ -82,7 +82,7 @@ func _physics_process(delta: float) -> void:
 		var player := _get_player()
 		# Drop the wind-up if we died or lost the ball (e.g. a round reset), so it
 		# stops draining stamina with nothing in hand.
-		if player == null or not player.controllable() or _equipped_ball_of(player) == null:
+		if player == null or not player.controllable() or _held_ball_of(player) == null:
 			_charging = false
 			_charge = 0.0
 		else:
@@ -105,7 +105,7 @@ func _handle_interaction_input() -> void:
 		return
 	# Empty hand: a click is a straight interaction (grab a ball you're aiming at, or
 	# grab the rope you're standing in) — there's nothing to charge.
-	if _equipped_ball_of(me) == null:
+	if _held_ball_of(me) == null:
 		if Input.is_action_just_pressed("interaction"):
 			_try_interact(me)
 		return
@@ -133,7 +133,7 @@ func _update_interact_prompt() -> void:
 		HUD.hide_interact_prompt()
 		return
 	var target: Object = null
-	if _equipped_ball_of(me) == null and highlighted != null:
+	if _held_ball_of(me) == null and highlighted != null:
 		target = highlighted
 	elif me.can_grab_climb():
 		target = me.current_climb_zone()
@@ -149,7 +149,7 @@ func _update_interact_prompt() -> void:
 # Fire the highest-priority instant interaction in reach. Returns true if one ran.
 func _try_interact(me: Player) -> bool:
 	# Grab a free ball only when our hand is empty and one is on the crosshair.
-	if _equipped_ball_of(me) == null and highlighted != null:
+	if _held_ball_of(me) == null and highlighted != null:
 		_send_interact(0.0)
 		return true
 	# Climbing a rope works whether or not we're holding a ball.
@@ -208,7 +208,7 @@ func _get_player() -> Player:
 
 # Push charge to the held ball; host writes it, clients ask the server (it replicates).
 func _push_charge(value: float) -> void:
-	var held := _equipped_ball_of(_get_player())
+	var held := _held_ball_of(_get_player())
 	if held == null:
 		return
 	if multiplayer.is_server():
@@ -240,8 +240,8 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 	var actor := get_tree().current_scene.get_node_or_null(str(peer_id)) as Player
 	if actor == null or not actor.alive:
 		return
-	# Holding a ball in the active slot => throw it; otherwise grab into that slot.
-	var held := _equipped_ball_of(actor)
+	# Holding a ball => throw it; otherwise grab the targeted free ball.
+	var held := _held_ball_of(actor)
 	if held:
 		held.throw(aim, power)
 		return
@@ -249,7 +249,7 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 		return
 	var ball := get_node_or_null(target_path) as Grabbable
 	if ball:
-		ball.grab(peer_id, actor.active_slot)
+		ball.grab(peer_id)
 
 # --- Detection -------------------------------------------------------------
 func _on_grabbable_area_body_entered(body: Node3D) -> void:
@@ -281,9 +281,9 @@ func _interactable_of(area: Area3D) -> Node3D:
 
 # --- Highlight (local visual for the controlling peer) ---------------------
 func update_highlight() -> void:
-	# Nothing to highlight while the active slot already holds a ball.
+	# Nothing to highlight while we're already holding a ball.
 	var target: Grabbable = null
-	if _equipped_ball_of(_get_player()) == null:
+	if _held_ball_of(_get_player()) == null:
 		target = get_targeted_grabbable()
 	if target == highlighted:
 		return
@@ -350,14 +350,12 @@ func get_targeted_grabbable() -> Grabbable:
 			best = object
 	return best
 
-# The ball occupying the player's currently active slot, or null if it's empty.
-func _equipped_ball_of(player: Player) -> Grabbable:
+# The ball the player is currently holding, or null if their hand is empty.
+func _held_ball_of(player: Player) -> Grabbable:
 	if player == null:
 		return null
-	return _ball_in_slot(player.name.to_int(), player.active_slot)
-
-func _ball_in_slot(peer_id: int, slot: int) -> Grabbable:
+	var peer_id := player.name.to_int()
 	for b in get_tree().get_nodes_in_group("grabbable"):
-		if b is Grabbable and b.held_by == peer_id and b.held_slot == slot:
+		if b is Grabbable and b.held_by == peer_id:
 			return b
 	return null
