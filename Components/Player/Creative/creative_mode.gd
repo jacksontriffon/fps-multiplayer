@@ -304,14 +304,16 @@ func _clear_gizmos() -> void:
 	_gizmos.clear()
 	_clear_hover()
 
-# Editable bodies whose bounds sit within hands reach of the camera. Same resolution as a ray grab
+# Editable bodies a gizmo should show on: close to the player (measured from the eye/hand root, not
+# the dolly-able camera) and in front of where the hand is aiming. Same resolution as a ray grab
 # (instanced scene roots move as one piece; loose CSG/bodies move alone; balls are skipped).
 func _editables_in_range() -> Array:
 	var out: Array = []
 	var map := CreativeManager.map_node()
 	if map == null:
 		return out
-	var cam := camera.global_position
+	var origin := player.head.global_position
+	var fwd := -camera.global_transform.basis.z
 	var seen := {}
 	for n in map.find_children("*", "Node3D", true, false):
 		if n is Grabbable or not (n is CSGShape3D or n is PhysicsBody3D or n is VisualInstance3D):
@@ -323,15 +325,20 @@ func _editables_in_range() -> Array:
 		if seen.has(id):
 			continue
 		seen[id] = true
-		if _in_reach(target, cam):
+		if _in_reach(target, origin, fwd):
 			out.append(target)
 	return out
 
-func _in_reach(node: Node3D, cam: Vector3) -> bool:
+# Within hands reach of `origin` and in the forward hemisphere (so bodies beside or behind the hand
+# get no gizmo). Distance is to the body's nearest bounds point so large bodies count when adjacent.
+func _in_reach(node: Node3D, origin: Vector3, fwd: Vector3) -> bool:
 	var aabb := CreativeGizmo.local_aabb(node)
 	var center: Vector3 = node.global_transform * aabb.get_center()
 	var radius := (aabb.size * 0.5).length()
-	return cam.distance_to(center) - radius <= GRAB_MAX_DIST
+	var to := center - origin
+	if to.length() - radius > GRAB_MAX_DIST:
+		return false
+	return to.dot(fwd) > 0.0
 
 # --- Hover + axis drag -----------------------------------------------------
 
@@ -429,7 +436,9 @@ func _closest_param(from: Vector3, dir: Vector3, p0: Vector3, axis: Vector3, fal
 # and grabbable balls are skipped so creative editing can't fight their netcode.
 func _targeted_editable() -> Node3D:
 	var space := player.get_world_3d().direct_space_state
-	var from := camera.global_position
+	# Cast from the eye/hand root (not the dolly-able camera) so reach stays relative to the player;
+	# the dolly is straight back along this same ray, so it still matches the crosshair.
+	var from := player.head.global_position
 	var to := from - camera.global_transform.basis.z * GRAB_MAX_DIST
 	var query := PhysicsRayQueryParameters3D.create(from, to)
 	query.exclude = [player.get_rid()]
