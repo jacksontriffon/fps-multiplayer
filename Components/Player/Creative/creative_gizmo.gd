@@ -23,8 +23,9 @@ const COL_Z := Color(0.32, 0.56, 1.0)
 const COL_CENTER := Color(0.92, 0.92, 0.95)
 
 var _node: Node3D = null
-var _local_center := Vector3.ZERO
+var _aabb := AABB()
 var _arm_len := 1.0
+var _front_gap := 0.2  # how far off the body's surface the gizmo floats, toward the player
 var _pick_r := 0.16
 var _center_r := 0.18
 var _hover := HANDLE_NONE
@@ -37,9 +38,9 @@ func _ready() -> void:
 # Build the arrows + center handle sized to `node`'s bounds and remember the body we track.
 func attach(node: Node3D) -> void:
 	_node = node
-	var aabb := local_aabb(node)
-	_local_center = aabb.get_center()
-	_arm_len = clampf((aabb.size * 0.5).length() * 1.25, ARM_MIN, ARM_MAX)
+	_aabb = local_aabb(node)
+	_arm_len = clampf((_aabb.size * 0.5).length() * 1.25, ARM_MIN, ARM_MAX)
+	_front_gap = _arm_len * 0.2
 	_pick_r = _arm_len * PICK_FRAC
 	_center_r = _arm_len * (CENTER_FRAC * 0.5 + 0.06)
 	_build_arm(HANDLE_X, Vector3.RIGHT, COL_X)
@@ -54,11 +55,18 @@ func target_node() -> Node3D:
 func has_valid_target() -> bool:
 	return is_instance_valid(_node)
 
-# Sit at the body's bounds center, oriented to world axes (a global-space translate gizmo).
-func update_placement() -> void:
+# Sit on the body's surface facing `toward` (the player's position), nudged out toward them — so the
+# gizmo rides in front of the body on the player's side and tracks the player's position, not the
+# camera look. Oriented to world axes (a global-space translate gizmo).
+func update_placement(toward: Vector3) -> void:
 	if not is_instance_valid(_node):
 		return
-	global_transform = Transform3D(Basis.IDENTITY, _node.global_transform * _local_center)
+	var local := _node.global_transform.affine_inverse() * toward
+	var surface: Vector3 = _node.global_transform * local.clamp(_aabb.position, _aabb.end)
+	var out := toward - surface
+	if out.length() > 0.001:
+		surface += out.normalized() * _front_gap
+	global_transform = Transform3D(Basis.IDENTITY, surface)
 
 # World-space direction of an axis handle.
 func axis_dir(handle: int) -> Vector3:

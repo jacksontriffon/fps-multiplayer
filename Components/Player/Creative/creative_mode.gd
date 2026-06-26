@@ -17,9 +17,8 @@ const GRAB_DIST_STEP := 0.5
 const ROTATE_MOUSE_SENS := 0.01  # rad per pixel of mouse motion while holding RMB
 const DOUBLE_TAP_MS := 300       # max gap between Space presses to count as a double-tap
 
-# Third-person view. Turning creative on dollies the camera back to TP_DEFAULT_DIST; the wheel
-# (when no body is held) pulls it in/out, and scrolling all the way in snaps to first person.
-const TP_DEFAULT_DIST := 4.0
+# Third-person view. Creative starts in first person; the wheel (when no body is held) dollies the
+# camera out behind the player and back, snapping to first person once pulled all the way in.
 const TP_MAX_DIST := 9.0
 const TP_DIST_STEP := 0.6        # camera dolly per wheel notch
 const TP_FP_SNAP := 0.4          # below this the camera returns to true first person
@@ -136,8 +135,8 @@ func set_active(value: bool) -> void:
 		return
 	active = value
 	if active:
-		# Pop out to third person, easing from the eye so the pull-back is visible.
-		_cam_dist = TP_DEFAULT_DIST
+		# Stay in first person on entry; the wheel can dolly out to third person from here.
+		_cam_dist = 0.0
 		_cam_dist_smooth = 0.0
 	else:
 		_stop_fly()
@@ -268,6 +267,7 @@ func _refresh_gizmos(delta: float) -> void:
 	if _scan_accum <= 0.0:
 		_scan_accum = GIZMO_SCAN_INTERVAL
 		_rescan_gizmos()
+	var origin := player.head.global_position
 	for id in _gizmos.keys():
 		var g: CreativeGizmo = _gizmos[id]
 		if not is_instance_valid(g) or not g.has_valid_target():
@@ -275,7 +275,7 @@ func _refresh_gizmos(delta: float) -> void:
 				g.queue_free()
 			_gizmos.erase(id)
 		else:
-			g.update_placement()
+			g.update_placement(origin)
 
 func _rescan_gizmos() -> void:
 	var wanted := {}
