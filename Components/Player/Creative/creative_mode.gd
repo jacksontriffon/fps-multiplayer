@@ -4,10 +4,11 @@ class_name CreativeMode
 # Authority-local map-building controller, one per player. Toggled with F2 or the pause menu when
 # CreativeManager.creative_allowed(). Two tools: ghost-fly/spectator (double-tap Space to toggle —
 # noclip through walls, double-tap again returns to normal standing physics) and grab/move/rotate of
-# any solid body in the map. Every editable body within hands reach wears a translate gizmo
-# (CreativeGizmo): grab a coloured arrow to slide it along that world axis, or the center box to move
-# it freely welded to the camera (hold RMB + mouse to rotate, wheel for distance). Edits are routed
-# through CreativeManager so they replicate and persist; nothing here touches networked state directly.
+# any solid body in the map. The body the crosshair is on (same raycast as the highlight) wears a
+# translate gizmo (CreativeGizmo): grab a coloured arrow to slide it along that world axis, or the
+# center box to move it freely welded to the camera (hold RMB + mouse to rotate, wheel for distance).
+# Edits are routed through CreativeManager so they replicate and persist; nothing here touches
+# networked state directly.
 
 const GRAB_MIN_DIST := 1.5
 # Grabbing reach matches the hands' interaction reach — you have to be close to pick up a body,
@@ -23,8 +24,6 @@ const TP_MAX_DIST := 9.0
 const TP_DIST_STEP := 0.6        # camera dolly per wheel notch
 const TP_FP_SNAP := 0.4          # below this the camera returns to true first person
 const TP_ZOOM_DAMP := 12.0       # how fast the camera eases toward the target distance
-
-const GIZMO_SCAN_INTERVAL := 0.2  # how often we re-sweep the map for bodies entering/leaving reach
 
 @export var player: Player
 @export var camera: Camera3D
@@ -44,11 +43,10 @@ var _local_offset := Vector3.ZERO
 var _local_basis := Basis.IDENTITY
 var _highlight: CreativeHighlight  # translucent box on the targeted body (own component)
 
-# One translate gizmo per in-reach editable body, keyed by the body's instance id.
-var _gizmos := {}
-var _scan_accum := 0.0
-# The handle the crosshair is on this frame (its body + which arrow / the center), for grab + outline.
-var _hover_node: Node3D = null
+# A single translate gizmo on the body the crosshair is targeting (_focus), rebuilt when the target
+# changes. _hover_handle is which part of it the crosshair is on this frame, for grab + outline.
+var _gizmo: CreativeGizmo = null
+var _focus: Node3D = null
 var _hover_handle := CreativeGizmo.HANDLE_NONE
 
 # Axis-constrained drag (a coloured arrow): the body slides only along _drag_dir. _drag_anchor is the
@@ -112,18 +110,20 @@ func _physics_process(delta: float) -> void:
 	_update_fly_toggle()
 	if Global.is_input_blocked():
 		_highlight.target(null)
-		_clear_hover()
+		_set_focus(null)
+		_hover_handle = CreativeGizmo.HANDLE_NONE
 		return
-	_refresh_gizmos(delta)
 	if _held != null:
 		_update_held(delta)
 		_highlight.target(_held)
+		_place_gizmo(CreativeGizmo.HANDLE_CENTER)
 	elif _drag_node != null:
 		_update_axis_drag()
 		_highlight.target(_drag_node)
+		_place_gizmo(_drag_axis)
 	else:
-		_update_hover()
-		_highlight.target(_hover_node)
+		_update_focus()
+		_highlight.target(_focus)
 	_handle_grab_input()
 
 # --- Toggle ----------------------------------------------------------------
@@ -142,7 +142,8 @@ func set_active(value: bool) -> void:
 		_stop_fly()
 		_drop()
 		_end_axis_drag()
-		_clear_gizmos()
+		_set_focus(null)
+		_hover_handle = CreativeGizmo.HANDLE_NONE
 		_highlight.clear()
 		_cam_dist = 0.0
 		_cam_dist_smooth = 0.0
@@ -205,11 +206,11 @@ func _stop_fly() -> void:
 # coloured arrow starts an axis-constrained slide. Release commits whichever is active.
 func _handle_grab_input() -> void:
 	if Input.is_action_just_pressed("interaction"):
-		if _held == null and _drag_node == null and _hover_node != null:
+		if _held == null and _drag_node == null and _focus != null:
 			if _hover_handle == CreativeGizmo.HANDLE_CENTER:
-				_grab(_hover_node)
+				_grab(_focus)
 			else:
-				_begin_axis_drag(_hover_node, _hover_handle)
+				_begin_axis_drag(_focus, _hover_handle)
 	elif Input.is_action_just_released("interaction"):
 		if _held != null:
 			_drop()
@@ -258,125 +259,54 @@ func _drop() -> void:
 		return
 	CreativeManager.commit_transform(path, node.global_transform)
 
-# --- Gizmos ----------------------------------------------------------------
+# --- Gizmo (single, on the targeted body) ----------------------------------
 
-# Keep a gizmo on every editable body in reach: re-sweep the map periodically (cheap dev tool), but
-# reposition the live gizmos and prune dead ones every frame so they ride moving bodies smoothly.
-func _refresh_gizmos(delta: float) -> void:
-	_scan_accum -= delta
-	if _scan_accum <= 0.0:
-		_scan_accum = GIZMO_SCAN_INTERVAL
-		_rescan_gizmos()
-	var origin := player.head.global_position
-	for id in _gizmos.keys():
-		var g: CreativeGizmo = _gizmos[id]
-		if not is_instance_valid(g) or not g.has_valid_target():
-			if is_instance_valid(g):
-				g.queue_free()
-			_gizmos.erase(id)
-		else:
-			g.update_placement(origin)
-
-func _rescan_gizmos() -> void:
-	var wanted := {}
-	for node in _editables_in_range():
-		wanted[node.get_instance_id()] = node
-	# The body being moved keeps its gizmo even if the drag carries it out of reach.
-	for n in [_held, _drag_node]:
-		if is_instance_valid(n):
-			wanted[n.get_instance_id()] = n
-	for id in _gizmos.keys():
-		if not wanted.has(id):
-			if is_instance_valid(_gizmos[id]):
-				_gizmos[id].queue_free()
-			_gizmos.erase(id)
-	for id in wanted:
-		if not _gizmos.has(id) or not is_instance_valid(_gizmos[id]):
-			var g := CreativeGizmo.new()
-			add_child(g)
-			g.attach(wanted[id])
-			_gizmos[id] = g
-
-func _clear_gizmos() -> void:
-	for id in _gizmos:
-		if is_instance_valid(_gizmos[id]):
-			_gizmos[id].queue_free()
-	_gizmos.clear()
-	_clear_hover()
-
-# Editable bodies a gizmo should show on: close to the player (measured from the eye/hand root, not
-# the dolly-able camera) and in front of where the hand is aiming. Same resolution as a ray grab
-# (instanced scene roots move as one piece; loose CSG/bodies move alone; balls are skipped).
-func _editables_in_range() -> Array:
-	var out: Array = []
-	var map := CreativeManager.map_node()
-	if map == null:
-		return out
-	var origin := player.head.global_position
-	var fwd := -camera.global_transform.basis.z
-	var seen := {}
-	for n in map.find_children("*", "Node3D", true, false):
-		if n is Grabbable or not (n is CSGShape3D or n is PhysicsBody3D or n is VisualInstance3D):
-			continue
-		var target := _editable_target(n)
-		if target == null:
-			continue
-		var id := target.get_instance_id()
-		if seen.has(id):
-			continue
-		seen[id] = true
-		if _in_reach(target, origin, fwd):
-			out.append(target)
-	return out
-
-# Within hands reach of `origin` and in the forward hemisphere (so bodies beside or behind the hand
-# get no gizmo). Distance is to the body's nearest bounds point so large bodies count when adjacent.
-func _in_reach(node: Node3D, origin: Vector3, fwd: Vector3) -> bool:
-	var aabb := CreativeGizmo.local_aabb(node)
-	var center: Vector3 = node.global_transform * aabb.get_center()
-	var radius := (aabb.size * 0.5).length()
-	var to := center - origin
-	if to.length() - radius > GRAB_MAX_DIST:
-		return false
-	return to.dot(fwd) > 0.0
-
-# --- Hover + axis drag -----------------------------------------------------
-
-# Find the handle the crosshair is on across every gizmo (nearest perpendicular gap wins) and light
-# it up. If no handle is hit, fall back to a world raycast so aiming at a body face still grabs it.
-func _update_hover() -> void:
-	_clear_hover()
+# Point the gizmo at the body under the crosshair (the same raycast the highlight uses) and light up
+# the handle being aimed at. Once a gizmo is up, aiming at one of its arms keeps it focused even if
+# the ray slips off the body's silhouette, so the arrows stay grabbable.
+func _update_focus() -> void:
 	var from := camera.global_position
 	var dir := -camera.global_transform.basis.z
-	var best: CreativeGizmo = null
-	var best_handle := CreativeGizmo.HANDLE_NONE
-	var best_dist := INF
-	for id in _gizmos:
-		var g: CreativeGizmo = _gizmos[id]
-		var r := g.pick(from, dir)
-		if r.handle != CreativeGizmo.HANDLE_NONE and r.dist < best_dist:
-			best_dist = r.dist
-			best = g
-			best_handle = r.handle
-	if best != null:
-		best.set_hover(best_handle)
-		_hover_node = best.target_node()
-		_hover_handle = best_handle
-		return
+	var on_arm := CreativeGizmo.HANDLE_NONE
+	if _gizmo != null and is_instance_valid(_gizmo) and is_instance_valid(_focus):
+		_gizmo.update_placement(player.head.global_position)
+		on_arm = _gizmo.pick(from, dir).handle
 	var body := _targeted_editable()
 	if body != null:
-		_hover_node = body
-		_hover_handle = CreativeGizmo.HANDLE_CENTER
-		var g: CreativeGizmo = _gizmos.get(body.get_instance_id())
-		if is_instance_valid(g):
-			g.set_hover(CreativeGizmo.HANDLE_CENTER)
+		_set_focus(body)
+	elif on_arm == CreativeGizmo.HANDLE_NONE:
+		_set_focus(null)
+	if _focus == null:
+		_hover_handle = CreativeGizmo.HANDLE_NONE
+		return
+	_gizmo.update_placement(player.head.global_position)
+	var handle: int = _gizmo.pick(from, dir).handle
+	if handle == CreativeGizmo.HANDLE_NONE:
+		handle = CreativeGizmo.HANDLE_CENTER  # on the body but off the arms → center grab
+	_hover_handle = handle
+	_gizmo.set_hover(handle)
 
-func _clear_hover() -> void:
-	_hover_node = null
-	_hover_handle = CreativeGizmo.HANDLE_NONE
-	for id in _gizmos:
-		if is_instance_valid(_gizmos[id]):
-			_gizmos[id].set_hover(CreativeGizmo.HANDLE_NONE)
+# Swap the gizmo onto `node` (rebuilding it to that body's size), or tear it down for null.
+func _set_focus(node: Node3D) -> void:
+	if node == _focus and (node == null or is_instance_valid(_gizmo)):
+		return
+	_focus = node
+	if _gizmo != null and is_instance_valid(_gizmo):
+		_gizmo.queue_free()
+	_gizmo = null
+	if node != null:
+		_gizmo = CreativeGizmo.new()
+		add_child(_gizmo)
+		_gizmo.attach(node)
+
+# Keep the live gizmo riding its body and highlighting `handle` (used while holding / axis-dragging).
+func _place_gizmo(handle: int) -> void:
+	if _gizmo == null or not is_instance_valid(_gizmo):
+		return
+	_gizmo.update_placement(player.head.global_position)
+	_gizmo.set_hover(handle)
+
+# --- Axis drag -------------------------------------------------------------
 
 func _begin_axis_drag(node: Node3D, handle: int) -> void:
 	_drag_path = _rel_path(node)
