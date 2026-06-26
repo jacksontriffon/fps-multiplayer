@@ -14,8 +14,8 @@ const SHAFT_RADIUS_FRAC := 0.025
 const HEAD_RADIUS_FRAC := 0.07
 const CENTER_FRAC := 0.13     # center box edge as a fraction of arm length
 const PICK_FRAC := 0.16       # ray-to-arm pick tolerance (world units, scaled by arm length)
-const ARM_MIN := 0.6
-const ARM_MAX := 2.2
+const ARM_MIN := 0.3
+const ARM_MAX := 0.8
 
 const COL_X := Color(1.0, 0.30, 0.34)
 const COL_Y := Color(0.46, 0.92, 0.30)
@@ -39,7 +39,7 @@ func _ready() -> void:
 func attach(node: Node3D) -> void:
 	_node = node
 	_aabb = local_aabb(node)
-	_arm_len = clampf((_aabb.size * 0.5).length() * 1.25, ARM_MIN, ARM_MAX)
+	_arm_len = clampf((_aabb.size * 0.5).length() * 0.55, ARM_MIN, ARM_MAX)
 	_front_gap = _arm_len * 0.2
 	_pick_r = _arm_len * PICK_FRAC
 	_center_r = _arm_len * (CENTER_FRAC * 0.5 + 0.06)

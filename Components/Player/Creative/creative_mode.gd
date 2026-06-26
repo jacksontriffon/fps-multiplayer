@@ -269,7 +269,7 @@ func _update_focus() -> void:
 	var dir := -camera.global_transform.basis.z
 	var on_arm := CreativeGizmo.HANDLE_NONE
 	if _gizmo != null and is_instance_valid(_gizmo) and is_instance_valid(_focus):
-		_gizmo.update_placement(player.head.global_position)
+		_gizmo.update_placement(player.global_position)
 		on_arm = _gizmo.pick(from, dir).handle
 	var body := _targeted_editable()
 	if body != null:
@@ -279,7 +279,7 @@ func _update_focus() -> void:
 	if _focus == null:
 		_hover_handle = CreativeGizmo.HANDLE_NONE
 		return
-	_gizmo.update_placement(player.head.global_position)
+	_gizmo.update_placement(player.global_position)
 	var handle: int = _gizmo.pick(from, dir).handle
 	if handle == CreativeGizmo.HANDLE_NONE:
 		handle = CreativeGizmo.HANDLE_CENTER  # on the body but off the arms → center grab
@@ -303,7 +303,7 @@ func _set_focus(node: Node3D) -> void:
 func _place_gizmo(handle: int) -> void:
 	if _gizmo == null or not is_instance_valid(_gizmo):
 		return
-	_gizmo.update_placement(player.head.global_position)
+	_gizmo.update_placement(player.global_position)
 	_gizmo.set_hover(handle)
 
 # --- Axis drag -------------------------------------------------------------
