@@ -11,7 +11,10 @@ class_name AbilityOrb
 
 const SOURCE := &"ability_orb"
 
-enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, HEART }
+# RANDOM is a meta-pick (kept last so the real abilities keep their numeric values, and so a
+# roll covers the whole HEART..DASH range): an orb set to it rolls one of the concrete
+# abilities below. See `ability`/_roll_ability for how the roll stays identical on every peer.
+enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, HEART, RANDOM }
 
 # Player effects granted by each ability. HEART is absent: it isn't a player effect but a
 # server-authoritative heart added to MatchManager.lives (see _collect_heart).
@@ -64,6 +67,8 @@ const RESPAWN_DELAY := 15.0
 const NAME_SHOW_DISTANCE := 6.0
 const NAME_FADE_SPEED := 6.0
 
+# The configured pick. RANDOM defers the choice to a per-spawn roll (see _resolve_ability);
+# anything else is used as-is.
 @export var ability: Ability = Ability.DASH
 
 # Bob/spin feel for the floating core (purely visual, runs on every peer).
@@ -83,11 +88,40 @@ var _t := 0.0
 var _name_alpha := 0.0
 var _collected := false
 var _respawn_left := 0.0
+var _roll_count := 0
+# The concrete ability in effect (equals `ability`, or a rolled one when that is RANDOM).
+var _resolved: Ability = Ability.DASH
 
 func _ready() -> void:
 	_base_y = _bob.position.y
 	body_entered.connect(_on_body_entered)
+	_resolve_ability()
 	_apply_color()
+
+# Settle _resolved from `ability`. RANDOM rolls a concrete ability with a seed that is
+# identical on every peer but varies per game: the host's match_seed (same for everyone, fresh
+# each game), the node path (so sibling orbs differ) and _roll_count (so a timed-buff orb
+# re-rolls to something new on each respawn). No per-orb RPCs needed.
+func _resolve_ability() -> void:
+	if ability != Ability.RANDOM:
+		_resolved = ability
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(str(_match_seed()) + "|" + str(get_path()) + ":" + str(_roll_count))
+	_roll_count += 1
+	_resolved = (rng.randi() % Ability.RANDOM) as Ability  # RANDOM is last, so this is a real ability
+
+# The host-minted per-game seed (game.gd.match_seed), broadcast to every peer via load_map.
+# Walk up to the game root rather than using current_scene/groups: during the initial scene
+# instantiation (the authored lobby map) current_scene isn't set yet and the game_root group
+# isn't populated, but our ancestors — and their match_seed — already exist. Falls back to 0.
+func _match_seed() -> int:
+	var n := get_parent()
+	while n != null:
+		if "match_seed" in n:
+			return n.match_seed
+		n = n.get_parent()
+	return 0
 
 func _process(delta: float) -> void:
 	if _collected:
@@ -118,16 +152,16 @@ func _local_player() -> Player:
 	return null
 
 func _effect_id() -> StringName:
-	return EFFECTS[ability]
+	return EFFECTS[_resolved]
 
 func _on_body_entered(body: Node3D) -> void:
 	if _collected or not (body is Player):
 		return
-	if ability == Ability.HEART:
+	if _resolved == Ability.HEART:
 		_collect_heart(body)
 		return
 	_collected = true
-	var duration: float = DURATIONS.get(ability, 0.0)
+	var duration: float = DURATIONS.get(_resolved, 0.0)
 	if duration > 0.0:
 		# Timed buff: grant it (it self-expires on the player) and hide the orb until it respawns.
 		body.grant_timed_effect(_effect_id(), duration, SOURCE)
@@ -157,14 +191,14 @@ func _collect_heart(body: Player) -> void:
 # Tint the core, glow and floor ring to the ability's colour so the orb reads at a
 # glance and matches the matching container in the stamina bar.
 func _apply_color() -> void:
-	var col: Color = COLORS[ability]
+	var col: Color = COLORS[_resolved]
 	_light.light_color = col
 	_core.material_override = _emissive(col, 0.9)
 	_ring.material_override = _emissive(col, 0.7)
-	_icon.texture = ICONS[ability]
+	_icon.texture = ICONS[_resolved]
 	# Push the tint past white (HDR) so the billboard icon reads as glowing like the core.
 	_icon.modulate = col * 1.6
-	_name_label.text = NAMES[ability]
+	_name_label.text = NAMES[_resolved]
 	_name_label.modulate = Color(col.r, col.g, col.b, 0.0)
 
 func _emissive(col: Color, alpha: float) -> StandardMaterial3D:
@@ -203,6 +237,9 @@ func _tick_respawn(delta: float) -> void:
 func _restore() -> void:
 	_collected = false
 	_name_alpha = 0.0
+	if ability == Ability.RANDOM:
+		_resolve_ability()
+		_apply_color()
 	_bob.visible = true
 	_ring.visible = true
 	monitoring = true

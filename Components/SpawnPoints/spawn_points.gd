@@ -43,17 +43,29 @@ func release(id: int) -> void:
 	_team_of.erase(id)
 	_slot_of.erase(id)
 
-# Hand out any free spawn under this manager, ignoring teams. Used by teamless maps like the
-# lobby, where players have no side yet. Idempotent per id; the returned team is -1 (none).
+# Hand out a random free spawn under this manager, ignoring teams. Used by the free-for-all
+# modes (battle royale, race) and teamless maps like the lobby, where players have no side.
+# Re-randomises each call, preferring spots no other reserved id holds so simultaneous spawns
+# don't stack; the returned team is -1 (none).
 func reserve_any(id: int) -> Dictionary:
 	var points := _all_points()
-	if not _slot_of.has(id):
-		_team_of[id] = -1
-		_slot_of[id] = _next_free_any_slot()
 	if points.is_empty():
 		push_warning("SpawnPoints: no spawn points")
 		return {"team": -1, "position": global_position, "yaw": 0.0}
-	var marker: Marker3D = points[_slot_of[id] % points.size()]
+	# Drop any prior slot first so this id can re-pick and isn't counted as occupied.
+	_team_of.erase(id)
+	_slot_of.erase(id)
+	var used := {}
+	for pid in _slot_of:
+		used[_slot_of[pid]] = true
+	var free := []
+	for i in range(points.size()):
+		if not used.has(i):
+			free.append(i)
+	var slot: int = free[randi() % free.size()] if not free.is_empty() else randi() % points.size()
+	_team_of[id] = -1
+	_slot_of[id] = slot
+	var marker: Marker3D = points[slot]
 	return {"team": -1, "position": marker.global_position, "yaw": marker.global_rotation.y}
 
 # All SpawnPoints under this manager, sorted by name for stable slot ordering.
@@ -89,16 +101,6 @@ func _choose_team(buckets: Dictionary) -> int:
 			best = team
 			best_count = c
 	return best if best >= 0 else 0
-
-# Lowest slot index not used by any reserved id (across all teams), for the teamless pool.
-func _next_free_any_slot() -> int:
-	var used := {}
-	for pid in _slot_of:
-		used[_slot_of[pid]] = true
-	var i := 0
-	while used.has(i):
-		i += 1
-	return i
 
 func _next_free_slot(team: int) -> int:
 	var used := {}

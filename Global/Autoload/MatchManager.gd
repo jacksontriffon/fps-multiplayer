@@ -46,18 +46,17 @@ const MAP_OF := {
 const SANDBOX_MAP := "res://Screens/Maps/HungerGamesSandbox.tscn"
 const USE_SANDBOX_MAP := true
 
-# Maps the pre-match Map Select menu offers. `path` feeds straight into server_request_start;
-# `name` is the button label. Single source of truth for the selectable arena list.
-const MAP_CHOICES := [
-	{"name": "Colosseum", "path": "res://Screens/Maps/ColosseumMap.tscn"},
-	{"name": "Team Arena", "path": "res://Screens/Maps/TeamArena.tscn"},
-	{"name": "CTF Arena", "path": "res://Screens/Maps/CTFArena.tscn"},
-	{"name": "Hunger Games", "path": "res://Screens/Maps/HungerGamesSandbox.tscn"},
-	{"name": "Pirate Ship", "path": "res://Screens/Maps/PirateShipSandbox.tscn"},
-	{"name": "Office", "path": "res://Screens/Maps/Office.tscn"},
-	{"name": "Hedge Maze", "path": "res://Screens/Maps/HedgeMaze.tscn"},
-	{"name": "Gauntlet Run", "path": "res://Screens/Maps/GauntletRun.tscn"},
-]
+# The Map Select menu auto-discovers every .tscn in MAP_DIR (see map_choices), so a new map
+# shows up just by being saved there — no list to maintain. EXCLUDE_MAPS hides non-arena scenes
+# (file stem, no extension); NAME_OVERRIDES gives a curated label where the filename reads badly.
+const MAP_DIR := "res://Screens/Maps/"
+const EXCLUDE_MAPS := ["LobbyMap"]
+const NAME_OVERRIDES := {
+	"ColosseumMap": "Colosseum",
+	"CTFArena": "CTF Arena",
+	"HungerGamesSandbox": "Hunger Games",
+	"PirateShipSandbox": "Pirate Ship",
+}
 
 # Classic mode is a Team-Battle tournament: TOURNAMENT_MAPS maps drawn at random from this
 # pool, played back to back. The team that wins the most maps wins the tournament.
@@ -231,6 +230,53 @@ func roster() -> Array:
 	var ids := _team_of.keys()
 	ids.sort()
 	return ids
+
+# Selectable arenas for the Map Select menu: every .tscn under MAP_DIR (minus EXCLUDE_MAPS),
+# sorted by label. Exported builds expose scenes as `.tscn.remap`, so both are folded to one
+# stem and always referenced by their res:// .tscn path (the engine resolves the remap on load).
+func map_choices() -> Array:
+	var dir := DirAccess.open(MAP_DIR)
+	if dir == null:
+		return []
+	var stems := {}
+	for file in dir.get_files():
+		var stem := ""
+		if file.ends_with(".tscn"):
+			stem = file.trim_suffix(".tscn")
+		elif file.ends_with(".tscn.remap"):
+			stem = file.trim_suffix(".tscn.remap")
+		else:
+			continue
+		if stem in EXCLUDE_MAPS:
+			continue
+		stems[stem] = true
+	var out: Array = []
+	for stem in stems:
+		out.append({"name": _map_display_name(stem), "path": MAP_DIR + stem + ".tscn"})
+	out.sort_custom(func(a, b): return a["name"].naturalnocasecmp_to(b["name"]) < 0)
+	return out
+
+# Curated label if one exists, else the filename stem with spaces inserted at camelCase and
+# letter/digit boundaries: "HungerGamesSandbox" -> "Hunger Games Sandbox", "Office2Player" -> "Office 2 Player".
+func _map_display_name(stem: String) -> String:
+	if NAME_OVERRIDES.has(stem):
+		return NAME_OVERRIDES[stem]
+	var out := ""
+	for i in stem.length():
+		var c := stem[i]
+		if i > 0 and _new_word(stem[i - 1], c):
+			out += " "
+		out += c
+	return out
+
+func _new_word(prev: String, c: String) -> bool:
+	var c_upper := c != c.to_lower() and c == c.to_upper()
+	var c_digit := c >= "0" and c <= "9"
+	var prev_upper := prev != prev.to_lower() and prev == prev.to_upper()
+	var prev_digit := prev >= "0" and prev <= "9"
+	if c_upper and not prev_upper and not prev_digit:
+		return true
+	return c_digit != prev_digit
 
 func server_player_left(id: int) -> void:
 	if not multiplayer.is_server():
@@ -669,8 +715,9 @@ func _respawn(id: int) -> void:
 	var spawner := spawner_for(game_mode)
 	p.set_alive_remote.rpc(true, false)
 	if spawner:
-		# Battle royale players are teamless, so any free spot in the mode's set will do.
-		if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
+		# Battle royale and race are free-for-alls, so drop the player onto a random spawn point;
+		# team and CTF keep them on their own team's spawns (handled below).
+		if game_mode == Pedestal.GameMode.BATTLE_ROYALE or game_mode == Pedestal.GameMode.RACE:
 			var spawn: Dictionary = spawner.reserve_any(id)
 			p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"], spawn["team"])
 			return
@@ -723,7 +770,7 @@ func _game_root() -> Node:
 func _load_map_for(path: String) -> void:
 	var root := _game_root()
 	if root:
-		root.load_map.rpc(path)
+		root.load_map.rpc(path, randi())  # fresh per-instance seed; server-authoritative, sent to all peers
 	for p in get_tree().get_nodes_in_group("players"):
 		p.reset_upgrades.rpc()
 	await get_tree().process_frame
