@@ -51,6 +51,33 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -12)
 [node name="BallSpawner4" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 12)
 
+[node name="BallSpawner5" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.266313, 0.2999981, -15.009566)
+
+[node name="BallSpawner6" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.06937, 0.2999981, 16.72072)
+
+[node name="BallSpawner7" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.844566, 0.2999981, 4.3211107)
+
+[node name="BallSpawner8" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.106579, 0.2999981, -4.6816587)
+
+[node name="BallSpawner9" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.235956, 0.2999981, 14.97445)
+
+[node name="BallSpawner11" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.567383, 0.2999981, 10.213822)
+
+[node name="BallSpawner10" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.100752, 0.2999981, -6.6216373)
+
+[node name="BallSpawner12" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.534925, 0.2999981, 3.9234438)
+
+[node name="BallSpawner13" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.509115, 0.2999981, -6.1153183)
+
 [node name="Dodgeball" parent="." instance=ExtResource("2_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.3, 0)
 
@@ -60,8 +87,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.3, 0)
 [node name="Dodgeball3" parent="." instance=ExtResource("2_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -12)
 
+[node name="Dodgeball11" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.042086, 0.3, -12)
+
 [node name="Dodgeball4" parent="." instance=ExtResource("2_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 12)
+
+[node name="Dodgeball5" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.905554, 0.3, 13.550549)
+
+[node name="Dodgeball6" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.113024, 0.3, -14.56054)
+
+[node name="Dodgeball7" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.23064, 0.3, -11.877597)
+
+[node name="Dodgeball8" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.323395, 0.3, 4.9639397)
+
+[node name="Dodgeball9" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.098196, 0.3, 7.203953)
+
+[node name="Dodgeball10" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.267313, 0.3, -6.0174837)
 
 [node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("5_base")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.728638, 0, 0)
@@ -85,28 +133,28 @@ script = ExtResource("3_spawn")
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -26.728638, 0.1, -9)
 
 [node name="Red2" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -26.728638, 0.1, -3)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -11.88197, 0.1, -20.109745)
 
 [node name="Red3" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -26.728638, 0.1, 3)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -17.780127, 0.1, 19.286278)
 
 [node name="Red4" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -26.728638, 0.1, 9)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -14.809219, 0.1, 9.249366)
 
 [node name="Blue1" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 27.178799, 0.1, -9)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 24.858734, 0.1, -6.608981)
 team = 1
 
 [node name="Blue2" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 27.178799, 0.1, -3)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 14.724663, 0.1, -4.586602)
 team = 1
 
 [node name="Blue3" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 27.178799, 0.1, 3)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -2.1747742, 0.1, 19.8339)
 team = 1
 
 [node name="Blue4" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 27.178799, 0.1, 9)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 17.51115, 0.1, -20.3522)
 team = 1
 
 [node name="Cubicles" type="Node3D" parent="."]
@@ -287,7 +335,7 @@ ability = 2
 
 [node name="AbilityOrb4" parent="Walls" instance=ExtResource("9_n2ddm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.482023, 0.03658271, 16.76802)
-ability = 3
+ability = 4
 
 [node name="AbilityOrb5" parent="Walls" instance=ExtResource("9_n2ddm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.060129166, 0.03658271, -0.07227516)
@@ -308,16 +356,28 @@ ability = 3
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.043388, 0, -6.428747)
 
 [node name="Conference" parent="Conferences" instance=ExtResource("9_7wg7y")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3949852, 0, -0.14400148)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3949852, 0, 0.12275028)
 
 [node name="Conference7" parent="Conferences" instance=ExtResource("9_7wg7y")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.965054, 0, -10.902391)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.8148, 0, -10.902391)
 
 [node name="Conference5" parent="Conferences" instance=ExtResource("9_7wg7y")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 9.74968, 0, -10.627134)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 9.173597, 0, -12.058924)
 
 [node name="Conference4" parent="Conferences" instance=ExtResource("9_7wg7y")]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -20.553331, 0, 13.106003)
+
+[node name="Conference8" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, -41.253292, 0, 13.106003)
+
+[node name="Conference9" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, -41.253292, 0, -0.6224909)
+
+[node name="Conference10" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(-4.371138e-08, 0, -1, 0, 1, 0, 1, 0, -4.371138e-08, 22.936451, 0, -0.6224909)
+
+[node name="Conference11" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(-4.371138e-08, 0, -1, 0, 1, 0, 1, 0, -4.371138e-08, 22.936451, 0, 13.106003)
 
 [node name="Conference6" parent="Conferences" instance=ExtResource("9_7wg7y")]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -7.818968, 0, 24.122982)
@@ -326,4 +386,4 @@ transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -7.8
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 5.5336466, 0, 12.747172)
 
 [node name="Conference3" parent="Conferences" instance=ExtResource("9_7wg7y")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -25.826511, 0, -2.5659084)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -25.999954, 0, -2.5659084)
