@@ -698,11 +698,15 @@ func _game_root() -> Node:
 	return get_tree().get_first_node_in_group("game_root")
 
 # Swap every peer to `path` and wait a frame so the new map (and its SpawnPoints/balls) is in
-# the tree before callers reset or respawn into it.
+# the tree before callers reset or respawn into it. Players persist across the swap, so wipe
+# their granted upgrades here — every map change, rematch and lobby return drops everyone back
+# to the orb-less default state (the new map's orbs must be re-collected).
 func _load_map_for(path: String) -> void:
 	var root := _game_root()
 	if root:
 		root.load_map.rpc(path)
+	for p in get_tree().get_nodes_in_group("players"):
+		p.reset_upgrades.rpc()
 	await get_tree().process_frame
 
 func _schedule(cb: Callable, delay: float) -> void:

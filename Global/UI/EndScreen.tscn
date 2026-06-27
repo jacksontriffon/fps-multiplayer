@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://c2endscreen0001"]
+[gd_scene load_steps=4 format=3 uid="uid://dkb76kxsiyciq"]
 
 [ext_resource type="Script" path="res://Global/UI/end_screen.gd" id="1_es"]
 
