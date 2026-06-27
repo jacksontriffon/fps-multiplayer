@@ -92,14 +92,16 @@ func _refresh_reservations() -> void:
 	# Infinite ammo: a big slice up front that shrinks with the buff's remaining time. Cleared
 	# first so the cap below sees only the other reservations, then capped to leave AMMO_MIN_CAPACITY.
 	reserve(RES_INFINITE_AMMO, 0.0)
-	if player.has_effect(Player.INFINITE_AMMO) and Player.INFINITE_AMMO_DURATION > 0.0:
-		var frac := clampf(player.effect_time_left(Player.INFINITE_AMMO) / Player.INFINITE_AMMO_DURATION, 0.0, 1.0)
+	var ammo_total := player.effect_total_time(Player.INFINITE_AMMO)
+	if player.has_effect(Player.INFINITE_AMMO) and ammo_total > 0.0:
+		var frac := clampf(player.effect_time_left(Player.INFINITE_AMMO) / ammo_total, 0.0, 1.0)
 		var max_allowed := maxf(capacity() - AMMO_MIN_CAPACITY, 0.0)
 		reserve(RES_INFINITE_AMMO, minf(frac * AMMO_MAX_RESERVE, max_allowed))
 	# Triple throw: same shrinking slice as infinite ammo, capped against the pool left after it.
 	reserve(RES_TRIPLE_THROW, 0.0)
-	if player.has_effect(Player.TRIPLE_THROW) and Player.TRIPLE_THROW_DURATION > 0.0:
-		var frac := clampf(player.effect_time_left(Player.TRIPLE_THROW) / Player.TRIPLE_THROW_DURATION, 0.0, 1.0)
+	var triple_total := player.effect_total_time(Player.TRIPLE_THROW)
+	if player.has_effect(Player.TRIPLE_THROW) and triple_total > 0.0:
+		var frac := clampf(player.effect_time_left(Player.TRIPLE_THROW) / triple_total, 0.0, 1.0)
 		var max_allowed := maxf(capacity() - TRIPLE_MIN_CAPACITY, 0.0)
 		reserve(RES_TRIPLE_THROW, minf(frac * TRIPLE_MAX_RESERVE, max_allowed))
 
