@@ -1,12 +1,15 @@
-[gd_scene load_steps=11 format=3 uid="uid://y81esgw4e0ya"]
+[gd_scene load_steps=14 format=3 uid="uid://y81esgw4e0ya"]
 
 [ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="2_ball"]
-[ext_resource type="PackedScene" uid="uid://dballspawner01" path="res://Components/BallSpawner/BallSpawner.tscn" id="99_bspawn"]
 [ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="3_spawn"]
 [ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="4_sp"]
 [ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="5_base"]
 [ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="6_flag"]
+[ext_resource type="PackedScene" uid="uid://cpu537482dhl6" path="res://Components/Office/cubicles.tscn" id="8_vdjpe"]
+[ext_resource type="PackedScene" uid="uid://csylun2ei0dy4" path="res://Screens/Maps/conference.tscn" id="9_7wg7y"]
+[ext_resource type="PackedScene" uid="uid://uexgtf7lwynk" path="res://Components/AbilityOrb/ability_orb.tscn" id="9_n2ddm"]
+[ext_resource type="PackedScene" uid="uid://cryyg8edx41b5" path="res://Components/BallSpawner/BallSpawner.tscn" id="99_bspawn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_office"]
 
@@ -48,6 +51,33 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -12)
 [node name="BallSpawner4" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 12)
 
+[node name="BallSpawner5" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.266313, 0.2999981, -15.009566)
+
+[node name="BallSpawner6" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.06937, 0.2999981, 16.72072)
+
+[node name="BallSpawner7" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.844566, 0.2999981, 4.3211107)
+
+[node name="BallSpawner8" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.106579, 0.2999981, -4.6816587)
+
+[node name="BallSpawner9" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.235956, 0.2999981, 14.97445)
+
+[node name="BallSpawner11" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.567383, 0.2999981, 10.213822)
+
+[node name="BallSpawner10" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.100752, 0.2999981, -6.6216373)
+
+[node name="BallSpawner12" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.534925, 0.2999981, 3.9234438)
+
+[node name="BallSpawner13" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.509115, 0.2999981, -6.1153183)
+
 [node name="Dodgeball" parent="." instance=ExtResource("2_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.3, 0)
 
@@ -57,329 +87,305 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.3, 0)
 [node name="Dodgeball3" parent="." instance=ExtResource("2_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -12)
 
+[node name="Dodgeball11" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.042086, 0.3, -12)
+
 [node name="Dodgeball4" parent="." instance=ExtResource("2_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 12)
 
+[node name="Dodgeball5" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.905554, 0.3, 13.550549)
+
+[node name="Dodgeball6" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.113024, 0.3, -14.56054)
+
+[node name="Dodgeball7" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.23064, 0.3, -11.877597)
+
+[node name="Dodgeball8" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.323395, 0.3, 4.9639397)
+
+[node name="Dodgeball9" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.098196, 0.3, 7.203953)
+
+[node name="Dodgeball10" parent="." instance=ExtResource("2_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.267313, 0.3, -6.0174837)
+
 [node name="RedBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("5_base")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.728638, 0, 0)
 flag = NodePath("../RedFlag")
 
 [node name="BlueBase" parent="." node_paths=PackedStringArray("flag") instance=ExtResource("5_base")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.958847, 0, 0)
 team = 1
 flag = NodePath("../BlueFlag")
 
 [node name="RedFlag" parent="." instance=ExtResource("6_flag")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.728638, 1, 0)
 
 [node name="BlueFlag" parent="." instance=ExtResource("6_flag")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.178799, 1, 0)
 
 [node name="SpawnPoints" type="Node3D" parent="."]
 script = ExtResource("3_spawn")
 
 [node name="Red1" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -36, 0.1, -9)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -26.728638, 0.1, -9)
 
 [node name="Red2" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -36, 0.1, -3)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -11.88197, 0.1, -20.109745)
 
 [node name="Red3" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -36, 0.1, 3)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -17.780127, 0.1, 19.286278)
 
 [node name="Red4" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -36, 0.1, 9)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -14.809219, 0.1, 9.249366)
 
 [node name="Blue1" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 36, 0.1, -9)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 24.858734, 0.1, -6.608981)
 team = 1
 
 [node name="Blue2" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 36, 0.1, -3)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 14.724663, 0.1, -4.586602)
 team = 1
 
 [node name="Blue3" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 36, 0.1, 3)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -2.1747742, 0.1, 19.8339)
 team = 1
 
 [node name="Blue4" parent="SpawnPoints" instance=ExtResource("4_sp")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 36, 0.1, 9)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 17.51115, 0.1, -20.3522)
 team = 1
 
-[node name="Hedges" type="Node3D" parent="."]
+[node name="Cubicles" type="Node3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 9.065818, 0.1, 9.881849)
 
-[node name="CSGBox3D" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.986515, 1.6831903, -0.1381321)
-size = Vector3(0.50512695, 3.3691406, 8.234684)
+[node name="Cubicles" parent="Cubicles" instance=ExtResource("8_vdjpe")]
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.1238184, 1.6831903, -0.1381321)
-size = Vector3(0.54956055, 3.3691406, 8.234684)
+[node name="Cubicles2" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -4.437039, 0, 1.6158133)
 
-[node name="CSGBox3D21" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.858301, 1.6831903, -8.863007)
+[node name="Cubicles30" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -16.144764, 0, -12.412248)
+
+[node name="Cubicles31" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.2918158, 0, -12.412248)
+
+[node name="Cubicles32" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, -3.0805316, 0, 30.32891)
+
+[node name="Cubicles33" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, -20.036144, 0, 31.125126)
+
+[node name="Cubicles24" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.968622, 0, -3.9827528)
+
+[node name="Cubicles25" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.531584, 0, -2.3669405)
+
+[node name="Cubicles26" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.9392786, 0, -6.814047)
+
+[node name="Cubicles27" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 9.376318, 0, -8.429856)
+
+[node name="Cubicles4" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.622429, 0, 5.191822)
+
+[node name="Cubicles5" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -27.048565, 0, 6.7363815)
+
+[node name="Cubicles21" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.622429, 0, -0.076963425)
+
+[node name="Cubicles22" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -27.048565, 0, 1.467596)
+
+[node name="Cubicles23" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -24.520645, 0, -4.5323887)
+
+[node name="Cubicles3" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.838443, 0, 0)
+
+[node name="Cubicles6" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.2444415)
+
+[node name="Cubicles7" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5.931671, 0, 4.964897)
+
+[node name="Cubicles8" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.013545, 0, 5.244442)
+
+[node name="Cubicles9" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -17.439682, 0, 6.813897)
+
+[node name="Cubicles10" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.838443, 0, 5.244442)
+
+[node name="Cubicles11" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -19.110872, 0, 17.987343)
+
+[node name="Cubicles12" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14.684736, 0, 16.350193)
+
+[node name="Cubicles13" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.606307, 0, 17.987343)
+
+[node name="Cubicles14" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 8.0433445, 0, 16.303246)
+
+[node name="Cubicles28" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1, 0, 7.1054274e-15, 0, 1, 0, -7.1054274e-15, 0, 1, 9.75831, 0, 21.19516)
+
+[node name="Cubicles29" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371138e-08, 0, -1, 0, 1, 0, 1, 0, -4.371138e-08, 5.321272, 0, 22.879257)
+
+[node name="Cubicles15" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10.418867, 0, 17.987343)
+
+[node name="Cubicles16" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -19.110872, 0, 12.521604)
+
+[node name="Cubicles17" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, -13.166595, 0, 12.720031)
+
+[node name="Cubicles34" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, -27.059248, 0, 24.826403)
+
+[node name="Cubicles18" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -6.1082296, 0, 12.521602)
+
+[node name="Cubicles19" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -1.6711903, 0, 10.897236)
+
+[node name="Cubicles20" parent="Cubicles" instance=ExtResource("8_vdjpe")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10.418867, 0, 12.521603)
+
+[node name="Walls" type="Node3D" parent="."]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.69155884, 1.5386047, -22)
 use_collision = true
-size = Vector3(0.54956055, 3.3691406, 4.0836954)
+size = Vector3(72.80133, 6.60553, 1)
 
-[node name="CSGBox3D6" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 5.9969015, 1.6831903, 3.6965861)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
-
-[node name="CSGBox3D16" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 6.5914803, 1.6831903, -8.133532)
+[node name="CSGBox3D6" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.293541, 1.5386047, -13.903353)
 use_collision = true
-size = Vector3(0.6887207, 3.3691406, 4.202836)
+size = Vector3(13.493301, 6.60553, 1)
 
-[node name="CSGBox3D17" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.3713253, 1.6831903, -6.1727448)
-size = Vector3(0.7669678, 3.3691406, 2.15201)
-
-[node name="CSGBox3D20" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.5626817, 1.6831903, -12.920019)
+[node name="CSGBox3D4" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.69155884, 1.5386047, 22.090683)
 use_collision = true
-size = Vector3(4.044739, 3.3691406, 3.036965)
+size = Vector3(72.80133, 6.60553, 1)
 
-[node name="CSGBox3D18" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -1.3672297, 1.6831903, -8.134524)
+[node name="CSGBox3D2" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 30.586075, 1.5386047, 0.7420578)
 use_collision = true
-size = Vector3(0.91052246, 3.3691406, 2.15201)
+size = Vector3(72.80133, 6.60553, 1)
 
-[node name="CSGBox3D24" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5.6094995, 1.6831903, -9.323675)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="CSGBox3D3" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -29.21402, 1.5386047, 0.7420578)
+use_collision = true
+size = Vector3(72.80133, 6.60553, 1)
 
-[node name="CSGBox3D22" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.2446713, 1.6831903, -15.319898)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="CSGBox3D5" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -19.068806, 1.5386047, -18.642027)
+use_collision = true
+size = Vector3(10.655811, 6.60553, 1)
 
-[node name="CSGBox3D19" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1494813, 1.6831903, -11.811703)
-size = Vector3(0.54956055, 3.3691406, 7.595864)
+[node name="CSGBox3D7" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -20.311836, 1.5386047, 20.321169)
+use_collision = true
+size = Vector3(13.493301, 6.60553, 1)
 
-[node name="CSGBox3D23" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.385583, 1.6831903, -12.325964)
-size = Vector3(0.54956055, 3.3691406, 6.567341)
+[node name="CSGBox3D8" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -25.05051, 1.5386047, 13.096434)
+use_collision = true
+size = Vector3(10.655811, 6.60553, 1)
 
-[node name="CSGBox3D25" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.4122176, 1.6831903, -10.519517)
-size = Vector3(0.54956055, 3.3691406, 2.9544468)
+[node name="CSGBox3D9" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 31.411522, 1.5386047, 14.339464)
+use_collision = true
+size = Vector3(13.493301, 6.60553, 1)
 
-[node name="CSGBox3D26" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-0.9997112, 0, -0.024030907, 0, 1, 0, 0.024030907, 0, -0.9997112, -8.798304, 1.6831903, 8.287572)
-size = Vector3(0.54956055, 3.3691406, 4.0836954)
+[node name="CSGBox3D11" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 30.6394, 1.5386047, -13.031475)
+size = Vector3(15.037544, 6.60553, 1)
 
-[node name="CSGBox3D27" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.02403095, 0, -0.9997112, 0, 1, 0, 0.9997112, 0, 0.02403095, -6.5496664, 1.6831903, 7.503834)
-size = Vector3(0.6887207, 3.3691406, 4.202836)
+[node name="CSGBox3D12" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 23.454008, 1.5386047, -20.025974)
+use_collision = true
+size = Vector3(15.037544, 6.60553, 1)
 
-[node name="CSGBox3D28" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.02403095, 0, -0.9997112, 0, 1, 0, 0.9997112, 0, 0.02403095, -2.3778496, 1.6831903, 5.4421988)
-size = Vector3(0.7669678, 3.3691406, 2.15201)
+[node name="CSGBox3D10" type="CSGBox3D" parent="Walls"]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 24.186787, 1.5386047, 19.078138)
+use_collision = true
+size = Vector3(10.655811, 6.60553, 1)
 
-[node name="CSGBox3D29" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.02403095, 0, -0.9997112, 0, 1, 0, 0.9997112, 0, 0.02403095, -2.4070072, 1.6831903, 12.192123)
-size = Vector3(4.044739, 3.3691406, 3.036965)
+[node name="AbilityOrb" parent="Walls" instance=ExtResource("9_n2ddm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.372929, 0.03658271, 17.28611)
+ability = 6
 
-[node name="CSGBox3D30" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.02403095, 0, -0.9997112, 0, 1, 0, 0.9997112, 0, 0.02403095, 1.406769, 1.6831903, 7.313571)
-size = Vector3(0.91052246, 3.3691406, 2.15201)
+[node name="AbilityOrb2" parent="Walls" instance=ExtResource("9_n2ddm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.827671, 0.03658271, -14.208359)
+ability = 6
 
-[node name="CSGBox3D31" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.024030415, 0.0066671083, -0.999689, -0.00016021695, 0.99997777, 0.0066651828, 0.9997112, 0, 0.02403095, 5.6775436, 1.6789523, 8.404968)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="AbilityOrb3" parent="Walls" instance=ExtResource("9_n2ddm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.943969, 0.03658271, -17.087414)
+ability = 6
 
-[node name="CSGBox3D32" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.024030415, 0.0066671083, -0.999689, -0.00016021695, 0.99997777, 0.0066651828, 0.9997112, 0, 0.02403095, 3.45748, 1.6937541, 14.440789)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="AbilityOrb4" parent="Walls" instance=ExtResource("9_n2ddm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.482023, 0.03658271, 16.76802)
+ability = 6
 
-[node name="CSGBox3D38" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.024030415, 0.0066671083, -0.999689, -0.00016021695, 0.99997777, 0.0066651828, 0.9997112, 0, 0.02403095, 1.8977346, 1.6937541, 14.474332)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="AbilityOrb5" parent="Walls" instance=ExtResource("9_n2ddm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.060129166, 0.03658271, -0.07227516)
+ability = 6
 
-[node name="CSGBox3D39" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.024030415, 0.0066671083, -0.999689, -0.00016021695, 0.99997777, 0.0066651828, 0.9997112, 0, 0.02403095, -7.5813417, 1.6937541, 10.025247)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="AbilityOrb6" parent="Walls" instance=ExtResource("9_n2ddm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.966952, 0.03658271, 2.9825332)
+ability = 6
 
-[node name="CSGBox3D36" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.024030415, 0.0066671083, -0.999689, -0.00016021695, 0.99997777, 0.0066651828, 0.9997112, 0, 0.02403095, 7.853866, 1.6794094, 13.322065)
-size = Vector3(0.54956055, 3.3691406, 6.456376)
+[node name="AbilityOrb7" parent="Walls" instance=ExtResource("9_n2ddm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.449789, 0.03658271, -4.4939203)
+ability = 6
 
-[node name="CSGBox3D33" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-0.9997112, 0, -0.024030907, 0, 1, 0, 0.024030907, 0, -0.9997112, 2.2771606, 1.6831903, 10.970889)
-size = Vector3(0.54956055, 3.3691406, 7.595864)
+[node name="AbilityOrb8" parent="Walls" instance=ExtResource("9_n2ddm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.706707, 0.03658271, -15.938844)
+ability = 6
 
-[node name="CSGBox3D34" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-0.999689, 0.0066671083, -0.024030373, 0.0066651828, 0.99997777, 0.00016021666, 0.024030907, 0, -0.9997112, 4.5249863, 1.6866367, 11.431267)
-size = Vector3(0.54956055, 3.3691406, 6.567341)
+[node name="Conferences" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.043388, 0, -6.428747)
 
-[node name="CSGBox3D35" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-0.999689, 0.0066671083, -0.024030373, 0.0066651828, 0.99997777, 0.00016021666, 0.024030907, 0, -0.9997112, 6.5075808, 1.6734183, 9.576639)
-size = Vector3(0.54956055, 3.3691406, 2.9544468)
+[node name="Conference" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3949852, 0, 0.12275028)
 
-[node name="CSGBox3D37" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-0.999689, 0.0066671083, -0.024030373, 0.0066651828, 0.99997777, 0.00016021666, 0.024030907, 0, -0.9997112, 10.445477, 1.6691253, 9.680746)
-size = Vector3(1.8319702, 3.3691406, 1.4617562)
+[node name="Conference7" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.8148, 0, -10.902391)
 
-[node name="CSGBox3D7" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 5.9969015, 1.6831903, -3.9606996)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="Conference5" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 9.173597, 0, -12.058924)
 
-[node name="CSGBox3D13" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.31778, 1.6831903, -0.1381321)
-size = Vector3(0.54956055, 3.3691406, 8.234684)
+[node name="Conference4" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -20.553331, 0, 13.106003)
 
-[node name="CSGBox3D14" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 34.190865, 1.6831903, 3.6965861)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="Conference8" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, -41.253292, 0, 13.106003)
 
-[node name="CSGBox3D15" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 34.190865, 1.6831903, -3.9606996)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="Conference9" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, -41.253292, 0, -0.6224909)
 
-[node name="CSGBox3D8" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5.9878693, 1.6831903, 3.6965861)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="Conference10" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(-4.371138e-08, 0, -1, 0, 1, 0, 1, 0, -4.371138e-08, 22.936451, 0, -0.6224909)
 
-[node name="CSGBox3D9" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5.9878693, 1.6831903, -3.9606996)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="Conference11" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(-4.371138e-08, 0, -1, 0, 1, 0, 1, 0, -4.371138e-08, 22.936451, 0, 13.106003)
 
-[node name="CSGBox3D10" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.691105, 1.6831903, -0.1381321)
-size = Vector3(0.50512695, 3.3691406, 8.234684)
+[node name="Conference6" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -7.818968, 0, 24.122982)
 
-[node name="CSGBox3D11" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -33.69246, 1.6831903, 3.6965861)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
+[node name="Conference2" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 5.5336466, 0, 12.747172)
 
-[node name="CSGBox3D12" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -33.69246, 1.6831903, -3.9606996)
-size = Vector3(0.54956055, 3.3691406, 2.15201)
-
-[node name="CSGBox3D3" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.03900385, -0.1919055, -0.1381321)
-size = Vector3(0.73779297, 3.3691406, 8.234684)
-
-[node name="CSGBox3D40" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.020383345, 0.7035744, 0.22441983)
-size = Vector3(0.107788086, 1.2044678, 1.3356099)
-
-[node name="CSGBox3D50" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 1.1339602, 0.5135779, 0.27562743)
-size = Vector3(0.028015137, 0.51093674, 0.39181256)
-
-[node name="CSGBox3D51" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3603535, 0.7551531, 0.2804756)
-size = Vector3(0.028015137, 0.51093674, 0.309501)
-
-[node name="CSGBox3D41" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.41234088, 0.42847043, -0.27289468)
-size = Vector3(0.4953003, 0.19918823, 0.21614558)
-
-[node name="CSGBox3D42" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.40970093, 0.42847043, -0.27289468)
-size = Vector3(0.4953003, 0.19918823, 0.21614558)
-
-[node name="CSGBox3D43" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.40970093, 0.42847043, 0.7363568)
-size = Vector3(0.4953003, 0.19918823, 0.21614558)
-
-[node name="CSGBox3D45" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.92452693, 0.34590513, 0.4292559)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D47" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.92452693, 0.34590513, 0.12029363)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D48" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 1.3515196, 0.34590513, 0.4292559)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D49" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 1.3515196, 0.34590513, 0.12029363)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D52" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-2.1208738e-10, -0.0048519936, -0.99998826, 1, -4.371139e-08, 0, -4.3710877e-08, -0.99998826, 0.0048519936, 0.27211055, 0.5135779, 1.1774614)
-size = Vector3(0.028015137, 0.51093674, 0.39181256)
-
-[node name="CSGBox3D53" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(0.0048519936, 0, -0.99998826, 0, 1, 0, 0.99998826, 0, 0.0048519936, 0.26836082, 0.7551531, 1.4038756)
-size = Vector3(0.028015137, 0.51093674, 0.309501)
-
-[node name="CSGBox3D46" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-2.1208738e-10, -0.0048519936, -0.99998826, 1, -4.371139e-08, 0, -4.3710877e-08, -0.99998826, 0.0048519936, 0.1174676, 0.34590513, 0.968776)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D54" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-2.1208738e-10, -0.0048519936, -0.99998826, 1, -4.371139e-08, 0, -4.3710877e-08, -0.99998826, 0.0048519936, 0.4264263, 0.34590513, 0.96727693)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D55" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-2.1208738e-10, -0.0048519936, -0.99998826, 1, -4.371139e-08, 0, -4.3710877e-08, -0.99998826, 0.0048519936, 0.119539365, 0.34590513, 1.3957636)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D56" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-2.1208738e-10, -0.0048519936, -0.99998826, 1, -4.371139e-08, 0, -4.3710877e-08, -0.99998826, 0.0048519936, 0.4284981, 0.34590513, 1.3942646)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D57" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.0156602e-08, 0.46112928, -0.88733304, 1, -4.371139e-08, 0, -3.8786553e-08, -0.88733304, -0.46112928, -0.79449743, 0.5135779, 1.2347612)
-size = Vector3(0.028015137, 0.51093674, 0.39181256)
-
-[node name="CSGBox3D58" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-0.46112928, 0, -0.88733304, 0, 1, 0, 0.88733304, 0, -0.46112928, -0.90319604, 0.7551531, 1.4334118)
-size = Vector3(0.028015137, 0.51093674, 0.309501)
-
-[node name="CSGBox3D59" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.0156602e-08, 0.46112928, -0.88733304, 1, -4.371139e-08, 0, -3.8786553e-08, -0.88733304, -0.46112928, -0.8342414, 0.34590513, 0.9780816)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D60" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.0156602e-08, 0.46112928, -0.88733304, 1, -4.371139e-08, 0, -3.8786553e-08, -0.88733304, -0.46112928, -0.5600889, 0.34590513, 1.1205531)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D61" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.0156602e-08, 0.46112928, -0.88733304, 1, -4.371139e-08, 0, -3.8786553e-08, -0.88733304, -0.46112928, -1.0311401, 0.34590513, 1.3569663)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D62" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.0156602e-08, 0.46112928, -0.88733304, 1, -4.371139e-08, 0, -3.8786553e-08, -0.88733304, -0.46112928, -0.7569877, 0.34590513, 1.4994378)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D63" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.182661e-08, 0.49933478, 0.8664092, 1, -4.3711385e-08, 6.20404e-17, 3.7871942e-08, 0.8664092, -0.49933478, -0.33984855, 0.5135779, -0.8596591)
-size = Vector3(0.028015137, 0.51093674, 0.39181256)
-
-[node name="CSGBox3D64" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-0.49933478, 0, 0.8664092, 0, 1, 0, -0.8664092, 0, -0.49933478, -0.44869405, 0.7551531, -1.0582292)
-size = Vector3(0.028015137, 0.51093674, 0.309501)
-
-[node name="CSGBox3D65" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.182661e-08, 0.49933478, 0.8664092, 1, -4.3711385e-08, 6.20404e-17, 3.7871942e-08, 0.8664092, -0.49933478, -0.10216603, 0.34590513, -0.7549163)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D66" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.182661e-08, 0.49933478, 0.8664092, 1, -4.3711385e-08, 6.20404e-17, 3.7871942e-08, 0.8664092, -0.49933478, -0.36985385, 0.34590513, -0.60064065)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D67" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.182661e-08, 0.49933478, 0.8664092, 1, -4.3711385e-08, 6.20404e-17, 3.7871942e-08, 0.8664092, -0.49933478, -0.31537837, 0.34590513, -1.1248666)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D68" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(2.182661e-08, 0.49933478, 0.8664092, 1, -4.3711385e-08, 6.20404e-17, 3.7871942e-08, 0.8664092, -0.49933478, -0.5830661, 0.34590513, -0.970591)
-size = Vector3(0.33016968, 0.07518768, 0.06266273)
-
-[node name="CSGBox3D44" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.46223384, 0.42847043, 0.7363568)
-size = Vector3(0.4953003, 0.19918823, 0.21614558)
-
-[node name="CSGBox3D4" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.5742043, -0.30906677, -0.0118534565)
-size = Vector3(0.7095947, 3.3691406, 3.9233785)
-
-[node name="CSGBox3D5" type="CSGBox3D" parent="Hedges"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 1.4854041, -0.30906677, -0.0118534565)
-size = Vector3(0.7095947, 3.3691406, 3.9233785)
+[node name="Conference3" parent="Conferences" instance=ExtResource("9_7wg7y")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -25.999954, 0, -2.5659084)

@@ -1,11 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://5w2u1jxldism"]
+[gd_scene load_steps=12 format=3 uid="uid://5w2u1jxldism"]
 
 [ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="1_ball"]
-[ext_resource type="PackedScene" uid="uid://dballspawner01" path="res://Components/BallSpawner/BallSpawner.tscn" id="99_bspawn"]
 [ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="2_spawn"]
 [ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="3_sp"]
 [ext_resource type="PackedScene" uid="uid://h4khs4eb658e" path="res://Components/CaptureTheFlag/base.tscn" id="4_base"]
 [ext_resource type="PackedScene" uid="uid://w6qvq64q0bhm" path="res://Components/Flag/flag.tscn" id="5_flag"]
+[ext_resource type="PackedScene" uid="uid://cryyg8edx41b5" path="res://Components/BallSpawner/BallSpawner.tscn" id="99_bspawn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hedge"]
 
@@ -21,6 +21,9 @@ glow_enabled = true
 [sub_resource type="StandardMaterial3D" id="GroundMaterial_hedge"]
 albedo_color = Color(0.286, 0.451, 0.243, 1)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ikx7c"]
+albedo_color = Color(0.26283506, 0.47923863, 0.27333885, 1)
+
 [node name="HedgeMaze" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -35,6 +38,111 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 use_collision = true
 size = Vector3(60, 1, 60)
 material = SubResource("GroundMaterial_hedge")
+
+[node name="Hedges" type="Node3D" parent="Floor"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0, 0, 0)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.407058, 1.6831903, -0.13813211)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 8.234684)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2949095, 1.6831903, -0.13813147)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 8.234684)
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6161847, 1.6831903, -2.2414806)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 4.0279865)
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4008536, 1.6831903, 2.164918)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 4.0279865)
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.498092, 1.6831903, 7.3859434)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 4.0279865)
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8495426, 1.6831903, 7.7424016)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 4.0279865)
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.7495537, 1.6831903, 9.276714)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 4.0279865)
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.2922726, 1.6831903, 7.304337)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 2.484208)
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4542241, 0.86916447, 10.997618)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 1.7410889, 3.347001)
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 1.6898202, 1.6831903, 12.4726715)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 4.898476)
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.5217237, 1.6831903, 11.701971)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 2.484208)
+
+[node name="CSGBox3D15" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0.42526764, 1.6831913, 9.36145)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(0.54956055, 3.3691406, 2.484208)
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9531302, 1.6831903, 2.314984)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(1.6541138, 3.3691406, 0.65494585)
+
+[node name="CSGBox3D16" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.219542, 1.6831903, 2.3149838)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(1.6541138, 3.3691406, 0.65494585)
+
+[node name="CSGBox3D18" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.871926, 1.6831903, -1.374276)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(2.5010529, 3.3691406, 2.7235508)
+
+[node name="CSGBox3D17" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.081186, 1.6831903, -2.8538663)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(8.301178, 3.3691406, 0.65494585)
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="Floor/Hedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5415158, 1.6831903, -2.399647)
+material_override = SubResource("StandardMaterial3D_ikx7c")
+use_collision = true
+size = Vector3(1.6541138, 3.3691406, 0.65494585)
 
 [node name="BallSpawners" type="Node3D" parent="."]
 
