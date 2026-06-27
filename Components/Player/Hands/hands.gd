@@ -246,9 +246,18 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 	# Holding a ball => throw it; otherwise grab the targeted free ball.
 	var held := _held_ball_of(actor)
 	if held:
+		# Capture the held ball's bomb state before the throw, so the triple-throw extras
+		# can match it (one bomb in hand => three bombs thrown).
+		var dodge := held as Dodgeball
+		var was_bomb := dodge != null and dodge.is_bomb()
 		held.throw(aim, power)
 		if actor.has_effect(Player.TRIPLE_THROW):
-			_throw_triple_extras(actor, aim, power)
+			_throw_triple_extras(actor, aim, power, was_bomb)
+		# Infinite ammo restocks the hand the instant the thrown ball leaves it.
+		if actor.has_effect(Player.INFINITE_AMMO):
+			var spawner := _ball_spawner()
+			if spawner:
+				spawner.refill_hand(actor)
 		return
 	if target_path.is_empty():
 		return
@@ -258,12 +267,12 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 
 # Server only. Fling two extra balls either side of the real throw for the x3 buff,
 # borrowing a BallSpawner's replicated container so the conjured balls reach every peer.
-func _throw_triple_extras(actor: Player, aim: Vector3, power: float) -> void:
+func _throw_triple_extras(actor: Player, aim: Vector3, power: float, as_bomb: bool) -> void:
 	var spawner := _ball_spawner()
 	if spawner == null:
 		return
 	for offset in [TRIPLE_SPREAD, -TRIPLE_SPREAD]:
-		spawner.launch_from_hand(actor, aim.rotated(Vector3.UP, offset), power)
+		spawner.launch_from_hand(actor, aim.rotated(Vector3.UP, offset), power, as_bomb)
 
 func _ball_spawner() -> BallSpawner:
 	for n in get_tree().get_nodes_in_group("ball_spawner"):
