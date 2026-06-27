@@ -53,6 +53,7 @@ const MAP_CHOICES := [
 	{"name": "Office", "path": "res://Screens/Maps/Office.tscn"},
 	{"name": "Hedge Maze", "path": "res://Screens/Maps/HedgeMaze.tscn"},
 	{"name": "Gauntlet Run", "path": "res://Screens/Maps/GauntletRun.tscn"},
+	{"name": "Wizard Tower", "path": "res://Screens/Maps/WizardTower.tscn"},
 ]
 
 # Classic mode is a Team-Battle tournament: TOURNAMENT_MAPS maps drawn at random from this
