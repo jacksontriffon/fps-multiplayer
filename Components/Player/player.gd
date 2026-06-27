@@ -153,6 +153,8 @@ const INFINITE_HEARTS := &"infinite_hearts"
 # the Stamina node reserves each owned ability's cost as a container slice, and the HUD
 # draws that container in the bar.
 const ABILITY_DASH := &"ability_dash"
+# ABILITY_DOUBLE_JUMP stacks: each jump orb grants it under its own source, so the source count
+# (effect_count) is how many mid-air jumps the player has — one orb double-jumps, two triple.
 const ABILITY_DOUBLE_JUMP := &"ability_double_jump"
 const ABILITY_BOMB := &"ability_bomb"
 
@@ -179,6 +181,11 @@ var _timed_effects := {}
 
 func has_effect(id: StringName) -> bool:
 	return _effects.has(id)
+
+# How many distinct sources grant an effect. For a stackable ability (double jump) each orb is
+# its own source, so this is the stack size — the number of mid-air jumps the player owns.
+func effect_count(id: StringName) -> int:
+	return _effects.get(id, {}).size()
 
 func set_effect(id: StringName, active: bool, source: StringName = &"default") -> void:
 	var sources: Dictionary = _effects.get(id, {})

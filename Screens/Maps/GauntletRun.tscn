@@ -262,6 +262,10 @@ ability = 3
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 4.85, -3)
 ability = 4
 
+[node name="DoubleJumpOrb2" parent="Abilities" instance=ExtResource("7_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -40)
+ability = 1
+
 [node name="Dodgeballs" type="Node3D" parent="."]
 
 [node name="Ball1" parent="Dodgeballs" instance=ExtResource("3_ball")]
