@@ -6,6 +6,10 @@ extends Node
 enum State { WAITING, PLAYING, ROUND_OVER, MATCH_OVER }
 
 const STARTING_LIVES := 3
+# Ceiling for a +1 Heart orb pickup. Capped at the round-start max because every heart also
+# reserves a slice of the stamina pool (see Stamina.PER_HEART) — letting hearts climb past
+# this would starve the bar, so the orb only ever restores a heart the player has lost.
+const MAX_LIVES := STARTING_LIVES
 const WIN_SCORE := 5
 const CTF_CAPTURE_LIMIT := 3
 # CTF isn't elimination-based, so a knocked-out player isn't gone for good: they sit out
@@ -300,6 +304,21 @@ func server_player_fell(id: int) -> void:
 		_respawn(id)
 	_broadcast()
 	_check_round_end()
+
+# A +1 Heart orb pickup. The picker's own client calls this (rpc'd to the host), which
+# restores one lost heart up to MAX_LIVES and broadcasts. Only meaningful during a live
+# match and never revives an eliminated player (0 hearts) — that's an elimination, not a wound.
+@rpc("any_peer", "reliable")
+func request_add_heart() -> void:
+	server_add_heart(multiplayer.get_remote_sender_id())
+
+func server_add_heart(id: int) -> void:
+	if not multiplayer.is_server() or state != State.PLAYING:
+		return
+	if lives.get(id, 0) <= 0 or lives[id] >= MAX_LIVES:
+		return
+	lives[id] += 1
+	_broadcast()
 
 # Whether thrower_id's ball is allowed to get victim_id out. Central source of
 # truth for the hit rules; the ball's detection and this scoring path both use it.
