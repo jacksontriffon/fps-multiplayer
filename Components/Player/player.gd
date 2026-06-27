@@ -165,6 +165,12 @@ const ABILITY_BOMB := &"ability_bomb"
 const INFINITE_AMMO := &"infinite_ammo"
 const INFINITE_AMMO_DURATION := 12.0
 
+# Timed power-up: while held, every throw flings three balls in a spread instead of one
+# (Hands conjures the two extras on the server). Granted with a duration by the orb and
+# ticked down on every peer; the Stamina node reserves a slice that shrinks as it expires.
+const TRIPLE_THROW := &"triple_throw"
+const TRIPLE_THROW_DURATION := 12.0
+
 var _effects := {}
 
 # Effect id -> {"left": seconds, "source": StringName} for effects that auto-expire. Ticked

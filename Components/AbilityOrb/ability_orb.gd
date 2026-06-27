@@ -11,13 +11,14 @@ class_name AbilityOrb
 
 const SOURCE := &"ability_orb"
 
-enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO }
+enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW }
 
 const EFFECTS := {
 	Ability.DASH: Player.ABILITY_DASH,
 	Ability.DOUBLE_JUMP: Player.ABILITY_DOUBLE_JUMP,
 	Ability.BOMB: Player.ABILITY_BOMB,
 	Ability.INFINITE_AMMO: Player.INFINITE_AMMO,
+	Ability.TRIPLE_THROW: Player.TRIPLE_THROW,
 }
 
 const COLORS := {
@@ -25,6 +26,7 @@ const COLORS := {
 	Ability.DOUBLE_JUMP: Color(0.75, 0.45, 1.0),
 	Ability.BOMB: Color(1.0, 0.45, 0.1),
 	Ability.INFINITE_AMMO: Color(1.0, 0.82, 0.2),
+	Ability.TRIPLE_THROW: Color(0.3, 0.9, 0.45),
 }
 
 # Billboard icon (two chevrons for dash, wings for double jump, a bomb for the explosion
@@ -35,18 +37,21 @@ const ICONS := {
 	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_double_jump.svg"),
 	Ability.BOMB: preload("res://Assets/Textures/UI/ability_bomb.svg"),
 	Ability.INFINITE_AMMO: preload("res://Assets/Textures/UI/ability_infinite.svg"),
+	Ability.TRIPLE_THROW: preload("res://Assets/Textures/UI/ability_triple.svg"),
 }
 const NAMES := {
 	Ability.DASH: "Dash",
 	Ability.DOUBLE_JUMP: "Double Jump",
 	Ability.BOMB: "Explosion",
 	Ability.INFINITE_AMMO: "Infinite Ammo",
+	Ability.TRIPLE_THROW: "Triple Throw",
 }
 
 # Abilities listed here are timed buffs (seconds), not permanent unlocks; the orb respawns
 # RESPAWN_DELAY seconds after such a pickup. Anything absent is a permanent one-shot grant.
 const DURATIONS := {
 	Ability.INFINITE_AMMO: Player.INFINITE_AMMO_DURATION,
+	Ability.TRIPLE_THROW: Player.TRIPLE_THROW_DURATION,
 }
 const RESPAWN_DELAY := 15.0
 

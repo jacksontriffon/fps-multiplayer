@@ -15,6 +15,8 @@ const STAMINA_PX_PER_UNIT := 3.0
 const HEART_WIDTH := Stamina.PER_HEART * STAMINA_PX_PER_UNIT
 # Gold, matching the infinite-ammo orb, for the buff's cell in the stamina bar.
 const COLORS_AMMO := Color(1.0, 0.82, 0.2)
+# Green, matching the triple-throw orb, for that buff's cell in the stamina bar.
+const COLORS_TRIPLE := Color(0.3, 0.9, 0.45)
 
 @onready var bottom_bar: HBoxContainer = %BottomBar
 @onready var stamina_panel: Panel = %StaminaBar
@@ -89,6 +91,11 @@ var _infinity_label: Label
 var _ammo_cell: Panel
 var _ammo_style: StyleBoxFlat
 
+# Green container slice in the stamina bar for the triple-throw buff, sized to its
+# reservation the same way the ammo cell is.
+var _triple_cell: Panel
+var _triple_style: StyleBoxFlat
+
 # Ability container cells in the stamina bar, one per unlockable movement ability. Each
 # is a coloured slice sized to the ability's cost (so it lines up with the stamina the
 # bar reserves for it), bright when armed and dim when there isn't enough to fire it.
@@ -107,6 +114,7 @@ func _ready() -> void:
 	stamina_panel.custom_minimum_size.x = Stamina.MAX * STAMINA_PX_PER_UNIT
 	_build_ability_cells()
 	_build_ammo_cell()
+	_build_triple_cell()
 	_build_creative_label()
 
 func _process(delta: float) -> void:
@@ -125,10 +133,11 @@ func _update_bar(id: int) -> void:
 	var player := _local_player()
 	var infinite := player != null and player.has_effect(Player.INFINITE_HEARTS)
 	var infinite_ammo := player != null and player.has_effect(Player.INFINITE_AMMO)
+	var triple := player != null and player.has_effect(Player.TRIPLE_THROW)
 	# Show the bar during a match, or whenever the local player carries a lobby buff
-	# (infinite hearts in the zone, or the infinite-ammo pickup) so its slots/timer read.
+	# (infinite hearts in the zone, or the infinite-ammo / triple-throw pickup) so its slots/timer read.
 	var playing := MatchManager.state != MatchManager.State.WAITING and MatchManager.lives.has(id)
-	var show := playing or infinite or infinite_ammo
+	var show := playing or infinite or infinite_ammo or triple
 	bottom_bar.visible = show
 	if not show:
 		return
@@ -156,6 +165,7 @@ func _update_stamina() -> void:
 	var player := _local_player()
 	_update_ability_cells(player)
 	_update_ammo_cell(player)
+	_update_triple_cell(player)
 	if player == null:
 		stamina_bar.visible = false
 		return
@@ -291,6 +301,36 @@ func _update_ammo_cell(player: Player) -> void:
 	var amount := player.stamina.reserved(Stamina.RES_INFINITE_AMMO) if player else 0.0
 	_ammo_cell.visible = amount > 0.0
 	_ammo_cell.custom_minimum_size.x = amount * STAMINA_PX_PER_UNIT
+
+# A green ×3 slice in the stamina bar for the triple-throw buff, built and sized like the
+# ammo cell so it shrinks as the buff runs down.
+func _build_triple_cell() -> void:
+	_triple_style = StyleBoxFlat.new()
+	_triple_style.corner_radius_top_left = 3
+	_triple_style.corner_radius_top_right = 3
+	_triple_style.corner_radius_bottom_right = 3
+	_triple_style.corner_radius_bottom_left = 3
+	_triple_style.bg_color = COLORS_TRIPLE
+	_triple_cell = Panel.new()
+	_triple_cell.custom_minimum_size = Vector2(0, 0)
+	_triple_cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_triple_cell.visible = false
+	_triple_cell.add_theme_stylebox_override("panel", _triple_style)
+	var label := Label.new()
+	label.text = "×3"
+	label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_size_override("font_size", 16)
+	_triple_cell.add_child(label)
+	lives_box.add_child(_triple_cell)
+	lives_box.move_child(_triple_cell, 1)  # right after the stamina fill (child 0)
+
+func _update_triple_cell(player: Player) -> void:
+	var amount := player.stamina.reserved(Stamina.RES_TRIPLE_THROW) if player else 0.0
+	_triple_cell.visible = amount > 0.0
+	_triple_cell.custom_minimum_size.x = amount * STAMINA_PX_PER_UNIT
 
 func _update_hurt(delta: float, id: int) -> void:
 	var n: int = MatchManager.lives.get(id, -1)

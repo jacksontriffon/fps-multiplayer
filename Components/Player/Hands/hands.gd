@@ -43,6 +43,9 @@ const AIM_MAX_DISTANCE := 1000.0
 const INTERACT_CONE_HALF_ANGLE := deg_to_rad(12.0)
 const INTERACT_REACH := 3.0
 
+# Triple-throw buff: the two extra balls fan out this far either side of the real throw.
+const TRIPLE_SPREAD := deg_to_rad(8.0)
+
 var grabbable_objects: Array[Grabbable] = []
 var highlighted: Grabbable = null
 
@@ -244,12 +247,29 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 	var held := _held_ball_of(actor)
 	if held:
 		held.throw(aim, power)
+		if actor.has_effect(Player.TRIPLE_THROW):
+			_throw_triple_extras(actor, aim, power)
 		return
 	if target_path.is_empty():
 		return
 	var ball := get_node_or_null(target_path) as Grabbable
 	if ball:
 		ball.grab(peer_id)
+
+# Server only. Fling two extra balls either side of the real throw for the x3 buff,
+# borrowing a BallSpawner's replicated container so the conjured balls reach every peer.
+func _throw_triple_extras(actor: Player, aim: Vector3, power: float) -> void:
+	var spawner := _ball_spawner()
+	if spawner == null:
+		return
+	for offset in [TRIPLE_SPREAD, -TRIPLE_SPREAD]:
+		spawner.launch_from_hand(actor, aim.rotated(Vector3.UP, offset), power)
+
+func _ball_spawner() -> BallSpawner:
+	for n in get_tree().get_nodes_in_group("ball_spawner"):
+		if n is BallSpawner:
+			return n
+	return null
 
 # --- Detection -------------------------------------------------------------
 func _on_grabbable_area_body_entered(body: Node3D) -> void:
