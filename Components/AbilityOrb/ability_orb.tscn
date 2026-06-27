@@ -40,14 +40,12 @@ omni_range = 4.0
 pixel_size = 0.0085
 billboard = 1
 shaded = false
-no_depth_test = true
 texture_filter = 5
 
 [node name="NameLabel" type="Label3D" parent="Bob"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.66, 0)
 visible = false
 billboard = 1
-no_depth_test = true
 pixel_size = 0.004
 font_size = 64
 outline_size = 14

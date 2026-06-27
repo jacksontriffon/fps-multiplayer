@@ -27,6 +27,16 @@ func _ready() -> void:
 	_base_color = _ball_material.albedo_color
 	ball_mesh.material_override = _ball_material
 
+# True while this ball is a live bomb (the holder carries the explosion upgrade, or it's an
+# armed pickup). Lets a triple throw conjure extras that match the ball actually in hand.
+func is_bomb() -> bool:
+	return _explosive != null and _explosive.armed
+
+# Arm this ball so a triple-throw extra detonates like the bomb it was flung alongside.
+func arm_as_bomb() -> void:
+	if _explosive:
+		_explosive.armed = true
+
 # --- Lifecycle, forwarded to behaviour components ----------------------------
 
 func grab(peer_id: int) -> bool:

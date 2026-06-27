@@ -24,6 +24,11 @@ const LOBBY_MAP := "res://Screens/Maps/LobbyMap.tscn"
 @export var dev_mode: bool = false
 
 var lobby_id: int = 0
+# Per-instance random seed for deterministic-but-varied map content (e.g. RANDOM ability orbs).
+# The server mints a fresh one for every load_map and ships it to all peers through that RPC, so
+# each map instance rolls the same on every peer yet differs each time it loads. Seeded here too
+# (randi() is auto-seeded per launch) for the authored lobby map, which never goes through load_map.
+var match_seed: int = randi()
 var peer: MultiplayerPeer
 var is_host: bool = false
 var is_joining: bool = false
@@ -112,7 +117,7 @@ func _teardown_session() -> void:
 	lobby_id = 0
 	current_map_path = LOBBY_MAP
 	MatchManager.reset_for_rehost()
-	load_map(LOBBY_MAP)
+	load_map(LOBBY_MAP, randi())
 
 
 # --- Map swapping ----------------------------------------------------------
@@ -120,8 +125,9 @@ func _teardown_session() -> void:
 # Swap MapContainer's single child to `path`. call_local so the host loads too; every peer
 # instances the same scene named "Map" → identical node paths for the synchronizers inside.
 @rpc("authority", "call_local", "reliable")
-func load_map(path: String) -> void:
+func load_map(path: String, p_match_seed: int = match_seed) -> void:
 	current_map_path = path
+	match_seed = p_match_seed  # adopt this load's seed before the map (and its orbs) instance
 	for c in map_container.get_children():
 		c.free()  # immediate, not queue_free: never let two maps coexist for a frame
 	# A player map saved to user:// only exists on the host's machine, so a client can be asked
@@ -144,7 +150,7 @@ func request_current_map() -> void:
 	if not multiplayer.is_server():
 		return
 	var joiner := multiplayer.get_remote_sender_id()
-	load_map.rpc_id(joiner, current_map_path)
+	load_map.rpc_id(joiner, current_map_path, match_seed)
 	# The joiner just loaded the bare map; catch them up to the current creative layout.
 	CreativeManager.send_overrides_to(joiner, current_map_path)
 

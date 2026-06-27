@@ -44,11 +44,10 @@ const DASH_BLEED = 5.0
 const HIT_TRAUMA = 0.6
 
 # Knockdown stun: a fast hit ragdolls the body and suspends control for this long,
-# then we stand back up. The first-person camera follows the tumble, but only leans
-# part-way toward the body's fall (never a full invert) and eases there.
+# then we stand back up. While stunned the view pulls back to a third-person camera that
+# watches the body tumble, then returns to first-person on recovery.
 const KNOCKDOWN_TIME := 2.2
-const KNOCKDOWN_CAM_LEAN := 0.35
-const KNOCKDOWN_CAM_DAMP := 6.0
+const KNOCKDOWN_CAM_PITCH := 0.3
 
 # Death cam: how long we frame the dead player's own body before swapping to spectate
 # a living teammate.
@@ -165,6 +164,12 @@ const ABILITY_BOMB := &"ability_bomb"
 const INFINITE_AMMO := &"infinite_ammo"
 const INFINITE_AMMO_DURATION := 12.0
 
+# Timed power-up: while held, every throw flings three balls in a spread instead of one
+# (Hands conjures the two extras on the server). Granted with a duration by the orb and
+# ticked down on every peer; the Stamina node reserves a slice that shrinks as it expires.
+const TRIPLE_THROW := &"triple_throw"
+const TRIPLE_THROW_DURATION := 12.0
+
 var _effects := {}
 
 # Effect id -> {"left": seconds, "source": StringName} for effects that auto-expire. Ticked
@@ -272,6 +277,7 @@ func apply_knockdown(impulse: Vector3, duration: float, fatal: bool) -> void:
 	else:
 		_knocked_down = true
 		_knockdown_timer = duration
+		_enter_knockdown_cam()
 
 func _enter_tree() -> void:
 	set_multiplayer_authority(name.to_int())
@@ -493,9 +499,15 @@ func _mirror_ragdoll() -> void:
 	var b := ragdoll.global_transform.basis.orthonormalized()
 	global_transform = Transform3D(b, ragdoll.global_position - b * RAGDOLL_OFFSET)
 
+# Pull back to a third-person orbit aimed at the body, watching it tumble until we stand up.
+func _enter_knockdown_cam() -> void:
+	_ensure_spectator_cam()
+	_spec_yaw = head.rotation.y
+	_spec_pitch = KNOCKDOWN_CAM_PITCH
+
 func _process_knockdown(delta: float) -> void:
 	_mirror_ragdoll()
-	_tame_first_person_camera(delta)
+	_aim_camera_at(_body_center())
 	_knockdown_timer -= delta
 	if _knockdown_timer <= 0.0:
 		_recover()
@@ -513,6 +525,7 @@ func _recover() -> void:
 	ragdoll.collision_mask = 0
 	global_rotation = Vector3.ZERO
 	global_position = rest - RAGDOLL_OFFSET + Vector3.UP * RECOVER_LIFT
+	_exit_spectator_cam()
 	camera.rotation = Vector3.ZERO
 	collision_shape.disabled = false
 	velocity = Vector3.ZERO
@@ -588,21 +601,6 @@ func _revive() -> void:
 	spectate_text = ""
 	if is_multiplayer_authority():
 		_exit_spectator_cam()
-
-# Lean the first-person camera part-way into the fall and ease there, so it follows the
-# body down without ever fully inverting.
-func _tame_first_person_camera(delta: float) -> void:
-	var fall := global_transform.basis
-	var lean_up := Vector3.UP.slerp(fall.y.normalized(), KNOCKDOWN_CAM_LEAN)
-	if lean_up.length() < 0.01:
-		lean_up = Vector3.UP
-	var fwd := -fall.z
-	fwd = fwd - lean_up * fwd.dot(lean_up)
-	if fwd.length() < 0.01:
-		fwd = -camera.global_transform.basis.z
-	var target := Basis.looking_at(fwd.normalized(), lean_up.normalized())
-	var b := camera.global_transform.basis.slerp(target, clampf(delta * KNOCKDOWN_CAM_DAMP, 0.0, 1.0))
-	camera.global_transform = Transform3D(b.orthonormalized(), camera.global_position)
 
 # --- Spectator --------------------------------------------------------------
 
