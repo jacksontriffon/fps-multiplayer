@@ -107,7 +107,9 @@ func _refresh_reservations() -> void:
 	if player.has_effect(Player.TRIPLE_THROW):
 		var triple_total := player.effect_total_time(Player.TRIPLE_THROW)
 		var max_allowed := maxf(capacity() - TRIPLE_MIN_CAPACITY, 0.0)
-		var want := (player.effect_time_left(Player.TRIPLE_THROW) / triple_total) * TRIPLE_MAX_RESERVE if triple_total > 0.0 else TRIPLE_CONST_RESERVE
+		# Constant grant grows its fixed slice per stack so the cell widens with each pickup.
+		var stacks := maxi(player.effect_stacks(Player.TRIPLE_THROW), 1)
+		var want := (player.effect_time_left(Player.TRIPLE_THROW) / triple_total) * TRIPLE_MAX_RESERVE if triple_total > 0.0 else TRIPLE_CONST_RESERVE * stacks
 		reserve(RES_TRIPLE_THROW, minf(want, max_allowed))
 
 func _physics_process(delta: float) -> void:

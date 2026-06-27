@@ -55,6 +55,12 @@ const NAMES := {
 	Ability.TRIPLE_THROW: "Triple Throw",
 }
 
+# Abilities that stack on a repeat pickup instead of being a no-op: each extra grant raises the
+# effect's level (triple throw triples the thrown balls per level — see Hands).
+const STACKABLE := {
+	Ability.TRIPLE_THROW: true,
+}
+
 # How long a timed orb (time_limit > 0) stays gone after a pickup before it deterministically
 # pops back, so a buff can be grabbed again without a round reset.
 const RESPAWN_DELAY := 15.0
@@ -160,14 +166,22 @@ func _on_body_entered(body: Node3D) -> void:
 	if _collected or not (body is Player):
 		return
 	_collected = true
+	var eid := _effect_id()
+	var stackable: bool = STACKABLE.has(_resolved)
 	if time_limit > 0.0:
 		# Timed buff: grant it (it self-expires on the player) and hide the orb until it respawns.
-		body.grant_timed_effect(_effect_id(), time_limit, SOURCE)
+		body.grant_timed_effect(eid, time_limit, SOURCE)
+		if stackable:
+			body.add_effect_stack(eid, SOURCE)
 		_hide_collected()
 		_respawn_left = RESPAWN_DELAY
 	else:
-		# Constant grant: kept until the round resets it, which also respawns this orb.
-		body.set_effect(_effect_id(), true, SOURCE)
+		# Constant grant: kept until the round resets it, which also respawns this orb. A stackable
+		# ability raises its level on each pickup instead of being a one-shot toggle.
+		if stackable:
+			body.add_effect_stack(eid, SOURCE)
+		else:
+			body.set_effect(eid, true, SOURCE)
 		_consume()
 
 # Tint the core, glow and floor ring to the ability's colour so the orb reads at a
