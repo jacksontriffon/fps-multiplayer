@@ -57,7 +57,9 @@ func _held_ball(player: Player) -> Grabbable:
 func _spawn_into_hand(player: Player) -> void:
 	var ball := BALL_SCENE.instantiate()
 	ball.ephemeral = true
-	balls.add_child(ball)  # under the MultiplayerSpawner's path, so it replicates to every peer
+	# force_readable_name so the node gets a non-reserved name; the MultiplayerSpawner
+	# refuses to auto-replicate children whose auto-name starts with "@".
+	balls.add_child(ball, true)  # under the MultiplayerSpawner's path, so it replicates to every peer
 	if not ball.grab(player.name.to_int()):
 		ball.queue_free()
 		return
@@ -72,7 +74,7 @@ func _spawn_into_hand(player: Player) -> void:
 func launch_from_hand(player: Player, direction: Vector3, power: float) -> void:
 	var ball := BALL_SCENE.instantiate()
 	ball.ephemeral = true
-	balls.add_child(ball)  # under the MultiplayerSpawner's path, so it replicates to every peer
+	balls.add_child(ball, true)  # under the MultiplayerSpawner's path, so it replicates to every peer
 	if not ball.grab(player.name.to_int()):
 		ball.queue_free()
 		return
@@ -96,4 +98,4 @@ func _spawn_ball() -> void:
 	var ball := BALL_SCENE.instantiate()
 	# Local zero = the spawn point; set before add_child so the spawn replication carries it.
 	ball.position = Vector3.ZERO
-	balls.add_child(ball)
+	balls.add_child(ball, true)
