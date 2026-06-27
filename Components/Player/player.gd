@@ -155,6 +155,9 @@ const INFINITE_HEARTS := &"infinite_hearts"
 const ABILITY_DASH := &"ability_dash"
 const ABILITY_DOUBLE_JUMP := &"ability_double_jump"
 const ABILITY_BOMB := &"ability_bomb"
+# Each owned ABILITY_EXTRA_JUMP grants one more mid-air jump on top of double jump, so the
+# DoubleJump node counts both abilities when refilling its air-jump budget.
+const ABILITY_EXTRA_JUMP := &"ability_extra_jump"
 
 # Timed power-up: while held, the BallSpawner keeps your hand stocked, so you never
 # run out of dodgeballs (and they auto-arm if you also carry ABILITY_BOMB). Granted with a
