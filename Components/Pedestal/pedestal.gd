@@ -11,12 +11,13 @@ class_name Pedestal
 # exports — drag any 3D node into them to swap the look. @tool so the object swaps in the
 # editor the moment you change the mode or the references.
 
-enum GameMode { TEAM, CAPTURE_THE_FLAG, BATTLE_ROYALE }
+enum GameMode { TEAM, CAPTURE_THE_FLAG, BATTLE_ROYALE, RACE }
 
 const MODE_NAMES := {
 	GameMode.TEAM: "Team Battle",
 	GameMode.CAPTURE_THE_FLAG: "Capture the Flag",
 	GameMode.BATTLE_ROYALE: "Battle Royale",
+	GameMode.RACE: "Race",
 }
 
 # Floating-object highlight: rests at its authored scale, swells when you're in range.

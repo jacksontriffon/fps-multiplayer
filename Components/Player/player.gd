@@ -320,6 +320,18 @@ func respawn_remote(pos: Vector3, yaw: float, t: int) -> void:
 	head.rotation.y = yaw
 	camera.rotation = Vector3.ZERO
 
+# Server -> every peer: wipe all granted upgrades (the ability unlocks and any timed buff) back
+# to the default, orb-less state. Called when a match (re)starts or the map changes so abilities
+# don't carry over and must be re-collected. Broadcast so every peer's copy agrees (the same
+# deterministic model the granting orbs use); the Stamina bar and HUD re-read has_effect next
+# frame, so clearing the dictionaries is enough.
+@rpc("any_peer", "call_local", "reliable")
+func reset_upgrades() -> void:
+	if not (multiplayer.get_remote_sender_id() in [0, 1]):
+		return
+	_effects.clear()
+	_timed_effects.clear()
+
 func _apply_team_color() -> void:
 	if not is_node_ready():
 		return

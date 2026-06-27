@@ -29,6 +29,7 @@ CTFManager="*res://Global/Autoload/CTFManager.gd"
 HUD="*res://Global/HUD/HUD.tscn"
 PauseMenu="*res://Global/UI/PauseMenu.tscn"
 MapSelect="*res://Global/UI/MapSelect.tscn"
+EndScreen="*res://Global/UI/EndScreen.tscn"
 CreativeManager="*res://Global/Autoload/CreativeManager.gd"
 
 [editor]
