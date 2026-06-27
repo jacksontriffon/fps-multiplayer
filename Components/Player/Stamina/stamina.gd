@@ -29,6 +29,11 @@ const BOMB_COST := PER_HEART
 const RES_INFINITE_AMMO := &"infinite_ammo"
 const AMMO_MAX_RESERVE := 100.0
 const AMMO_MIN_CAPACITY := 25.0
+# The triple-throw buff reserves a slice the same way: biggest at pickup, shrinking to
+# nothing as it expires, capped so a sliver of pool always survives to charge a throw.
+const RES_TRIPLE_THROW := &"triple_throw"
+const TRIPLE_MAX_RESERVE := 100.0
+const TRIPLE_MIN_CAPACITY := 25.0
 
 @export var player: Player
 
@@ -91,6 +96,12 @@ func _refresh_reservations() -> void:
 		var frac := clampf(player.effect_time_left(Player.INFINITE_AMMO) / Player.INFINITE_AMMO_DURATION, 0.0, 1.0)
 		var max_allowed := maxf(capacity() - AMMO_MIN_CAPACITY, 0.0)
 		reserve(RES_INFINITE_AMMO, minf(frac * AMMO_MAX_RESERVE, max_allowed))
+	# Triple throw: same shrinking slice as infinite ammo, capped against the pool left after it.
+	reserve(RES_TRIPLE_THROW, 0.0)
+	if player.has_effect(Player.TRIPLE_THROW) and Player.TRIPLE_THROW_DURATION > 0.0:
+		var frac := clampf(player.effect_time_left(Player.TRIPLE_THROW) / Player.TRIPLE_THROW_DURATION, 0.0, 1.0)
+		var max_allowed := maxf(capacity() - TRIPLE_MIN_CAPACITY, 0.0)
+		reserve(RES_TRIPLE_THROW, minf(frac * TRIPLE_MAX_RESERVE, max_allowed))
 
 func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():

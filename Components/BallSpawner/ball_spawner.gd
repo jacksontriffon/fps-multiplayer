@@ -16,6 +16,10 @@ const BALL_SCENE := preload("res://Components/Dodgeball/dodgeball.tscn")
 
 var _elapsed := 0.0
 
+func _ready() -> void:
+	# Found by Hands so the triple-throw buff can borrow this spawner's replicated container.
+	add_to_group("ball_spawner")
+
 func _physics_process(delta: float) -> void:
 	# Only the host spawns; mirrors grabbable.gd's guard so a peer connecting after _ready works.
 	if not multiplayer.has_multiplayer_peer() or not multiplayer.is_server():
@@ -60,6 +64,22 @@ func _spawn_into_hand(player: Player) -> void:
 	var marker := player.get_node_or_null("Head/Camera3D/Hands/MeshInstance3D/RightHandMarker")
 	if marker:
 		ball.global_position = marker.global_position
+
+# Conjure one extra ball already leaving a player's hand for the triple-throw buff, then
+# throw it. Server-only; mirrors _spawn_into_hand but launches the ball instead of leaving
+# it held. Ephemeral so the spread doesn't litter the arena, and grab() arms it for bomb
+# carriers so the extras carry whatever the real throw would.
+func launch_from_hand(player: Player, direction: Vector3, power: float) -> void:
+	var ball := BALL_SCENE.instantiate()
+	ball.ephemeral = true
+	balls.add_child(ball)  # under the MultiplayerSpawner's path, so it replicates to every peer
+	if not ball.grab(player.name.to_int()):
+		ball.queue_free()
+		return
+	var marker := player.get_node_or_null("Head/Camera3D/Hands/MeshInstance3D/RightHandMarker")
+	if marker:
+		ball.global_position = marker.global_position
+	ball.throw(direction, power)
 
 # Don't pile a new ball onto an existing ball or a standing player.
 func _space_clear() -> bool:
