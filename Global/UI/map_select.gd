@@ -129,7 +129,7 @@ func _build_map_buttons() -> void:
 	for c in map_list.get_children():
 		c.free()
 	_map_group = ButtonGroup.new()
-	for choice in MatchManager.MAP_CHOICES:
+	for choice in MatchManager.map_choices():
 		_add_map_button(choice["name"], choice["path"])
 	# Player maps built in creative mode (saved to user://) — selectable for local testing.
 	var player_maps: Array = CreativeManager.list_player_maps()
