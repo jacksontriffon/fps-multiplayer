@@ -347,6 +347,23 @@ func server_player_fell(id: int) -> void:
 	_broadcast()
 	_check_round_end()
 
+# A +1 Heart orb pickup. The picker's own client calls this (rpc'd to the host), which adds
+# a heart and broadcasts. There's no ceiling — players can stack hearts past the round-start
+# count (each one also reserves a slice of the stamina pool, so it's a survivability/stamina
+# trade). Only meaningful during a live match and never revives an eliminated player (0 hearts)
+# — that's an elimination, not a wound.
+@rpc("any_peer", "reliable")
+func request_add_heart() -> void:
+	server_add_heart(multiplayer.get_remote_sender_id())
+
+func server_add_heart(id: int) -> void:
+	if not multiplayer.is_server() or state != State.PLAYING:
+		return
+	if lives.get(id, 0) <= 0:
+		return
+	lives[id] += 1
+	_broadcast()
+
 # Whether thrower_id's ball is allowed to get victim_id out. Central source of
 # truth for the hit rules; the ball's detection and this scoring path both use it.
 func can_hit(victim_id: int, thrower_id: int) -> bool:

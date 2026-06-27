@@ -16,10 +16,10 @@ class_name AbilityOrb
 
 const SOURCE := &"ability_orb"
 
-# RANDOM is a meta-pick (kept last so the real abilities keep their numeric values): an orb
-# set to it rolls one of the concrete abilities below. See `ability`/_roll_ability for how the
-# roll stays identical on every peer.
-enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, RANDOM }
+# RANDOM is a meta-pick (kept last so the real abilities keep their numeric values, and so a
+# roll covers the whole HEART..DASH range): an orb set to it rolls one of the concrete
+# abilities below. See `ability`/_roll_ability for how the roll stays identical on every peer.
+enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, HEART, RANDOM }
 
 # Stackable abilities grant per-orb (each pickup raises the effect's level) rather than as a
 # single unlock — see _grant_source, which gives each orb its own grant source so the player's
@@ -30,6 +30,8 @@ const STACKABLE := {
 	Ability.TRIPLE_THROW: true,
 }
 
+# Player effects granted by each ability. HEART is absent: it isn't a player effect but a
+# server-authoritative heart added to MatchManager.lives (see _collect_heart).
 const EFFECTS := {
 	Ability.DASH: Player.ABILITY_DASH,
 	Ability.DOUBLE_JUMP: Player.ABILITY_DOUBLE_JUMP,
@@ -44,6 +46,7 @@ const COLORS := {
 	Ability.BOMB: Color(1.0, 0.45, 0.1),
 	Ability.INFINITE_AMMO: Color(1.0, 0.82, 0.2),
 	Ability.TRIPLE_THROW: Color(0.3, 0.9, 0.45),
+	Ability.HEART: Color(0.95, 0.25, 0.35),
 }
 
 # Billboard icon (two chevrons for dash, an up arrow with a plus for the stacking +1 Jump, a
@@ -55,6 +58,7 @@ const ICONS := {
 	Ability.BOMB: preload("res://Assets/Textures/UI/ability_bomb.svg"),
 	Ability.INFINITE_AMMO: preload("res://Assets/Textures/UI/ability_infinite.svg"),
 	Ability.TRIPLE_THROW: preload("res://Assets/Textures/UI/ability_triple.svg"),
+	Ability.HEART: preload("res://Assets/Textures/UI/ability_heart.svg"),
 }
 const NAMES := {
 	Ability.DASH: "Dash",
@@ -62,6 +66,7 @@ const NAMES := {
 	Ability.BOMB: "Explosion",
 	Ability.INFINITE_AMMO: "Infinite Ammo",
 	Ability.TRIPLE_THROW: "Triple Throw",
+	Ability.HEART: "+1 Heart",
 }
 
 # How long a timed orb (time_limit > 0) stays gone after a pickup before it deterministically
@@ -176,6 +181,9 @@ func _grant_source() -> StringName:
 func _on_body_entered(body: Node3D) -> void:
 	if _collected or not (body is Player):
 		return
+	if _resolved == Ability.HEART:
+		_collect_heart(body)
+		return
 	_collected = true
 	var eid := _effect_id()
 	if time_limit > 0.0:
@@ -188,6 +196,23 @@ func _on_body_entered(body: Node3D) -> void:
 		# ability uses a per-orb source (see _grant_source), so each pickup raises its level.
 		body.set_effect(eid, true, _grant_source())
 		_consume()
+
+# Heart pickup: hearts live in MatchManager.lives (server-authoritative), so unlike the
+# other grants this one can't run purely off the deterministic overlap. The hide/respawn
+# still does — every peer keys it on the replicated match state — but only the picker's own
+# client asks the host to add the heart, which then broadcasts the new count. Outside a live
+# match there are no hearts to add, so the touch is ignored and the orb stays grabbable.
+func _collect_heart(body: Player) -> void:
+	if MatchManager.state != MatchManager.State.PLAYING:
+		return
+	_collected = true
+	if body.is_multiplayer_authority():
+		if multiplayer.is_server():
+			MatchManager.server_add_heart(body.name.to_int())
+		else:
+			MatchManager.request_add_heart.rpc_id(1)
+	_hide_collected()
+	_respawn_left = RESPAWN_DELAY
 
 # Tint the core, glow and floor ring to the ability's colour so the orb reads at a
 # glance and matches the matching container in the stamina bar.
