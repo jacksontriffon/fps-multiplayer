@@ -704,7 +704,7 @@ func _game_root() -> Node:
 func _load_map_for(path: String) -> void:
 	var root := _game_root()
 	if root:
-		root.load_map.rpc(path)
+		root.load_map.rpc(path, root.match_seed)
 	for p in get_tree().get_nodes_in_group("players"):
 		p.reset_upgrades.rpc()
 	await get_tree().process_frame
