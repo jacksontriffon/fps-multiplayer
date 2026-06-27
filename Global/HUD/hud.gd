@@ -184,8 +184,7 @@ func _update_stamina() -> void:
 func _build_ability_cells() -> void:
 	_ability_defs = [
 		{"effect": Player.ABILITY_DASH, "cost": Dash.DASH_COST, "glyph": "»", "color": Color(0.25, 0.7, 1.0)},
-		{"effect": Player.ABILITY_DOUBLE_JUMP, "cost": DoubleJump.DOUBLE_JUMP_COST, "glyph": "↟", "color": Color(0.75, 0.45, 1.0)},
-		{"effect": Player.ABILITY_EXTRA_JUMP, "cost": DoubleJump.DOUBLE_JUMP_COST, "glyph": "↑", "color": Color(1.0, 0.5, 0.8)},
+		{"effect": Player.ABILITY_DOUBLE_JUMP, "cost": DoubleJump.DOUBLE_JUMP_COST, "glyph": "↟", "color": Color(0.75, 0.45, 1.0), "stacks": true},
 		{"effect": Player.ABILITY_BOMB, "cost": Stamina.BOMB_COST, "glyph": "✸", "color": Color(1.0, 0.45, 0.1)},
 	]
 	for i in _ability_defs.size():
@@ -222,11 +221,16 @@ func _update_ability_cells(player: Player) -> void:
 			continue
 		var cost: float = _ability_defs[i].cost
 		var color: Color = _ability_defs[i].color
+		# Stackable abilities (double jump) own one slice per pickup; the cell widens to match
+		# the reserved stamina and the glyph shows the multiplier once you hold more than one.
+		var count: int = player.effect_count(_ability_defs[i].effect) if _ability_defs[i].get("stacks", false) else 1
 		var armed: bool = player.stamina.amount >= cost
 		cell.visible = true
-		cell.custom_minimum_size.x = cost * STAMINA_PX_PER_UNIT
+		cell.custom_minimum_size.x = cost * float(count) * STAMINA_PX_PER_UNIT
 		_ability_styles[i].bg_color = color if armed else Color(color.r, color.g, color.b, 0.3)
-		(cell.get_child(0) as Label).modulate = Color.WHITE if armed else Color(1, 1, 1, 0.5)
+		var label := cell.get_child(0) as Label
+		label.text = "%s×%d" % [_ability_defs[i].glyph, count] if count > 1 else _ability_defs[i].glyph
+		label.modulate = Color.WHITE if armed else Color(1, 1, 1, 0.5)
 
 func _local_player() -> Player:
 	for p in get_tree().get_nodes_in_group("players"):

@@ -255,27 +255,27 @@ size = Vector3(72.80133, 6.60553, 1)
 
 [node name="AbilityOrb3" parent="Walls" instance=ExtResource("9_b857i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.943969, 0.03658271, -17.087414)
-ability = 6
+ability = 5
 
 [node name="AbilityOrb4" parent="Walls" instance=ExtResource("9_b857i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.482023, 0.03658271, 7.2997274)
-ability = 6
+ability = 5
 
 [node name="AbilityOrb5" parent="Walls" instance=ExtResource("9_b857i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.060129166, 0.03658271, -0.07227516)
-ability = 6
+ability = 5
 
 [node name="AbilityOrb6" parent="Walls" instance=ExtResource("9_b857i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.047709, 0.03658271, 9.7598095)
-ability = 6
+ability = 5
 
 [node name="AbilityOrb7" parent="Walls" instance=ExtResource("9_b857i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.536174, 0.03658271, -5.3609757)
-ability = 6
+ability = 5
 
 [node name="AbilityOrb8" parent="Walls" instance=ExtResource("9_b857i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.873123, 0.03658271, -15.938844)
-ability = 6
+ability = 5
 
 [node name="Conferences" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.043388, 0, -6.428747)

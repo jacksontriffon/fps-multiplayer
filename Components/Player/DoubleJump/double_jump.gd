@@ -4,8 +4,9 @@ class_name DoubleJump
 # Mid-air jumps unlocked by AbilityOrbs. Authority-only, gated on input-block and
 # controllable (no air jump while stunned or dead), and drives the Player body. Reads
 # jumped_from_ground so a single press can't spend both the ground jump and an air jump.
-# Double Jump grants one air jump; each Extra Jump (+1 Jump) orb adds another. Each air
-# jump drains DOUBLE_JUMP_COST, which Stamina reserves as a container slice in the bar.
+# The double-jump ability stacks: one jump orb grants one air jump, a second grants a
+# second, and so on. Each air jump drains DOUBLE_JUMP_COST, which Stamina reserves per
+# owned jump as a container slice in the bar.
 
 const DOUBLE_JUMP_COST := 14.0
 
@@ -13,14 +14,10 @@ const DOUBLE_JUMP_COST := 14.0
 
 var _air_jumps := 0
 
-# How many mid-air jumps the player currently owns: double jump plus every extra-jump orb.
+# How many mid-air jumps the player currently owns: one per jump orb grabbed (each is its own
+# source on the stacking double-jump effect).
 func _max_air_jumps() -> int:
-	var jumps := 0
-	if player.has_effect(Player.ABILITY_DOUBLE_JUMP):
-		jumps += 1
-	if player.has_effect(Player.ABILITY_EXTRA_JUMP):
-		jumps += 1
-	return jumps
+	return player.effect_count(Player.ABILITY_DOUBLE_JUMP)
 
 func _physics_process(_delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():

@@ -14,7 +14,13 @@ const SOURCE := &"ability_orb"
 # RANDOM is a meta-pick (kept last so the real abilities keep their numeric values): an orb
 # set to it rolls one of the concrete abilities below. See `ability`/_roll_ability for how the
 # roll stays identical on every peer.
-enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, EXTRA_JUMP, RANDOM }
+enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, RANDOM }
+
+# Stackable abilities grant per-orb (each pickup adds another air jump) rather than as a single
+# unlock — see _grant_source. Double Jump is the only one: grab a second jump orb for a triple.
+const STACKABLE := {
+	Ability.DOUBLE_JUMP: true,
+}
 
 const EFFECTS := {
 	Ability.DASH: Player.ABILITY_DASH,
@@ -22,7 +28,6 @@ const EFFECTS := {
 	Ability.BOMB: Player.ABILITY_BOMB,
 	Ability.INFINITE_AMMO: Player.INFINITE_AMMO,
 	Ability.TRIPLE_THROW: Player.TRIPLE_THROW,
-	Ability.EXTRA_JUMP: Player.ABILITY_EXTRA_JUMP,
 }
 
 const COLORS := {
@@ -31,7 +36,6 @@ const COLORS := {
 	Ability.BOMB: Color(1.0, 0.45, 0.1),
 	Ability.INFINITE_AMMO: Color(1.0, 0.82, 0.2),
 	Ability.TRIPLE_THROW: Color(0.3, 0.9, 0.45),
-	Ability.EXTRA_JUMP: Color(1.0, 0.5, 0.8),
 }
 
 # Billboard icon (two chevrons for dash, wings for double jump, a bomb for the explosion
@@ -43,7 +47,6 @@ const ICONS := {
 	Ability.BOMB: preload("res://Assets/Textures/UI/ability_bomb.svg"),
 	Ability.INFINITE_AMMO: preload("res://Assets/Textures/UI/ability_infinite.svg"),
 	Ability.TRIPLE_THROW: preload("res://Assets/Textures/UI/ability_triple.svg"),
-	Ability.EXTRA_JUMP: preload("res://Assets/Textures/UI/ability_extra_jump.svg"),
 }
 const NAMES := {
 	Ability.DASH: "Dash",
@@ -51,7 +54,6 @@ const NAMES := {
 	Ability.BOMB: "Explosion",
 	Ability.INFINITE_AMMO: "Infinite Ammo",
 	Ability.TRIPLE_THROW: "Triple Throw",
-	Ability.EXTRA_JUMP: "+1 Jump",
 }
 
 # Abilities listed here are timed buffs (seconds), not permanent unlocks; the orb respawns
@@ -153,6 +155,14 @@ func _local_player() -> Player:
 func _effect_id() -> StringName:
 	return EFFECTS[_resolved]
 
+# Who granted the effect. A stackable ability uses this orb's node path (identical on every
+# peer) so each jump orb is a distinct source and the player's source count is its air-jump
+# count; everything else shares SOURCE so a second orb of the same kind doesn't double up.
+func _grant_source() -> StringName:
+	if STACKABLE.get(_resolved, false):
+		return StringName(str(get_path()))
+	return SOURCE
+
 func _on_body_entered(body: Node3D) -> void:
 	if _collected or not (body is Player):
 		return
@@ -164,7 +174,7 @@ func _on_body_entered(body: Node3D) -> void:
 		_hide_collected()
 		_respawn_left = RESPAWN_DELAY
 	else:
-		body.set_effect(_effect_id(), true, SOURCE)
+		body.set_effect(_effect_id(), true, _grant_source())
 		_consume()
 
 # Tint the core, glow and floor ring to the ability's colour so the orb reads at a

@@ -507,15 +507,15 @@ material = ExtResource("2_adhmb")
 
 [node name="AbilityOrb" parent="FloorOne" instance=ExtResource("7_adhmb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4738827, 4.225995, 5.500256)
-ability = 6
+ability = 5
 
 [node name="AbilityOrb3" parent="FloorOne" instance=ExtResource("7_adhmb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.109267, 4.225995, -5.5724444)
-ability = 6
+ability = 5
 
 [node name="AbilityOrb2" parent="FloorOne" instance=ExtResource("7_adhmb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3650627, 4.225995, 4.93204)
-ability = 6
+ability = 5
 
 [node name="BallSpawner" parent="FloorOne" instance=ExtResource("3_5or0r")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6954424, 4.4000874, -1.6839367)
@@ -666,15 +666,15 @@ material = ExtResource("2_adhmb")
 
 [node name="AbilityOrb" parent="Floor2" instance=ExtResource("7_adhmb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4738827, 4.225995, 5.500256)
-ability = 6
+ability = 5
 
 [node name="AbilityOrb3" parent="Floor2" instance=ExtResource("7_adhmb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8656754, 4.225995, -2.620831)
-ability = 6
+ability = 5
 
 [node name="AbilityOrb2" parent="Floor2" instance=ExtResource("7_adhmb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.4628696, 4.8984313, 2.9511704)
-ability = 6
+ability = 5
 
 [node name="BallSpawner" parent="Floor2" instance=ExtResource("3_5or0r")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6954424, 4.4000874, -1.6839367)

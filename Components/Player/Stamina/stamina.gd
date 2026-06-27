@@ -19,7 +19,6 @@ const RES_HEARTS := &"hearts"
 # as a cell and the player spends from the pool to fire the ability.
 const RES_DASH := &"dash"
 const RES_DOUBLE_JUMP := &"double_jump"
-const RES_EXTRA_JUMP := &"extra_jump"
 const RES_BOMB := &"bomb"
 # Unlike dash/double-jump, the explosion upgrade doesn't drain per use — carrying it is the
 # whole cost, so its container reserves a fixed slice the size of one heart.
@@ -88,8 +87,8 @@ func _refresh_reservations() -> void:
 	reserve(RES_HEARTS, float(hearts) * PER_HEART)
 	# Each unlocked ability reserves its own container slice in the bar.
 	reserve(RES_DASH, Dash.DASH_COST if player.has_effect(Player.ABILITY_DASH) else 0.0)
-	reserve(RES_DOUBLE_JUMP, DoubleJump.DOUBLE_JUMP_COST if player.has_effect(Player.ABILITY_DOUBLE_JUMP) else 0.0)
-	reserve(RES_EXTRA_JUMP, DoubleJump.DOUBLE_JUMP_COST if player.has_effect(Player.ABILITY_EXTRA_JUMP) else 0.0)
+	# Double jump stacks: reserve one jump's cost per owned air jump.
+	reserve(RES_DOUBLE_JUMP, float(player.effect_count(Player.ABILITY_DOUBLE_JUMP)) * DoubleJump.DOUBLE_JUMP_COST)
 	reserve(RES_BOMB, BOMB_COST if player.has_effect(Player.ABILITY_BOMB) else 0.0)
 	# Infinite ammo: a big slice up front that shrinks with the buff's remaining time. Cleared
 	# first so the cap below sees only the other reservations, then capped to leave AMMO_MIN_CAPACITY.
