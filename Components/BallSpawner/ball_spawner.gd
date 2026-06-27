@@ -49,16 +49,19 @@ func refill_hand(player: Player) -> void:
 		ball.global_position = marker.global_position
 
 # Conjure one extra ball already leaving a player's hand for the triple-throw buff, then
-# throw it. Server-only; mirrors refill_hand but launches the ball instead of leaving
-# it held. Ephemeral so the spread doesn't litter the arena, and grab() arms it for bomb
-# carriers so the extras carry whatever the real throw would.
-func launch_from_hand(player: Player, direction: Vector3, power: float) -> void:
+# throw it. Server-only; mirrors refill_hand but launches the ball instead of leaving it
+# held. Ephemeral so the spread doesn't litter the arena. `as_bomb` matches the ball that was
+# in hand: grab() already arms it for upgrade carriers, but an armed pickup held without the
+# upgrade still needs arming so the spread is three bombs, not one bomb and two plain balls.
+func launch_from_hand(player: Player, direction: Vector3, power: float, as_bomb: bool = false) -> void:
 	var ball := BALL_SCENE.instantiate()
 	ball.ephemeral = true
 	balls.add_child(ball, true)  # under the MultiplayerSpawner's path, so it replicates to every peer
 	if not ball.grab(player.name.to_int()):
 		ball.queue_free()
 		return
+	if as_bomb:
+		ball.arm_as_bomb()
 	var marker := player.get_node_or_null("Head/Camera3D/Hands/MeshInstance3D/RightHandMarker")
 	if marker:
 		ball.global_position = marker.global_position
