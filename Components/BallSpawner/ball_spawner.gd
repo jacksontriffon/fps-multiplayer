@@ -13,6 +13,10 @@ const BALL_SCENE := preload("res://Components/Dodgeball/dodgeball.tscn")
 @export var interval: float = 60.0
 ## A spawn is held off while a ball or player sits within this radius of the spawn point.
 @export var clear_radius: float = 1.0
+## Drop a ball the moment this spawner goes live (server-side), so a map has a ball right away
+## without placing a separate static one. Still respects clear_radius, so a static ball already
+## sitting here won't be doubled. After this first ball, the normal interval refill takes over.
+@export var spawn_on_start: bool = true
 
 ## 0..1 fill of the radial bar; server-driven, replicated. Only meaningful while `pending`.
 @export var progress: float = 0.0
@@ -24,6 +28,7 @@ const BALL_SCENE := preload("res://Components/Dodgeball/dodgeball.tscn")
 @onready var radial_bar: MeshInstance3D = $RadialBar
 
 var _elapsed := 0.0
+var _did_initial_spawn := false
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -54,6 +59,13 @@ func _physics_process(delta: float) -> void:
 	# _ready still works. Clients just render the replicated progress in _process.
 	if not multiplayer.has_multiplayer_peer() or not multiplayer.is_server():
 		return
+	# One-time immediate ball when the spawner first goes live, so the map isn't empty at the
+	# start of a match. Skipped if the space is occupied (e.g. a static ball already sits here).
+	if spawn_on_start and not _did_initial_spawn:
+		_did_initial_spawn = true
+		if _space_clear():
+			_spawn_ball()
+			return
 	if not _space_clear():
 		# Occupied: pause the countdown where it is, don't reset. It resumes once clear.
 		return

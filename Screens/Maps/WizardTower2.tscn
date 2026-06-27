@@ -1,0 +1,707 @@
+[gd_scene load_steps=11 format=3 uid="uid://bs4dx7p0ouchg"]
+
+[ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_qwdv7"]
+[ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_adhmb"]
+[ext_resource type="PackedScene" uid="uid://cryyg8edx41b5" path="res://Components/BallSpawner/BallSpawner.tscn" id="3_5or0r"]
+[ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="4_4w26n"]
+[ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="5_1snk1"]
+[ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="6_b3wq7"]
+[ext_resource type="PackedScene" uid="uid://uexgtf7lwynk" path="res://Components/AbilityOrb/ability_orb.tscn" id="7_adhmb"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ta"]
+
+[sub_resource type="Sky" id="Sky_ta"]
+sky_material = SubResource("ProceduralSkyMaterial_ta")
+
+[sub_resource type="Environment" id="Environment_ta"]
+background_mode = 2
+sky = SubResource("Sky_ta")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="TeamArena" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ta")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 12, 0)
+shadow_enabled = true
+
+[node name="Arena" type="Node3D" parent="."]
+
+[node name="Floor" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(40, 1, 24)
+material = ExtResource("1_qwdv7")
+
+[node name="WallWest" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 2, 0)
+use_collision = true
+size = Vector3(1, 4, 24)
+material = ExtResource("2_adhmb")
+
+[node name="WallEast" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 2, 0)
+use_collision = true
+size = Vector3(1, 4, 24)
+material = ExtResource("2_adhmb")
+
+[node name="WallNorth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -12)
+use_collision = true
+size = Vector3(40, 4, 1)
+material = ExtResource("2_adhmb")
+
+[node name="WallSouth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 12)
+use_collision = true
+size = Vector3(40, 4, 1)
+material = ExtResource("2_adhmb")
+
+[node name="CenterLine" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+use_collision = true
+size = Vector3(0.5, 0.3, 24)
+material = ExtResource("2_adhmb")
+
+[node name="Dodgeball" parent="Arena" instance=ExtResource("4_4w26n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -8)
+
+[node name="Dodgeball2" parent="Arena" instance=ExtResource("4_4w26n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -4)
+
+[node name="Dodgeball3" parent="Arena" instance=ExtResource("4_4w26n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+
+[node name="Dodgeball4" parent="Arena" instance=ExtResource("4_4w26n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 4)
+
+[node name="Dodgeball5" parent="Arena" instance=ExtResource("4_4w26n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 8)
+
+[node name="BallSpawners" type="Node3D" parent="."]
+
+[node name="BallSpawner1" parent="BallSpawners" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -8)
+progress = 0.2541666666666723
+pending = true
+
+[node name="BallSpawner2" parent="BallSpawners" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -4)
+progress = 0.2541666666666723
+pending = true
+
+[node name="BallSpawner3" parent="BallSpawners" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+progress = 0.2541666666666723
+pending = true
+
+[node name="BallSpawner4" parent="BallSpawners" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 4)
+progress = 0.2541666666666723
+pending = true
+
+[node name="BallSpawner5" parent="BallSpawners" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 8)
+progress = 0.2541666666666723
+pending = true
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+script = ExtResource("5_1snk1")
+
+[node name="Red1" parent="SpawnPoints" instance=ExtResource("6_b3wq7")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.6682663, 7.87062, -3.5465968)
+
+[node name="Red2" parent="SpawnPoints" instance=ExtResource("6_b3wq7")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.9897132, 7.87062, -4.2855844)
+
+[node name="Red3" parent="SpawnPoints" instance=ExtResource("6_b3wq7")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 2.7536612, 7.87062, 3.4212718)
+
+[node name="Red4" parent="SpawnPoints" instance=ExtResource("6_b3wq7")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -4.651377, 7.87062, -0.39582545)
+
+[node name="Blue1" parent="SpawnPoints" instance=ExtResource("6_b3wq7")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0.5158156, 4.229355, -6)
+team = 1
+
+[node name="Blue2" parent="SpawnPoints" instance=ExtResource("6_b3wq7")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 5.6358232, 4.229355, -2.6241076)
+team = 1
+
+[node name="Blue3" parent="SpawnPoints" instance=ExtResource("6_b3wq7")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 5.6358232, 4.229355, 2)
+team = 1
+
+[node name="Blue4" parent="SpawnPoints" instance=ExtResource("6_b3wq7")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 2.0025334, 4.229355, 3.3417516)
+team = 1
+
+[node name="SpiralStaircase" type="Node3D" parent="."]
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.29789925, 0)
+use_collision = true
+height = 1.2895508
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D3" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7467886, -0.12297249, -0.76343614)
+use_collision = true
+height = 1.6394043
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D4" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0048573017, 0.8346386, -1.0645893)
+use_collision = true
+height = 0.58477783
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D5" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7078805, 1.2345867, -0.631994)
+use_collision = true
+height = 0.7034607
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D6" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0661786, 1.6483974, 0.14777577)
+use_collision = true
+height = 0.57048035
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D7" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.741432, 1.9895172, 0.9401251)
+use_collision = true
+height = 0.6577568
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D8" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.008329749, 2.3905172, 1.0292162)
+use_collision = true
+height = 0.5790615
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D9" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.717018, 2.8035624, 0.7581421)
+use_collision = true
+height = 0.646688
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D10" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9753475, 3.2791176, 0.07052153)
+use_collision = true
+height = 0.6023967
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D11" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.70655704, 3.7572846, -0.7733248)
+use_collision = true
+height = 0.6549937
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0573254, 0)
+use_collision = true
+radius = 0.76220703
+height = 4.279541
+material = ExtResource("2_adhmb")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7748814, 2.259489, 0)
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1252726, 2.6061296, -1.9473454)
+
+[node name="OmniLight3D3" type="OmniLight3D" parent="SpiralStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9011494, 3.032892, 1.1932533)
+
+[node name="SpiralStaircase2" type="Node3D" parent="."]
+transform = Transform3D(-0.13600947, 0, 0.9907075, 0, 1, 0, -0.9907075, 0, -0.13600947, 0, 4.2508125, 0)
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.29789925, 0)
+use_collision = true
+height = 1.2895508
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D3" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7467886, -0.12297249, -0.76343614)
+use_collision = true
+height = 1.6394043
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D4" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0048573017, 0.8346386, -1.0645893)
+use_collision = true
+height = 0.58477783
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D5" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7078805, 1.2345867, -0.631994)
+use_collision = true
+height = 0.7034607
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D6" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0661786, 1.6483974, 0.14777577)
+use_collision = true
+height = 0.57048035
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D7" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.741432, 1.9895172, 0.9401251)
+use_collision = true
+height = 0.6577568
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D8" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.008329749, 2.3905172, 1.0292162)
+use_collision = true
+height = 0.5790615
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D9" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.717018, 2.8035624, 0.7581421)
+use_collision = true
+height = 0.646688
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D10" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9753475, 3.2791176, 0.07052153)
+use_collision = true
+height = 0.6023967
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D11" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.70655704, 3.7572846, -0.7733248)
+use_collision = true
+height = 0.6549937
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0573254, 0)
+use_collision = true
+radius = 0.76220703
+height = 4.279541
+material = ExtResource("2_adhmb")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7748814, 2.259489, 0)
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1252726, 2.6061296, -1.9473454)
+
+[node name="OmniLight3D3" type="OmniLight3D" parent="SpiralStaircase2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9011494, 3.032892, 1.1932533)
+
+[node name="SpiralStaircase3" type="Node3D" parent="."]
+transform = Transform3D(-0.99853206, 0, -0.05416581, 0, 1, 0, 0.05416581, 0, -0.99853206, 0, 8.406637, 0)
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.29789925, 0)
+use_collision = true
+height = 1.2895508
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D3" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7467886, -0.12297249, -0.76343614)
+use_collision = true
+height = 1.6394043
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D4" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0048573017, 0.8346386, -1.0645893)
+use_collision = true
+height = 0.58477783
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D5" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7078805, 1.2345867, -0.631994)
+use_collision = true
+height = 0.7034607
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D6" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0661786, 1.6483974, 0.14777577)
+use_collision = true
+height = 0.57048035
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D7" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.741432, 1.9895172, 0.9401251)
+use_collision = true
+height = 0.6577568
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D8" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.008329749, 2.3905172, 1.0292162)
+use_collision = true
+height = 0.5790615
+material = ExtResource("2_adhmb")
+
+[node name="OmniLight3D4" type="OmniLight3D" parent="SpiralStaircase3"]
+transform = Transform3D(0.0821473, 0, -0.99662006, 0, 1, 0, 0.99662006, 0, 0.0821473, 1.2633982, -1.9787989, -4.0483336)
+light_color = Color(0.52156866, 1, 1, 1)
+
+[node name="OmniLight3D5" type="OmniLight3D" parent="SpiralStaircase3"]
+transform = Transform3D(0.0821473, 0, -0.99662006, 0, 1, 0, 0.99662006, 0, 0.0821473, -5.1943793, -1.9787989, -0.31800222)
+light_color = Color(0.52156866, 1, 1, 1)
+
+[node name="OmniLight3D6" type="OmniLight3D" parent="SpiralStaircase3"]
+transform = Transform3D(0.0821473, 0, -0.99662006, 0, 1, 0, 0.99662006, 0, 0.0821473, -5.503583, -1.9787989, 5.3820987)
+light_color = Color(0.52156866, 1, 1, 1)
+
+[node name="OmniLight3D7" type="OmniLight3D" parent="SpiralStaircase3"]
+transform = Transform3D(0.0821473, 0, -0.99662006, 0, 1, 0, 0.99662006, 0, 0.0821473, 2.4478226, -1.9787989, 5.5406876)
+light_color = Color(0.52156866, 1, 1, 1)
+
+[node name="CSGCylinder3D9" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.717018, 2.8035624, 0.7581421)
+use_collision = true
+height = 0.646688
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D10" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9753475, 3.2791176, 0.07052153)
+use_collision = true
+height = 0.6023967
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D11" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.70655704, 3.7572846, -0.7733248)
+use_collision = true
+height = 0.6549937
+material = ExtResource("2_adhmb")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="SpiralStaircase3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0573254, 0)
+use_collision = true
+radius = 0.76220703
+height = 4.279541
+material = ExtResource("2_adhmb")
+
+[node name="FloorOne" type="Node3D" parent="."]
+
+[node name="Walls" type="Node3D" parent="FloorOne"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.839333, 7.917553, 4.231228)
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3879738, -2.1461792, -5.631382)
+use_collision = true
+size = Vector3(4.6097946, 3.6495361, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="FloorOne/Walls"]
+transform = Transform3D(-0.99853194, 0, -0.054165803, 0, 1, 0, 0.054165803, 0, -0.99853194, -10.6116085, 2.7485733, -4.13509)
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="FloorOne/Walls"]
+transform = Transform3D(-0.99853194, 0, -0.054165803, 0, 1, 0, 0.054165803, 0, -0.99853194, -7.6102324, 3.095214, -2.3476925)
+
+[node name="OmniLight3D3" type="OmniLight3D" parent="FloorOne/Walls"]
+transform = Transform3D(-0.99853194, 0, -0.054165803, 0, 1, 0, 0.054165803, 0, -0.99853194, -8.00414, 3.5219765, -5.471541)
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.350237, -2.144287, -3.8595002)
+use_collision = true
+size = Vector3(0.6852684, 3.6533203, 3.9516525)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.350237, -2.9713745, 0.82478523)
+use_collision = true
+size = Vector3(0.6852684, 1.9991455, 2.9743614)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3693247, -2.1434326, -4.6589184)
+use_collision = true
+size = Vector3(0.6329684, 3.6550293, 14.821774)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.656747, -3, 0.82478523)
+use_collision = true
+size = Vector3(0.6852684, 1.9418945, 2.9743614)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D15" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.024736, -3, -0.37388325)
+use_collision = true
+size = Vector3(3.4212475, 1.9418945, 0.57702446)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.255173, -2.1339111, 2.4624252)
+use_collision = true
+size = Vector3(14.447536, 3.6740723, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.668116, -2.1331787, -4.6589184)
+use_collision = true
+size = Vector3(1.6216497, 3.675537, 14.821774)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -2.1455688, -8)
+use_collision = true
+size = Vector3(5.833847, 3.6507568, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.562017, -3, -8)
+use_collision = true
+size = Vector3(5.833847, 1.9418945, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="FloorOne/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.255173, -2.1432495, -11.833249)
+use_collision = true
+size = Vector3(14.447536, 3.6553955, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="FloorOne"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.51823425, 4.063305, -4.264847)
+use_collision = true
+size = Vector3(14.476044, 0.23339844, 5.9394226)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D16" type="CSGBox3D" parent="FloorOne"]
+transform = Transform3D(1, 0, 0, 0, 0.22325009, -0.9747612, 0, 0.9747612, 0.22325009, 1.3285124, 4.1372743, 4.8775096)
+use_collision = true
+size = Vector3(3.8357196, 2.1352005, 0.59988356)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D17" type="CSGBox3D" parent="FloorOne"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2322241, 4.279901, 6.130409)
+use_collision = true
+size = Vector3(0.7142465, 0.3406, 0.7501371)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="FloorOne"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.51823425, 4.063305, 4.2313967)
+use_collision = true
+size = Vector3(14.476044, 0.23339844, 5.4767914)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="FloorOne"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9983559, 4.063305, -0.1968298)
+use_collision = true
+size = Vector3(5.4428635, 0.23339844, 5.0009155)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="FloorOne"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.7629976, 4.063305, -0.1968298)
+use_collision = true
+size = Vector3(5.985531, 0.23339844, 5.0009155)
+material = ExtResource("2_adhmb")
+
+[node name="CSGTorus3D" type="CSGTorus3D" parent="FloorOne"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8923635, 0)
+use_collision = true
+inner_radius = 1.6600617
+outer_radius = 3.0938368
+material = ExtResource("2_adhmb")
+
+[node name="AbilityOrb" parent="FloorOne" instance=ExtResource("7_adhmb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4738827, 4.225995, 5.500256)
+ability = 5
+
+[node name="AbilityOrb3" parent="FloorOne" instance=ExtResource("7_adhmb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.109267, 4.225995, -5.5724444)
+ability = 5
+
+[node name="AbilityOrb2" parent="FloorOne" instance=ExtResource("7_adhmb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3650627, 4.225995, 4.93204)
+ability = 5
+
+[node name="BallSpawner" parent="FloorOne" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6954424, 4.4000874, -1.6839367)
+progress = 0.2541666666666723
+pending = true
+
+[node name="BallSpawner2" parent="FloorOne" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4134204, 4.4000874, -2.6289573)
+progress = 0.16888888888889028
+pending = true
+
+[node name="BallSpawner3" parent="FloorOne" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6980257, 4.3727365, 0.6106808)
+progress = 0.08027777777777759
+pending = true
+
+[node name="BallSpawner4" parent="FloorOne" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.0588694, 4.3727365, -5.524686)
+progress = 0.1291666666666663
+pending = true
+
+[node name="Floor2" type="Node3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.93337774, 3.6437726, 0)
+
+[node name="OmniLight3D8" type="OmniLight3D" parent="Floor2"]
+transform = Transform3D(0.9907075, 0, 0.13600941, 0, 1, 0, -0.13600941, 0, 0.9907075, 5.399965, 6.0884624, -5.798528)
+light_color = Color(0.52156866, 0.35686275, 1, 1)
+
+[node name="OmniLight3D9" type="OmniLight3D" parent="Floor2"]
+transform = Transform3D(0.9907075, 0, 0.13600941, 0, 1, 0, -0.13600941, 0, 0.9907075, -3.7903676, 5.6853623, -5.798528)
+light_color = Color(0.52156866, 0.35686275, 1, 1)
+
+[node name="OmniLight3D10" type="OmniLight3D" parent="Floor2"]
+transform = Transform3D(0.9907075, 0, 0.13600941, 0, 1, 0, -0.13600941, 0, 0.9907075, 1.6016077, 5.538446, 2.9872236)
+light_color = Color(0.52156866, 0.35686275, 1, 1)
+
+[node name="Walls" type="Node3D" parent="Floor2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.839333, 7.917553, 4.231228)
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3879738, -2.1461792, -5.631382)
+use_collision = true
+size = Vector3(4.6097946, 3.6495361, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.350237, -2.144287, -1.0635002)
+use_collision = true
+size = Vector3(0.6852684, 3.6533203, 3.9516525)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.691903, -3.480957, -1.0635002)
+use_collision = true
+size = Vector3(2.001936, 0.97998047, 3.9516525)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3693247, -2.1434326, -4.6589184)
+use_collision = true
+size = Vector3(0.6329684, 3.6550293, 14.821774)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.656747, -3, 0.82478523)
+use_collision = true
+size = Vector3(0.6852684, 1.9418945, 2.9743614)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D15" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.024736, -1.9448853, -0.37388325)
+use_collision = true
+size = Vector3(3.4212475, 4.052124, 0.57702446)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.255173, -2.1339111, 2.4624252)
+use_collision = true
+size = Vector3(14.447536, 3.6740723, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.668116, -2.1331787, -4.6589184)
+use_collision = true
+size = Vector3(1.6216497, 3.675537, 14.821774)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D16" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.255391, -0.10354614, -4.6589184)
+use_collision = true
+size = Vector3(14.4471, 0.59991455, 14.821774)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -2.1455688, -8)
+use_collision = true
+size = Vector3(5.833847, 3.6507568, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.562017, -3, -8)
+use_collision = true
+size = Vector3(5.833847, 1.9418945, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="Floor2/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.255173, -2.1432495, -11.833249)
+use_collision = true
+size = Vector3(14.447536, 3.6553955, 0.5790863)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Floor2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.51823425, 4.063305, -4.264847)
+use_collision = true
+size = Vector3(14.476044, 0.23339844, 5.9394226)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D17" type="CSGBox3D" parent="Floor2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.20078655, 4.5892825, 5.2801013)
+use_collision = true
+size = Vector3(1.5802678, 0.9593625, 2.4507523)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="Floor2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.51823425, 4.063305, 4.2313967)
+use_collision = true
+size = Vector3(14.476044, 0.23339844, 5.4767914)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="Floor2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9983559, 4.063305, -0.1968298)
+use_collision = true
+size = Vector3(5.4428635, 0.23339844, 5.0009155)
+material = ExtResource("2_adhmb")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="Floor2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.7629976, 4.063305, -0.1968298)
+use_collision = true
+size = Vector3(5.985531, 0.23339844, 5.0009155)
+material = ExtResource("2_adhmb")
+
+[node name="CSGTorus3D" type="CSGTorus3D" parent="Floor2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8923635, 0)
+use_collision = true
+inner_radius = 1.6600617
+outer_radius = 3.0938368
+material = ExtResource("2_adhmb")
+
+[node name="AbilityOrb" parent="Floor2" instance=ExtResource("7_adhmb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4738827, 4.225995, 5.500256)
+ability = 5
+
+[node name="AbilityOrb3" parent="Floor2" instance=ExtResource("7_adhmb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8656754, 4.225995, -2.620831)
+ability = 5
+
+[node name="AbilityOrb2" parent="Floor2" instance=ExtResource("7_adhmb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.4628696, 4.8984313, 2.9511704)
+ability = 5
+
+[node name="BallSpawner" parent="Floor2" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6954424, 4.4000874, -1.6839367)
+progress = 0.14500000000000018
+pending = true
+
+[node name="BallSpawner2" parent="Floor2" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.113426, 4.400087, -2.6289577)
+progress = 0.14500000000000018
+pending = true
+
+[node name="BallSpawner5" parent="Floor2" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.3451576, 4.400087, -2.6289577)
+progress = 0.2441666666666718
+pending = true
+
+[node name="BallSpawner3" parent="Floor2" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6980257, 4.3727365, 2.823519)
+progress = 0.14500000000000018
+pending = true
+
+[node name="BallSpawner4" parent="Floor2" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.0588694, 4.3727365, -5.524686)
+progress = 0.14500000000000018
+pending = true
+
+[node name="BallSpawner6" parent="Floor2" instance=ExtResource("3_5or0r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.9265757, 4.3727365, -5.5246854)
+progress = 0.8466666666666399
+pending = true
