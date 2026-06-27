@@ -650,8 +650,9 @@ func _respawn(id: int) -> void:
 	var spawner := spawner_for(game_mode)
 	p.set_alive_remote.rpc(true, false)
 	if spawner:
-		# Battle royale players are teamless, so any free spot in the mode's set will do.
-		if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
+		# Battle royale and race are free-for-alls, so drop the player onto a random spawn point;
+		# team and CTF keep them on their own team's spawns (handled below).
+		if game_mode == Pedestal.GameMode.BATTLE_ROYALE or game_mode == Pedestal.GameMode.RACE:
 			var spawn: Dictionary = spawner.reserve_any(id)
 			p.respawn_remote.rpc_id(id, spawn["position"], spawn["yaw"], spawn["team"])
 			return
@@ -704,7 +705,7 @@ func _game_root() -> Node:
 func _load_map_for(path: String) -> void:
 	var root := _game_root()
 	if root:
-		root.load_map.rpc(path)
+		root.load_map.rpc(path, randi())  # fresh per-instance seed; server-authoritative, sent to all peers
 	for p in get_tree().get_nodes_in_group("players"):
 		p.reset_upgrades.rpc()
 	await get_tree().process_frame
