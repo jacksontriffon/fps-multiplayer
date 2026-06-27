@@ -94,16 +94,23 @@ func _ready() -> void:
 	_apply_color()
 
 # Settle _resolved from `ability`. RANDOM rolls a concrete ability with a seed that is
-# identical on every peer (the node path matches in each loaded map) and advances with
-# _roll_count, so a timed-buff orb re-rolls to something new on each respawn — still in sync.
+# identical on every peer but varies per match: the lobby id (same for everyone in the
+# match, fresh each game), the node path (so sibling orbs differ) and _roll_count (so a
+# timed-buff orb re-rolls to something new on each respawn). No RPCs needed.
 func _resolve_ability() -> void:
 	if ability != Ability.RANDOM:
 		_resolved = ability
 		return
 	var rng := RandomNumberGenerator.new()
-	rng.seed = hash(str(get_path()) + ":" + str(_roll_count))
+	rng.seed = hash(str(_match_seed()) + "|" + str(get_path()) + ":" + str(_roll_count))
 	_roll_count += 1
 	_resolved = (rng.randi() % Ability.RANDOM) as Ability  # RANDOM is last, so this is a real ability
+
+# Per-match value shared by every peer (the Steam lobby id). Falls back to 0 in LOCAL test
+# mode, where both windows share it and stay in sync (just not varied between games).
+func _match_seed() -> int:
+	var root := get_tree().current_scene
+	return root.lobby_id if root != null and "lobby_id" in root else 0
 
 func _process(delta: float) -> void:
 	if _collected:
