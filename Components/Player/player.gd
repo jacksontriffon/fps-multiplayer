@@ -153,22 +153,21 @@ const INFINITE_HEARTS := &"infinite_hearts"
 # the Stamina node reserves each owned ability's cost as a container slice, and the HUD
 # draws that container in the bar.
 const ABILITY_DASH := &"ability_dash"
+# ABILITY_DOUBLE_JUMP stacks: each jump orb grants it under its own source, so the source count
+# (effect_count) is how many mid-air jumps the player has — one orb double-jumps, two triple.
 const ABILITY_DOUBLE_JUMP := &"ability_double_jump"
 const ABILITY_BOMB := &"ability_bomb"
 
-# Timed power-up: while held, the BallSpawner keeps your hand stocked, so you never
-# run out of dodgeballs (and they auto-arm if you also carry ABILITY_BOMB). Granted with a
-# duration by the orb and ticked down on every peer (see _tick_timed_effects). The Stamina
-# node reads the remaining fraction to reserve a slice that's biggest on pickup and shrinks
-# away as the buff runs down, so the free ammo costs you stamina up front.
+# Power-up: while held, the BallSpawner keeps your hand stocked, so you never run out of
+# dodgeballs (and they auto-arm if you also carry ABILITY_BOMB). When granted with a time limit
+# it ticks down on every peer (see _tick_timed_effects) and the Stamina node reads the remaining
+# fraction to reserve a slice that's biggest on pickup and shrinks away as the buff runs down.
 const INFINITE_AMMO := &"infinite_ammo"
-const INFINITE_AMMO_DURATION := 12.0
 
-# Timed power-up: while held, every throw flings three balls in a spread instead of one
-# (Hands conjures the two extras on the server). Granted with a duration by the orb and
-# ticked down on every peer; the Stamina node reserves a slice that shrinks as it expires.
+# Power-up: while held, every throw flings three balls in a spread instead of one (Hands conjures
+# the two extras on the server). Same timed model as infinite ammo when given a limit; the Stamina
+# node reserves a slice that shrinks as it expires.
 const TRIPLE_THROW := &"triple_throw"
-const TRIPLE_THROW_DURATION := 12.0
 
 var _effects := {}
 
@@ -180,6 +179,11 @@ var _timed_effects := {}
 func has_effect(id: StringName) -> bool:
 	return _effects.has(id)
 
+# How many distinct sources grant an effect. For a stackable ability (double jump) each orb is
+# its own source, so this is the stack size — the number of mid-air jumps the player owns.
+func effect_count(id: StringName) -> int:
+	return _effects.get(id, {}).size()
+
 func set_effect(id: StringName, active: bool, source: StringName = &"default") -> void:
 	var sources: Dictionary = _effects.get(id, {})
 	if active:
@@ -190,14 +194,22 @@ func set_effect(id: StringName, active: bool, source: StringName = &"default") -
 		if sources.is_empty():
 			_effects.erase(id)
 
-# Grant a self-expiring effect; re-granting keeps whichever runs longest. Runs on every peer.
+# Grant a self-expiring effect; re-granting keeps whichever runs longest. "total" remembers the
+# granted length so the HUD/Stamina can size a shrinking slice without a per-ability constant.
+# Runs on every peer.
 func grant_timed_effect(id: StringName, duration: float, source: StringName = &"default") -> void:
 	set_effect(id, true, source)
 	var prev: float = _timed_effects.get(id, {}).get("left", 0.0)
-	_timed_effects[id] = {"left": maxf(prev, duration), "source": source}
+	var prev_total: float = _timed_effects.get(id, {}).get("total", 0.0)
+	_timed_effects[id] = {"left": maxf(prev, duration), "total": maxf(prev_total, duration), "source": source}
 
 func effect_time_left(id: StringName) -> float:
 	return _timed_effects.get(id, {}).get("left", 0.0)
+
+# The full duration a timed effect was granted for (0 if none), so callers can compute how much
+# of it remains as a fraction.
+func effect_total_time(id: StringName) -> float:
+	return _timed_effects.get(id, {}).get("total", 0.0)
 
 func _tick_timed_effects(delta: float) -> void:
 	for id in _timed_effects.keys():

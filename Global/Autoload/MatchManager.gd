@@ -347,6 +347,23 @@ func server_player_fell(id: int) -> void:
 	_broadcast()
 	_check_round_end()
 
+# A +1 Heart orb pickup. The picker's own client calls this (rpc'd to the host), which adds
+# a heart and broadcasts. There's no ceiling — players can stack hearts past the round-start
+# count (each one also reserves a slice of the stamina pool, so it's a survivability/stamina
+# trade). Only meaningful during a live match and never revives an eliminated player (0 hearts)
+# — that's an elimination, not a wound.
+@rpc("any_peer", "reliable")
+func request_add_heart() -> void:
+	server_add_heart(multiplayer.get_remote_sender_id())
+
+func server_add_heart(id: int) -> void:
+	if not multiplayer.is_server() or state != State.PLAYING:
+		return
+	if lives.get(id, 0) <= 0:
+		return
+	lives[id] += 1
+	_broadcast()
+
 # Whether thrower_id's ball is allowed to get victim_id out. Central source of
 # truth for the hit rules; the ball's detection and this scoring path both use it.
 func can_hit(victim_id: int, thrower_id: int) -> bool:
@@ -383,6 +400,7 @@ func _start_round() -> void:
 	round_num += 1
 	state = State.PLAYING
 	status_text = _round_status()
+	_reset_round_abilities()
 	for ball in get_tree().get_nodes_in_group("grabbable"):
 		if ball.has_method("server_reset"):
 			ball.server_reset()
@@ -402,6 +420,7 @@ func _start_ctf() -> void:
 		return
 	state = State.PLAYING
 	status_text = "Capture the Flag — first to %d" % CTF_CAPTURE_LIMIT
+	_reset_round_abilities()
 	for ball in get_tree().get_nodes_in_group("grabbable"):
 		if ball.has_method("server_reset"):
 			ball.server_reset()
@@ -414,6 +433,7 @@ func _start_ctf() -> void:
 func _start_battle_royale() -> void:
 	state = State.PLAYING
 	status_text = "Battle Royale — last one standing"
+	_reset_round_abilities()
 	for ball in get_tree().get_nodes_in_group("grabbable"):
 		if ball.has_method("server_reset"):
 			ball.server_reset()
@@ -428,6 +448,7 @@ func _start_battle_royale() -> void:
 func _start_race() -> void:
 	state = State.PLAYING
 	status_text = "Race — first to the finish!"
+	_reset_round_abilities()
 	for ball in get_tree().get_nodes_in_group("grabbable"):
 		if ball.has_method("server_reset"):
 			ball.server_reset()
@@ -755,6 +776,18 @@ func _load_map_for(path: String) -> void:
 	for p in get_tree().get_nodes_in_group("players"):
 		p.reset_upgrades.rpc()
 	await get_tree().process_frame
+
+# Start-of-round reset of collectable upgrades, driven by the active game mode. The default
+# policy (every mode for now) wipes each player's abilities and respawns every ability orb, so a
+# round begins orb-less and the abilities must be re-collected. Constant (time_limit 0) grants are
+# what this clears — timed orbs already self-expire. Modes with a single continuous round (CTF,
+# battle royale, race) call this once at their start, so their abilities last the whole round.
+# Broadcast per node (like _load_map_for's reset_upgrades) so every peer's copy agrees.
+func _reset_round_abilities() -> void:
+	for p in get_tree().get_nodes_in_group("players"):
+		p.reset_upgrades.rpc()
+	for orb in get_tree().get_nodes_in_group("ability_orbs"):
+		orb.round_respawn.rpc()
 
 func _schedule(cb: Callable, delay: float) -> void:
 	_reset_token += 1

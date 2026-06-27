@@ -2,20 +2,36 @@ extends Area3D
 class_name AbilityOrb
 
 # A floating, glowing orb resting on the floor that grants one upgrade — dash, double jump,
-# the explosion upgrade, or a timed infinite-ammo buff — to the first player who touches it.
+# the explosion upgrade, infinite ammo or triple throw — to the first player who touches it.
 # Mirrors InfiniteHeartZone: the grant runs on every peer off body_entered (player bodies
 # replicate identically, so the overlap fires the same everywhere), which keeps the pickup
-# deterministic with no extra RPCs. The ability grants are permanent (kept for the rest of
-# the run); a timed grant (see DURATIONS) instead self-expires on the player and the orb
-# fades out, then deterministically respawns after RESPAWN_DELAY so it can be grabbed again.
+# deterministic with no extra RPCs.
+#
+# Every orb carries a `time_limit` (seconds) that applies to whichever ability it grants. A
+# positive limit makes it a timed buff that self-expires on the player; the orb fades out and
+# deterministically respawns after RESPAWN_DELAY so it can be grabbed again. A limit of 0 makes
+# the grant constant — kept until the match's game mode clears it (by default when a round
+# finishes; see MatchManager). Constant orbs stay taken until the round respawns every orb
+# (round_respawn), so each round starts orb-less and the abilities can be re-collected.
 
 const SOURCE := &"ability_orb"
 
-# RANDOM is a meta-pick (kept last so the real abilities keep their numeric values): an orb
-# set to it rolls one of the concrete abilities below. See `ability`/_roll_ability for how the
-# roll stays identical on every peer.
-enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, RANDOM }
+# RANDOM is a meta-pick (kept last so the real abilities keep their numeric values, and so a
+# roll covers the whole HEART..DASH range): an orb set to it rolls one of the concrete
+# abilities below. See `ability`/_roll_ability for how the roll stays identical on every peer.
+enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, HEART, RANDOM }
 
+# Stackable abilities grant per-orb (each pickup raises the effect's level) rather than as a
+# single unlock — see _grant_source, which gives each orb its own grant source so the player's
+# source count is the stack size. +1 Jump stacks air jumps (one orb double-jumps, two triple);
+# Triple Throw triples the thrown balls per stack (see Hands).
+const STACKABLE := {
+	Ability.DOUBLE_JUMP: true,
+	Ability.TRIPLE_THROW: true,
+}
+
+# Player effects granted by each ability. HEART is absent: it isn't a player effect but a
+# server-authoritative heart added to MatchManager.lives (see _collect_heart).
 const EFFECTS := {
 	Ability.DASH: Player.ABILITY_DASH,
 	Ability.DOUBLE_JUMP: Player.ABILITY_DOUBLE_JUMP,
@@ -26,36 +42,35 @@ const EFFECTS := {
 
 const COLORS := {
 	Ability.DASH: Color(0.25, 0.7, 1.0),
-	Ability.DOUBLE_JUMP: Color(0.75, 0.45, 1.0),
+	Ability.DOUBLE_JUMP: Color(1.0, 0.5, 0.8),
 	Ability.BOMB: Color(1.0, 0.45, 0.1),
 	Ability.INFINITE_AMMO: Color(1.0, 0.82, 0.2),
 	Ability.TRIPLE_THROW: Color(0.3, 0.9, 0.45),
+	Ability.HEART: Color(0.95, 0.25, 0.35),
 }
 
-# Billboard icon (two chevrons for dash, wings for double jump, a bomb for the explosion
-# upgrade, an infinity loop for infinite ammo) and the name shown above it. The icons are
-# white so modulate tints them.
+# Billboard icon (two chevrons for dash, an up arrow with a plus for the stacking +1 Jump, a
+# bomb for the explosion upgrade, an infinity loop for infinite ammo) and the name shown above
+# it. The icons are white so modulate tints them.
 const ICONS := {
 	Ability.DASH: preload("res://Assets/Textures/UI/ability_dash.svg"),
-	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_double_jump.svg"),
+	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_extra_jump.svg"),
 	Ability.BOMB: preload("res://Assets/Textures/UI/ability_bomb.svg"),
 	Ability.INFINITE_AMMO: preload("res://Assets/Textures/UI/ability_infinite.svg"),
 	Ability.TRIPLE_THROW: preload("res://Assets/Textures/UI/ability_triple.svg"),
+	Ability.HEART: preload("res://Assets/Textures/UI/ability_heart.svg"),
 }
 const NAMES := {
 	Ability.DASH: "Dash",
-	Ability.DOUBLE_JUMP: "Double Jump",
+	Ability.DOUBLE_JUMP: "+1 Jump",
 	Ability.BOMB: "Explosion",
 	Ability.INFINITE_AMMO: "Infinite Ammo",
 	Ability.TRIPLE_THROW: "Triple Throw",
+	Ability.HEART: "+1 Heart",
 }
 
-# Abilities listed here are timed buffs (seconds), not permanent unlocks; the orb respawns
-# RESPAWN_DELAY seconds after such a pickup. Anything absent is a permanent one-shot grant.
-const DURATIONS := {
-	Ability.INFINITE_AMMO: Player.INFINITE_AMMO_DURATION,
-	Ability.TRIPLE_THROW: Player.TRIPLE_THROW_DURATION,
-}
+# How long a timed orb (time_limit > 0) stays gone after a pickup before it deterministically
+# pops back, so a buff can be grabbed again without a round reset.
 const RESPAWN_DELAY := 15.0
 
 # How close the local player must be for the floating name to fade in.
@@ -65,6 +80,11 @@ const NAME_FADE_SPEED := 6.0
 # The configured pick. RANDOM defers the choice to a per-spawn roll (see _resolve_ability);
 # anything else is used as-is.
 @export var ability: Ability = Ability.DASH
+
+# Seconds the granted ability lasts. 0 = constant: kept until the game mode resets it (by
+# default at the end of a round). Any positive value makes it a timed buff that self-expires on
+# the player, and the orb respawns RESPAWN_DELAY later. Applies to whichever ability is granted.
+@export var time_limit: float = 0.0
 
 # Bob/spin feel for the floating core (purely visual, runs on every peer).
 @export var bob_height := 0.18
@@ -88,6 +108,7 @@ var _roll_count := 0
 var _resolved: Ability = Ability.DASH
 
 func _ready() -> void:
+	add_to_group("ability_orbs")
 	_base_y = _bob.position.y
 	body_entered.connect(_on_body_entered)
 	_resolve_ability()
@@ -149,19 +170,49 @@ func _local_player() -> Player:
 func _effect_id() -> StringName:
 	return EFFECTS[_resolved]
 
+# Who granted the effect. A stackable ability uses this orb's node path (identical on every
+# peer) so each jump orb is a distinct source and the player's source count is its air-jump
+# count; everything else shares SOURCE so a second orb of the same kind doesn't double up.
+func _grant_source() -> StringName:
+	if STACKABLE.get(_resolved, false):
+		return StringName(str(get_path()))
+	return SOURCE
+
 func _on_body_entered(body: Node3D) -> void:
 	if _collected or not (body is Player):
 		return
+	if _resolved == Ability.HEART:
+		_collect_heart(body)
+		return
 	_collected = true
-	var duration: float = DURATIONS.get(_resolved, 0.0)
-	if duration > 0.0:
+	var eid := _effect_id()
+	if time_limit > 0.0:
 		# Timed buff: grant it (it self-expires on the player) and hide the orb until it respawns.
-		body.grant_timed_effect(_effect_id(), duration, SOURCE)
+		body.grant_timed_effect(eid, time_limit, _grant_source())
 		_hide_collected()
 		_respawn_left = RESPAWN_DELAY
 	else:
-		body.set_effect(_effect_id(), true, SOURCE)
+		# Constant grant: kept until the round resets it, which also respawns this orb. A stackable
+		# ability uses a per-orb source (see _grant_source), so each pickup raises its level.
+		body.set_effect(eid, true, _grant_source())
 		_consume()
+
+# Heart pickup: hearts live in MatchManager.lives (server-authoritative), so unlike the
+# other grants this one can't run purely off the deterministic overlap. The hide/respawn
+# still does — every peer keys it on the replicated match state — but only the picker's own
+# client asks the host to add the heart, which then broadcasts the new count. Outside a live
+# match there are no hearts to add, so the touch is ignored and the orb stays grabbable.
+func _collect_heart(body: Player) -> void:
+	if MatchManager.state != MatchManager.State.PLAYING:
+		return
+	_collected = true
+	if body.is_multiplayer_authority():
+		if multiplayer.is_server():
+			MatchManager.server_add_heart(body.name.to_int())
+		else:
+			MatchManager.request_add_heart.rpc_id(1)
+	_hide_collected()
+	_respawn_left = RESPAWN_DELAY
 
 # Tint the core, glow and floor ring to the ability's colour so the orb reads at a
 # glance and matches the matching container in the stamina bar.
@@ -193,11 +244,23 @@ func _hide_collected() -> void:
 	_ring.visible = false
 	_name_label.visible = false
 
-# Permanently take the orb. Kept (not freed) so the deterministic overlap can't re-fire a
-# grant, and so any late body_entered on another peer still finds it inert.
+# Take a constant orb. Kept (not freed) so the deterministic overlap can't re-fire a grant, and
+# so any late body_entered on another peer still finds it inert. Processing stops until the round
+# respawns it (round_respawn re-enables it).
 func _consume() -> void:
 	_hide_collected()
 	set_process(false)
+
+# Server -> every peer at the start of a round (see MatchManager): bring the orb back so its
+# ability can be collected again, matching the round wiping every player's upgrades. Re-arms a
+# consumed constant orb or a faded-out timed one alike.
+@rpc("any_peer", "call_local", "reliable")
+func round_respawn() -> void:
+	if not (multiplayer.get_remote_sender_id() in [0, 1]):
+		return
+	_respawn_left = 0.0
+	set_process(true)
+	_restore()
 
 # Timed-buff orbs only: count down the cooldown (in step on every peer) and pop back.
 func _tick_respawn(delta: float) -> void:

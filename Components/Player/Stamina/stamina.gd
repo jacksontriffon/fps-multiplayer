@@ -25,15 +25,19 @@ const RES_BOMB := &"bomb"
 const BOMB_COST := PER_HEART
 # The infinite-ammo buff reserves a slice scaled by its remaining time: AMMO_MAX_RESERVE at
 # pickup, shrinking to nothing as it expires. Capped so a sliver of pool always survives —
-# you still need a little stamina to charge a throw with all that free ammo.
+# you still need a little stamina to charge a throw with all that free ammo. A constant grant
+# (no time limit) has nothing to shrink, so it holds a fixed slice the size of one heart, like
+# the bomb container, so the bar still shows a cell for as long as you carry it.
 const RES_INFINITE_AMMO := &"infinite_ammo"
 const AMMO_MAX_RESERVE := 100.0
 const AMMO_MIN_CAPACITY := 25.0
-# The triple-throw buff reserves a slice the same way: biggest at pickup, shrinking to
-# nothing as it expires, capped so a sliver of pool always survives to charge a throw.
+const AMMO_CONST_RESERVE := PER_HEART
+# The triple-throw buff reserves a slice the same way: biggest at pickup, shrinking to nothing as
+# it expires (or a fixed one-heart slice when constant), capped so a sliver of pool always survives.
 const RES_TRIPLE_THROW := &"triple_throw"
 const TRIPLE_MAX_RESERVE := 100.0
 const TRIPLE_MIN_CAPACITY := 25.0
+const TRIPLE_CONST_RESERVE := PER_HEART
 
 @export var player: Player
 
@@ -87,21 +91,27 @@ func _refresh_reservations() -> void:
 	reserve(RES_HEARTS, float(hearts) * PER_HEART)
 	# Each unlocked ability reserves its own container slice in the bar.
 	reserve(RES_DASH, Dash.DASH_COST if player.has_effect(Player.ABILITY_DASH) else 0.0)
-	reserve(RES_DOUBLE_JUMP, DoubleJump.DOUBLE_JUMP_COST if player.has_effect(Player.ABILITY_DOUBLE_JUMP) else 0.0)
+	# Double jump stacks: reserve one jump's cost per owned air jump.
+	reserve(RES_DOUBLE_JUMP, float(player.effect_count(Player.ABILITY_DOUBLE_JUMP)) * DoubleJump.DOUBLE_JUMP_COST)
 	reserve(RES_BOMB, BOMB_COST if player.has_effect(Player.ABILITY_BOMB) else 0.0)
 	# Infinite ammo: a big slice up front that shrinks with the buff's remaining time. Cleared
 	# first so the cap below sees only the other reservations, then capped to leave AMMO_MIN_CAPACITY.
 	reserve(RES_INFINITE_AMMO, 0.0)
-	if player.has_effect(Player.INFINITE_AMMO) and Player.INFINITE_AMMO_DURATION > 0.0:
-		var frac := clampf(player.effect_time_left(Player.INFINITE_AMMO) / Player.INFINITE_AMMO_DURATION, 0.0, 1.0)
+	if player.has_effect(Player.INFINITE_AMMO):
+		var ammo_total := player.effect_total_time(Player.INFINITE_AMMO)
 		var max_allowed := maxf(capacity() - AMMO_MIN_CAPACITY, 0.0)
-		reserve(RES_INFINITE_AMMO, minf(frac * AMMO_MAX_RESERVE, max_allowed))
-	# Triple throw: same shrinking slice as infinite ammo, capped against the pool left after it.
+		# Timed: a slice that shrinks with the remaining fraction. Constant: a fixed one-heart slice.
+		var want := (player.effect_time_left(Player.INFINITE_AMMO) / ammo_total) * AMMO_MAX_RESERVE if ammo_total > 0.0 else AMMO_CONST_RESERVE
+		reserve(RES_INFINITE_AMMO, minf(want, max_allowed))
+	# Triple throw: same shrinking (or fixed, when constant) slice, capped against the pool left after it.
 	reserve(RES_TRIPLE_THROW, 0.0)
-	if player.has_effect(Player.TRIPLE_THROW) and Player.TRIPLE_THROW_DURATION > 0.0:
-		var frac := clampf(player.effect_time_left(Player.TRIPLE_THROW) / Player.TRIPLE_THROW_DURATION, 0.0, 1.0)
+	if player.has_effect(Player.TRIPLE_THROW):
+		var triple_total := player.effect_total_time(Player.TRIPLE_THROW)
 		var max_allowed := maxf(capacity() - TRIPLE_MIN_CAPACITY, 0.0)
-		reserve(RES_TRIPLE_THROW, minf(frac * TRIPLE_MAX_RESERVE, max_allowed))
+		# Constant grant grows its fixed slice per stack so the cell widens with each pickup.
+		var stacks := maxi(player.effect_count(Player.TRIPLE_THROW), 1)
+		var want := (player.effect_time_left(Player.TRIPLE_THROW) / triple_total) * TRIPLE_MAX_RESERVE if triple_total > 0.0 else TRIPLE_CONST_RESERVE * stacks
+		reserve(RES_TRIPLE_THROW, minf(want, max_allowed))
 
 func _physics_process(delta: float) -> void:
 	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():
