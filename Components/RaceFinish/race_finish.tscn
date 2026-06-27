@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://c1racefinish001"]
+
+[ext_resource type="Script" path="res://Components/RaceFinish/race_finish.gd" id="1_fin"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fin"]
+size = Vector3(6, 3, 6)
+
+[node name="RaceFinish" type="Area3D"]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1_fin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_fin")

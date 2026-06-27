@@ -106,7 +106,7 @@ func _process(_delta: float) -> void:
 
 func _build_mode_buttons() -> void:
 	_mode_group = ButtonGroup.new()
-	for mode in [Pedestal.GameMode.TEAM, Pedestal.GameMode.CAPTURE_THE_FLAG, Pedestal.GameMode.BATTLE_ROYALE]:
+	for mode in [Pedestal.GameMode.TEAM, Pedestal.GameMode.CAPTURE_THE_FLAG, Pedestal.GameMode.BATTLE_ROYALE, Pedestal.GameMode.RACE]:
 		var b := Button.new()
 		b.text = Pedestal.MODE_NAMES[mode]
 		b.toggle_mode = true

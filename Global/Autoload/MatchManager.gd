@@ -30,6 +30,7 @@ const MAP_OF := {
 	Pedestal.GameMode.TEAM: "res://Screens/Maps/ColosseumMap.tscn",
 	Pedestal.GameMode.CAPTURE_THE_FLAG: "res://Screens/Maps/ColosseumMap.tscn",
 	Pedestal.GameMode.BATTLE_ROYALE: "res://Screens/Maps/HungerGamesSandbox.tscn",
+	Pedestal.GameMode.RACE: "res://Screens/Maps/GauntletRun.tscn",
 }
 # Sandbox override for map testing: when true, a start with no chosen map falls back to
 # SANDBOX_MAP. The Map Select menu always passes an explicit map, so it overrides this.
@@ -46,6 +47,7 @@ const MAP_CHOICES := [
 	{"name": "Pirate Ship", "path": "res://Screens/Maps/PirateShipSandbox.tscn"},
 	{"name": "Office", "path": "res://Screens/Maps/Office.tscn"},
 	{"name": "Hedge Maze", "path": "res://Screens/Maps/HedgeMaze.tscn"},
+	{"name": "Gauntlet Run", "path": "res://Screens/Maps/GauntletRun.tscn"},
 ]
 
 # Classic mode is a Team-Battle tournament: TOURNAMENT_MAPS maps drawn at random from this
@@ -110,9 +112,9 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String =
 	game_mode = mode
 	team_scores = [0, 0]
 	round_num = 0
-	# Split the teamless lobby roster into teams now, as the match begins. Battle royale is
-	# every player for themselves, so the roster stays teamless (-1).
-	if mode != Pedestal.GameMode.BATTLE_ROYALE:
+	# Split the teamless lobby roster into teams now, as the match begins. Battle royale and
+	# Race are every player for themselves, so the roster stays teamless (-1).
+	if mode != Pedestal.GameMode.BATTLE_ROYALE and mode != Pedestal.GameMode.RACE:
 		_assign_teams()
 	# Swap every peer into the chosen map first, then wait a frame so the new map's
 	# SpawnPoints and balls are in the tree before we reset and spawn players into them.
@@ -134,6 +136,8 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String =
 			_start_ctf()
 		Pedestal.GameMode.BATTLE_ROYALE:
 			_start_battle_royale()
+		Pedestal.GameMode.RACE:
+			_start_race()
 		_:
 			_start_round()
 
@@ -231,6 +235,36 @@ func server_resolve_hit(victim_id: int, thrower_id: int, impulse: Vector3, is_kn
 		_broadcast()
 		_check_round_end()
 
+# A player fell into an out-of-bounds volume (see OutOfBounds). During a live match it costs one
+# heart and respawns them at their spawn — a fatal fall eliminates them, mirroring a fatal hit
+# (CTF benches and respawns instead). Outside a match (lobby/intermission) it just puts them back
+# so they don't fall forever. Server-authoritative; the trigger only calls this on the host.
+func server_player_fell(id: int) -> void:
+	if not multiplayer.is_server() or _player(id) == null:
+		return
+	if state != State.PLAYING:
+		# Outside a live match there are no hearts to spend. In the lobby, catch the fall and
+		# respawn neutrally; during the brief intermission, leave them be (a reset is imminent).
+		if state == State.WAITING:
+			_respawn_neutral(id)
+		return
+	# Already eliminated and spectating — don't dock a heart or (crucially) revive them.
+	if lives.get(id, 0) <= 0:
+		return
+	lives[id] -= 1
+	_drop_held_items(id)
+	if lives[id] <= 0:
+		if game_mode == Pedestal.GameMode.CAPTURE_THE_FLAG:
+			_ctf_knockout(id)
+		else:
+			var p := _player(id)
+			if p:
+				p.set_alive_remote.rpc(false, true)
+	else:
+		_respawn(id)
+	_broadcast()
+	_check_round_end()
+
 # Whether thrower_id's ball is allowed to get victim_id out. Central source of
 # truth for the hit rules; the ball's detection and this scoring path both use it.
 func can_hit(victim_id: int, thrower_id: int) -> bool:
@@ -239,10 +273,11 @@ func can_hit(victim_id: int, thrower_id: int) -> bool:
 		return false
 	if victim_id == thrower_id:
 		return self_hit
-	# The lobby (teamless WAITING) and battle royale are free-for-alls; team matches use
+	# The lobby (teamless WAITING), battle royale and race are free-for-alls; team matches use
 	# the configured friendly_fire rule (off = real dodgeball).
 	var ff := friendly_fire or state == State.WAITING \
-		or game_mode == Pedestal.GameMode.BATTLE_ROYALE
+		or game_mode == Pedestal.GameMode.BATTLE_ROYALE \
+		or game_mode == Pedestal.GameMode.RACE
 	if not ff and _team_of.get(victim_id, -1) == _team_of.get(thrower_id, -2):
 		return false
 	return true
@@ -305,6 +340,20 @@ func _start_battle_royale() -> void:
 		_respawn(id)
 	_broadcast()
 
+# Race: one continuous free-for-all from the start line to the finish. First racer to reach the
+# finish wins (server_on_race_finish); hearts still matter — a ball hit or a fall (out of bounds)
+# costs one and respawns you at the start, and running out eliminates you from the race.
+func _start_race() -> void:
+	state = State.PLAYING
+	status_text = "Race — first to the finish!"
+	for ball in get_tree().get_nodes_in_group("grabbable"):
+		if ball.has_method("server_reset"):
+			ball.server_reset()
+	for id in _team_of:
+		lives[id] = STARTING_LIVES
+		_respawn(id)
+	_broadcast()
+
 # Reported by the CaptureTheFlag arena when a carrier delivers the flag. Owns CTF scoring
 # so the HUD (which reads team_scores) shows it.
 func server_on_flag_capture(scoring_team: int) -> void:
@@ -331,6 +380,11 @@ func _check_round_end() -> void:
 	# Battle royale ends when one player is left; CTF ends on captures, not eliminations.
 	if game_mode == Pedestal.GameMode.BATTLE_ROYALE:
 		_check_br_end()
+		return
+	# Race ends when someone reaches the finish (see server_on_race_finish); eliminations only
+	# decide it if everyone but one racer is knocked out first.
+	if game_mode == Pedestal.GameMode.RACE:
+		_check_race_end()
 		return
 	if game_mode != Pedestal.GameMode.TEAM:
 		return
@@ -425,6 +479,33 @@ func _check_br_end() -> void:
 func _end_match_br(winner_id: int) -> void:
 	state = State.MATCH_OVER
 	status_text = ("Player %d is the last one standing!" % winner_id) if winner_id > 0 else "Nobody survived!"
+	_broadcast()
+	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
+
+# Reported by a RaceFinish trigger when a racer crosses the line. The first valid crosser wins;
+# once the match is over (state left PLAYING) later crossers are ignored.
+func server_on_race_finish(id: int) -> void:
+	if not multiplayer.is_server() or state != State.PLAYING:
+		return
+	if game_mode != Pedestal.GameMode.RACE or lives.get(id, 0) <= 0:
+		return
+	_end_match_race(id)
+
+# Race fallback: if everyone but one racer is eliminated before anyone finishes, the survivor
+# wins. Mirrors the battle-royale last-standing check.
+func _check_race_end() -> void:
+	var winner := -1
+	var alive_n := 0
+	for id in _team_of:
+		if lives.get(id, 0) > 0:
+			alive_n += 1
+			winner = id
+	if alive_n <= 1:
+		_end_match_race(winner if alive_n == 1 else -1)
+
+func _end_match_race(winner_id: int) -> void:
+	state = State.MATCH_OVER
+	status_text = ("Player %d wins the race!" % winner_id) if winner_id > 0 else "Nobody finished the race!"
 	_broadcast()
 	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
 
