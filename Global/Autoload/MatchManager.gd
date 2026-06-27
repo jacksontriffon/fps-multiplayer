@@ -18,6 +18,11 @@ const TEAM_COUNT := 2
 const MIN_PLAYERS := 1
 const ROUND_RESET_DELAY := 3.0
 const MATCH_RESET_DELAY := 6.0
+# How long the end-of-match screen lingers before the match auto-returns to the lobby (and
+# everyone respawns there). Longer than MATCH_RESET_DELAY so players have time to read the
+# result and choose Rematch; if nobody acts, the auto-return is the safety that un-sticks a
+# match where everyone lost.
+const END_SCREEN_LINGER := 15.0
 const TEAM_NAMES := ["Red", "Blue"]
 
 # Where each mode is played, and where everyone waits between matches. The starting pedestal
@@ -85,6 +90,12 @@ var self_hit := false       # when true, your own thrown ball can get you out
 var _team_of := {}
 var _reset_token := 0
 
+# The last match's setup, captured at start so Rematch (from the end screen) can replay it.
+# Host-only; never replicated.
+var _last_mode: int = Pedestal.GameMode.TEAM
+var _last_map := ""
+var _last_tournament := false
+
 # A player joins teamless (team -1); _team_of doubles as the roster of present players.
 # Their real team is assigned at match start.
 func server_player_ready(id: int) -> void:
@@ -120,6 +131,9 @@ func server_request_start(mode: int = Pedestal.GameMode.TEAM, map_path: String =
 	# SpawnPoints and balls are in the tree before we reset and spawn players into them.
 	# An explicit pick from Map Select wins; otherwise fall back to the sandbox/mode default.
 	var chosen_map: String = map_path if map_path != "" else (SANDBOX_MAP if USE_SANDBOX_MAP else MAP_OF[mode])
+	_last_mode = mode
+	_last_map = chosen_map
+	_last_tournament = false
 	await _load_map_for(chosen_map)
 	# A player may have left during the swap; bail back to the lobby if we can't start anymore.
 	if not _enough_players_present():
@@ -159,6 +173,7 @@ func server_request_start_tournament() -> void:
 	game_mode = Pedestal.GameMode.TEAM
 	team_scores = [0, 0]
 	round_num = 0
+	_last_tournament = true
 	_assign_teams()
 	await _load_map_for(tournament_maps[0])
 	if not _enough_players_present():
@@ -184,6 +199,27 @@ func server_request_to_lobby() -> void:
 		return
 	_reset_token += 1  # cancel any pending round/match transition before resetting
 	_reset_to_waiting()
+
+# Replay the last match (same mode + map, or a fresh tournament) straight from the end screen,
+# skipping the trip back to the lobby. Only valid once a match is over; the pending auto-return
+# is cancelled. If the roster has thinned out too much to restart, fall back to the lobby so the
+# end screen never strands everyone on a finished arena.
+@rpc("any_peer", "reliable")
+func request_rematch() -> void:
+	server_request_rematch()
+
+func server_request_rematch() -> void:
+	if not multiplayer.is_server() or state != State.MATCH_OVER:
+		return
+	_reset_token += 1  # cancel the pending auto-return to lobby
+	state = State.WAITING  # satisfy can_start() for the restart below
+	if not can_start():
+		_reset_to_waiting()
+		return
+	if _last_tournament:
+		server_request_start_tournament()
+	else:
+		server_request_start(_last_mode, _last_map)
 
 # Peer ids of everyone present in the lobby, in a stable order. Read by the Map Select
 # menu to list the players waiting before a match starts.
@@ -452,7 +488,7 @@ func _end_tournament() -> void:
 		status_text = "Tournament drawn!  (%d–%d)" % [tournament_wins[0], tournament_wins[1]]
 	is_tournament = false
 	_broadcast()
-	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
+	_schedule(_reset_to_waiting, END_SCREEN_LINGER)
 
 # Round banner: in a tournament it carries the map number so players know where they are.
 func _round_status() -> String:
@@ -464,7 +500,7 @@ func _end_match(winner: int) -> void:
 	state = State.MATCH_OVER
 	status_text = "%s wins the match!" % TEAM_NAMES[winner]
 	_broadcast()
-	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
+	_schedule(_reset_to_waiting, END_SCREEN_LINGER)
 
 func _check_br_end() -> void:
 	var winner := -1
@@ -480,7 +516,7 @@ func _end_match_br(winner_id: int) -> void:
 	state = State.MATCH_OVER
 	status_text = ("Player %d is the last one standing!" % winner_id) if winner_id > 0 else "Nobody survived!"
 	_broadcast()
-	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
+	_schedule(_reset_to_waiting, END_SCREEN_LINGER)
 
 # Reported by a RaceFinish trigger when a racer crosses the line. The first valid crosser wins;
 # once the match is over (state left PLAYING) later crossers are ignored.
@@ -507,7 +543,7 @@ func _end_match_race(winner_id: int) -> void:
 	state = State.MATCH_OVER
 	status_text = ("Player %d wins the race!" % winner_id) if winner_id > 0 else "Nobody finished the race!"
 	_broadcast()
-	_schedule(_reset_to_waiting, MATCH_RESET_DELAY)
+	_schedule(_reset_to_waiting, END_SCREEN_LINGER)
 
 func _reset_to_waiting() -> void:
 	team_scores = [0, 0]
