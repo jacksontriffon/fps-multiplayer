@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://dwiztower00001"]
+[gd_scene load_steps=20 format=3 uid="uid://txys3ypxj0rk"]
 
 [ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
 [ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
