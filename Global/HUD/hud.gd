@@ -336,6 +336,10 @@ func _update_triple_cell(player: Player) -> void:
 	var amount := player.stamina.reserved(Stamina.RES_TRIPLE_THROW) if player else 0.0
 	_triple_cell.visible = amount > 0.0
 	_triple_cell.custom_minimum_size.x = amount * STAMINA_PX_PER_UNIT
+	# Each stack triples the thrown balls, so the label reads the live multiplier (×3, ×9, ...).
+	var stacks := player.effect_count(Player.TRIPLE_THROW) if player else 0
+	if stacks > 0:
+		(_triple_cell.get_child(0) as Label).text = "×%d" % int(pow(3, stacks))
 
 func _update_hurt(delta: float, id: int) -> void:
 	var n: int = MatchManager.lives.get(id, -1)

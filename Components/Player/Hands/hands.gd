@@ -252,7 +252,7 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 		var was_bomb := dodge != null and dodge.is_bomb()
 		held.throw(aim, power)
 		if actor.has_effect(Player.TRIPLE_THROW):
-			_throw_triple_extras(actor, aim, power, was_bomb)
+			_throw_triple_extras(actor, aim, power, was_bomb, maxi(actor.effect_count(Player.TRIPLE_THROW), 1))
 		# Infinite ammo restocks the hand the instant the thrown ball leaves it.
 		if actor.has_effect(Player.INFINITE_AMMO):
 			var spawner := _ball_spawner()
@@ -265,14 +265,25 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 	if ball:
 		ball.grab(peer_id)
 
-# Server only. Fling two extra balls either side of the real throw for the x3 buff,
-# borrowing a BallSpawner's replicated container so the conjured balls reach every peer.
-func _throw_triple_extras(actor: Player, aim: Vector3, power: float, as_bomb: bool) -> void:
+# Server only. The x3 buff multiplies the thrown balls: each stack triples the count (1 -> 3 ->
+# 9 -> ...), so beyond the real ball we conjure 3^stacks - 1 extras, fanned in symmetric pairs
+# either side of the aim. Uses a BallSpawner's replicated container so the conjured balls reach
+# every peer.
+func _throw_triple_extras(actor: Player, aim: Vector3, power: float, as_bomb: bool, stacks: int) -> void:
 	var spawner := _ball_spawner()
 	if spawner == null:
 		return
-	for offset in [TRIPLE_SPREAD, -TRIPLE_SPREAD]:
-		spawner.launch_from_hand(actor, aim.rotated(Vector3.UP, offset), power, as_bomb)
+	# Spread around the view's up axis (the part of world-up perpendicular to the aim), not world
+	# up, so the fan stays level to the crosshair when aiming up or down — rotating around world up
+	# would slant it with pitch.
+	var dir := aim.normalized()
+	var spread_axis := Vector3.UP - dir * dir.dot(Vector3.UP)
+	spread_axis = spread_axis.normalized() if spread_axis.length() > 0.001 else Vector3.FORWARD
+	var pairs := (int(pow(3, stacks)) - 1) / 2
+	for i in range(1, pairs + 1):
+		var offset := TRIPLE_SPREAD * i
+		spawner.launch_from_hand(actor, aim.rotated(spread_axis, offset), power, as_bomb)
+		spawner.launch_from_hand(actor, aim.rotated(spread_axis, -offset), power, as_bomb)
 
 func _ball_spawner() -> BallSpawner:
 	for n in get_tree().get_nodes_in_group("ball_spawner"):

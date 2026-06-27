@@ -2,12 +2,17 @@ extends Area3D
 class_name AbilityOrb
 
 # A floating, glowing orb resting on the floor that grants one upgrade — dash, double jump,
-# the explosion upgrade, or a timed infinite-ammo buff — to the first player who touches it.
+# the explosion upgrade, infinite ammo or triple throw — to the first player who touches it.
 # Mirrors InfiniteHeartZone: the grant runs on every peer off body_entered (player bodies
 # replicate identically, so the overlap fires the same everywhere), which keeps the pickup
-# deterministic with no extra RPCs. The ability grants are permanent (kept for the rest of
-# the run); a timed grant (see DURATIONS) instead self-expires on the player and the orb
-# fades out, then deterministically respawns after RESPAWN_DELAY so it can be grabbed again.
+# deterministic with no extra RPCs.
+#
+# Every orb carries a `time_limit` (seconds) that applies to whichever ability it grants. A
+# positive limit makes it a timed buff that self-expires on the player; the orb fades out and
+# deterministically respawns after RESPAWN_DELAY so it can be grabbed again. A limit of 0 makes
+# the grant constant — kept until the match's game mode clears it (by default when a round
+# finishes; see MatchManager). Constant orbs stay taken until the round respawns every orb
+# (round_respawn), so each round starts orb-less and the abilities can be re-collected.
 
 const SOURCE := &"ability_orb"
 
@@ -16,10 +21,13 @@ const SOURCE := &"ability_orb"
 # roll stays identical on every peer.
 enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, RANDOM }
 
-# Stackable abilities grant per-orb (each pickup adds another air jump) rather than as a single
-# unlock — see _grant_source. +1 Jump is the only one: one orb double-jumps, a second triples.
+# Stackable abilities grant per-orb (each pickup raises the effect's level) rather than as a
+# single unlock — see _grant_source, which gives each orb its own grant source so the player's
+# source count is the stack size. +1 Jump stacks air jumps (one orb double-jumps, two triple);
+# Triple Throw triples the thrown balls per stack (see Hands).
 const STACKABLE := {
 	Ability.DOUBLE_JUMP: true,
+	Ability.TRIPLE_THROW: true,
 }
 
 const EFFECTS := {
@@ -56,12 +64,8 @@ const NAMES := {
 	Ability.TRIPLE_THROW: "Triple Throw",
 }
 
-# Abilities listed here are timed buffs (seconds), not permanent unlocks; the orb respawns
-# RESPAWN_DELAY seconds after such a pickup. Anything absent is a permanent one-shot grant.
-const DURATIONS := {
-	Ability.INFINITE_AMMO: Player.INFINITE_AMMO_DURATION,
-	Ability.TRIPLE_THROW: Player.TRIPLE_THROW_DURATION,
-}
+# How long a timed orb (time_limit > 0) stays gone after a pickup before it deterministically
+# pops back, so a buff can be grabbed again without a round reset.
 const RESPAWN_DELAY := 15.0
 
 # How close the local player must be for the floating name to fade in.
@@ -71,6 +75,11 @@ const NAME_FADE_SPEED := 6.0
 # The configured pick. RANDOM defers the choice to a per-spawn roll (see _resolve_ability);
 # anything else is used as-is.
 @export var ability: Ability = Ability.DASH
+
+# Seconds the granted ability lasts. 0 = constant: kept until the game mode resets it (by
+# default at the end of a round). Any positive value makes it a timed buff that self-expires on
+# the player, and the orb respawns RESPAWN_DELAY later. Applies to whichever ability is granted.
+@export var time_limit: float = 0.0
 
 # Bob/spin feel for the floating core (purely visual, runs on every peer).
 @export var bob_height := 0.18
@@ -94,6 +103,7 @@ var _roll_count := 0
 var _resolved: Ability = Ability.DASH
 
 func _ready() -> void:
+	add_to_group("ability_orbs")
 	_base_y = _bob.position.y
 	body_entered.connect(_on_body_entered)
 	_resolve_ability()
@@ -167,14 +177,16 @@ func _on_body_entered(body: Node3D) -> void:
 	if _collected or not (body is Player):
 		return
 	_collected = true
-	var duration: float = DURATIONS.get(_resolved, 0.0)
-	if duration > 0.0:
+	var eid := _effect_id()
+	if time_limit > 0.0:
 		# Timed buff: grant it (it self-expires on the player) and hide the orb until it respawns.
-		body.grant_timed_effect(_effect_id(), duration, SOURCE)
+		body.grant_timed_effect(eid, time_limit, _grant_source())
 		_hide_collected()
 		_respawn_left = RESPAWN_DELAY
 	else:
-		body.set_effect(_effect_id(), true, _grant_source())
+		# Constant grant: kept until the round resets it, which also respawns this orb. A stackable
+		# ability uses a per-orb source (see _grant_source), so each pickup raises its level.
+		body.set_effect(eid, true, _grant_source())
 		_consume()
 
 # Tint the core, glow and floor ring to the ability's colour so the orb reads at a
@@ -207,11 +219,23 @@ func _hide_collected() -> void:
 	_ring.visible = false
 	_name_label.visible = false
 
-# Permanently take the orb. Kept (not freed) so the deterministic overlap can't re-fire a
-# grant, and so any late body_entered on another peer still finds it inert.
+# Take a constant orb. Kept (not freed) so the deterministic overlap can't re-fire a grant, and
+# so any late body_entered on another peer still finds it inert. Processing stops until the round
+# respawns it (round_respawn re-enables it).
 func _consume() -> void:
 	_hide_collected()
 	set_process(false)
+
+# Server -> every peer at the start of a round (see MatchManager): bring the orb back so its
+# ability can be collected again, matching the round wiping every player's upgrades. Re-arms a
+# consumed constant orb or a faded-out timed one alike.
+@rpc("any_peer", "call_local", "reliable")
+func round_respawn() -> void:
+	if not (multiplayer.get_remote_sender_id() in [0, 1]):
+		return
+	_respawn_left = 0.0
+	set_process(true)
+	_restore()
 
 # Timed-buff orbs only: count down the cooldown (in step on every peer) and pop back.
 func _tick_respawn(delta: float) -> void:
