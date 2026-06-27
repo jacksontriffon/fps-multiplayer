@@ -249,6 +249,11 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 		held.throw(aim, power)
 		if actor.has_effect(Player.TRIPLE_THROW):
 			_throw_triple_extras(actor, aim, power)
+		# Infinite ammo restocks the hand the instant the thrown ball leaves it.
+		if actor.has_effect(Player.INFINITE_AMMO):
+			var spawner := _ball_spawner()
+			if spawner:
+				spawner.refill_hand(actor)
 		return
 	if target_path.is_empty():
 		return
