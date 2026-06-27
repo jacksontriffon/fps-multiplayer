@@ -184,7 +184,7 @@ func _update_stamina() -> void:
 func _build_ability_cells() -> void:
 	_ability_defs = [
 		{"effect": Player.ABILITY_DASH, "cost": Dash.DASH_COST, "glyph": "»", "color": Color(0.25, 0.7, 1.0)},
-		{"effect": Player.ABILITY_DOUBLE_JUMP, "cost": DoubleJump.DOUBLE_JUMP_COST, "glyph": "↟", "color": Color(0.75, 0.45, 1.0), "stacks": true},
+		{"effect": Player.ABILITY_DOUBLE_JUMP, "cost": DoubleJump.DOUBLE_JUMP_COST, "glyph": "↑", "color": Color(1.0, 0.5, 0.8), "stacks": true},
 		{"effect": Player.ABILITY_BOMB, "cost": Stamina.BOMB_COST, "glyph": "✸", "color": Color(1.0, 0.45, 0.1)},
 	]
 	for i in _ability_defs.size():

@@ -17,7 +17,7 @@ const SOURCE := &"ability_orb"
 enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, RANDOM }
 
 # Stackable abilities grant per-orb (each pickup adds another air jump) rather than as a single
-# unlock — see _grant_source. Double Jump is the only one: grab a second jump orb for a triple.
+# unlock — see _grant_source. +1 Jump is the only one: one orb double-jumps, a second triples.
 const STACKABLE := {
 	Ability.DOUBLE_JUMP: true,
 }
@@ -32,25 +32,25 @@ const EFFECTS := {
 
 const COLORS := {
 	Ability.DASH: Color(0.25, 0.7, 1.0),
-	Ability.DOUBLE_JUMP: Color(0.75, 0.45, 1.0),
+	Ability.DOUBLE_JUMP: Color(1.0, 0.5, 0.8),
 	Ability.BOMB: Color(1.0, 0.45, 0.1),
 	Ability.INFINITE_AMMO: Color(1.0, 0.82, 0.2),
 	Ability.TRIPLE_THROW: Color(0.3, 0.9, 0.45),
 }
 
-# Billboard icon (two chevrons for dash, wings for double jump, a bomb for the explosion
-# upgrade, an infinity loop for infinite ammo) and the name shown above it. The icons are
-# white so modulate tints them.
+# Billboard icon (two chevrons for dash, an up arrow with a plus for the stacking +1 Jump, a
+# bomb for the explosion upgrade, an infinity loop for infinite ammo) and the name shown above
+# it. The icons are white so modulate tints them.
 const ICONS := {
 	Ability.DASH: preload("res://Assets/Textures/UI/ability_dash.svg"),
-	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_double_jump.svg"),
+	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_extra_jump.svg"),
 	Ability.BOMB: preload("res://Assets/Textures/UI/ability_bomb.svg"),
 	Ability.INFINITE_AMMO: preload("res://Assets/Textures/UI/ability_infinite.svg"),
 	Ability.TRIPLE_THROW: preload("res://Assets/Textures/UI/ability_triple.svg"),
 }
 const NAMES := {
 	Ability.DASH: "Dash",
-	Ability.DOUBLE_JUMP: "Double Jump",
+	Ability.DOUBLE_JUMP: "+1 Jump",
 	Ability.BOMB: "Explosion",
 	Ability.INFINITE_AMMO: "Infinite Ammo",
 	Ability.TRIPLE_THROW: "Triple Throw",
