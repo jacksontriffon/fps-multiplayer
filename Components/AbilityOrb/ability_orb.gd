@@ -106,11 +106,17 @@ func _resolve_ability() -> void:
 	_roll_count += 1
 	_resolved = (rng.randi() % Ability.RANDOM) as Ability  # RANDOM is last, so this is a real ability
 
-# The host-minted per-game seed, broadcast to every peer via game.gd load_map. Falls back to 0
-# if the game root is somehow absent (keeps rolls deterministic rather than crashing).
+# The host-minted per-game seed (game.gd.match_seed), broadcast to every peer via load_map.
+# Walk up to the game root rather than using current_scene/groups: during the initial scene
+# instantiation (the authored lobby map) current_scene isn't set yet and the game_root group
+# isn't populated, but our ancestors — and their match_seed — already exist. Falls back to 0.
 func _match_seed() -> int:
-	var root := get_tree().current_scene
-	return root.match_seed if root != null and "match_seed" in root else 0
+	var n := get_parent()
+	while n != null:
+		if "match_seed" in n:
+			return n.match_seed
+		n = n.get_parent()
+	return 0
 
 func _process(delta: float) -> void:
 	if _collected:

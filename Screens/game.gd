@@ -24,9 +24,10 @@ const LOBBY_MAP := "res://Screens/Maps/LobbyMap.tscn"
 @export var dev_mode: bool = false
 
 var lobby_id: int = 0
-# Per-game random seed. The host mints it (see _start_host) and ships it to every peer through
-# load_map, so deterministic-but-varied content (e.g. RANDOM ability orbs) rolls the same on
-# all peers yet differs each game. Seeded here too so a no-network boot already varies.
+# Per-instance random seed for deterministic-but-varied map content (e.g. RANDOM ability orbs).
+# The server mints a fresh one for every load_map and ships it to all peers through that RPC, so
+# each map instance rolls the same on every peer yet differs each time it loads. Seeded here too
+# (randi() is auto-seeded per launch) for the authored lobby map, which never goes through load_map.
 var match_seed: int = randi()
 var peer: MultiplayerPeer
 var is_host: bool = false
@@ -116,7 +117,7 @@ func _teardown_session() -> void:
 	lobby_id = 0
 	current_map_path = LOBBY_MAP
 	MatchManager.reset_for_rehost()
-	load_map(LOBBY_MAP)
+	load_map(LOBBY_MAP, randi())
 
 
 # --- Map swapping ----------------------------------------------------------
@@ -126,7 +127,7 @@ func _teardown_session() -> void:
 @rpc("authority", "call_local", "reliable")
 func load_map(path: String, p_match_seed: int = match_seed) -> void:
 	current_map_path = path
-	match_seed = p_match_seed  # adopt the host's seed before the map (and its orbs) instance
+	match_seed = p_match_seed  # adopt this load's seed before the map (and its orbs) instance
 	for c in map_container.get_children():
 		c.free()  # immediate, not queue_free: never let two maps coexist for a frame
 	# A player map saved to user:// only exists on the host's machine, so a client can be asked
@@ -191,7 +192,6 @@ func _host_enet() -> String:
 
 # Shared host setup for either transport.
 func _start_host(new_peer: MultiplayerPeer):
-	match_seed = randi()  # fresh per-game seed; broadcast to clients via load_map
 	peer = new_peer
 	multiplayer.multiplayer_peer = peer
 	if not multiplayer.peer_connected.is_connected(_add_player):
