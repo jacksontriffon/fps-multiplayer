@@ -1,3 +1,4 @@
+@tool
 extends Node3D
 class_name BallSpawner
 
@@ -17,8 +18,28 @@ const BALL_SCENE := preload("res://Components/Dodgeball/dodgeball.tscn")
 var _elapsed := 0.0
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		_show_editor_preview()
+		return
 	# Found by Hands so the triple-throw buff can borrow this spawner's replicated container.
 	add_to_group("ball_spawner")
+
+# Draw a translucent dodgeball at the spawn point so the spawner is visible while editing maps.
+# Editor-only and owner-less, so it never serializes into the scene or ships to a running game.
+func _show_editor_preview() -> void:
+	if has_node("EditorPreview"):
+		return
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.25  # matches the dodgeball's visible BallMesh (default sphere scaled by 0.5)
+	mesh.height = 0.5
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.3019608, 0.8784314, 0.39215687, 0.4)  # the ball's green, translucent
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mesh.material = mat
+	var preview := MeshInstance3D.new()
+	preview.name = "EditorPreview"
+	preview.mesh = mesh
+	add_child(preview)
 
 func _physics_process(delta: float) -> void:
 	# Only the host spawns; mirrors grabbable.gd's guard so a peer connecting after _ready works.
