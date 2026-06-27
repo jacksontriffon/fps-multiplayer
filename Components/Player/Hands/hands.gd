@@ -273,11 +273,17 @@ func _throw_triple_extras(actor: Player, aim: Vector3, power: float, as_bomb: bo
 	var spawner := _ball_spawner()
 	if spawner == null:
 		return
+	# Spread around the view's up axis (the part of world-up perpendicular to the aim), not world
+	# up, so the fan stays level to the crosshair when aiming up or down — rotating around world up
+	# would slant it with pitch.
+	var dir := aim.normalized()
+	var spread_axis := Vector3.UP - dir * dir.dot(Vector3.UP)
+	spread_axis = spread_axis.normalized() if spread_axis.length() > 0.001 else Vector3.FORWARD
 	var pairs := (int(pow(3, stacks)) - 1) / 2
 	for i in range(1, pairs + 1):
 		var offset := TRIPLE_SPREAD * i
-		spawner.launch_from_hand(actor, aim.rotated(Vector3.UP, offset), power, as_bomb)
-		spawner.launch_from_hand(actor, aim.rotated(Vector3.UP, -offset), power, as_bomb)
+		spawner.launch_from_hand(actor, aim.rotated(spread_axis, offset), power, as_bomb)
+		spawner.launch_from_hand(actor, aim.rotated(spread_axis, -offset), power, as_bomb)
 
 func _ball_spawner() -> BallSpawner:
 	for n in get_tree().get_nodes_in_group("ball_spawner"):

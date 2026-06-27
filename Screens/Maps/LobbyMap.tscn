@@ -1795,3 +1795,7 @@ ability = 4
 [node name="TripleThrowOrb2" parent="." instance=ExtResource("9_orb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.1, -6.2288876)
 ability = 4
+
+[node name="TripleThrowOrb3" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9097767, 0.1, -6.2288876)
+ability = 4
