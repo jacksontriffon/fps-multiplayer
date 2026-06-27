@@ -252,7 +252,7 @@ func _do_interact(peer_id: int, target_path: NodePath, aim: Vector3, power: floa
 		var was_bomb := dodge != null and dodge.is_bomb()
 		held.throw(aim, power)
 		if actor.has_effect(Player.TRIPLE_THROW):
-			_throw_triple_extras(actor, aim, power, was_bomb, maxi(actor.effect_stacks(Player.TRIPLE_THROW), 1))
+			_throw_triple_extras(actor, aim, power, was_bomb, maxi(actor.effect_count(Player.TRIPLE_THROW), 1))
 		# Infinite ammo restocks the hand the instant the thrown ball leaves it.
 		if actor.has_effect(Player.INFINITE_AMMO):
 			var spawner := _ball_spawner()

@@ -21,6 +21,15 @@ const SOURCE := &"ability_orb"
 # roll stays identical on every peer.
 enum Ability { DASH, DOUBLE_JUMP, BOMB, INFINITE_AMMO, TRIPLE_THROW, RANDOM }
 
+# Stackable abilities grant per-orb (each pickup raises the effect's level) rather than as a
+# single unlock — see _grant_source, which gives each orb its own grant source so the player's
+# source count is the stack size. +1 Jump stacks air jumps (one orb double-jumps, two triple);
+# Triple Throw triples the thrown balls per stack (see Hands).
+const STACKABLE := {
+	Ability.DOUBLE_JUMP: true,
+	Ability.TRIPLE_THROW: true,
+}
+
 const EFFECTS := {
 	Ability.DASH: Player.ABILITY_DASH,
 	Ability.DOUBLE_JUMP: Player.ABILITY_DOUBLE_JUMP,
@@ -31,34 +40,28 @@ const EFFECTS := {
 
 const COLORS := {
 	Ability.DASH: Color(0.25, 0.7, 1.0),
-	Ability.DOUBLE_JUMP: Color(0.75, 0.45, 1.0),
+	Ability.DOUBLE_JUMP: Color(1.0, 0.5, 0.8),
 	Ability.BOMB: Color(1.0, 0.45, 0.1),
 	Ability.INFINITE_AMMO: Color(1.0, 0.82, 0.2),
 	Ability.TRIPLE_THROW: Color(0.3, 0.9, 0.45),
 }
 
-# Billboard icon (two chevrons for dash, wings for double jump, a bomb for the explosion
-# upgrade, an infinity loop for infinite ammo) and the name shown above it. The icons are
-# white so modulate tints them.
+# Billboard icon (two chevrons for dash, an up arrow with a plus for the stacking +1 Jump, a
+# bomb for the explosion upgrade, an infinity loop for infinite ammo) and the name shown above
+# it. The icons are white so modulate tints them.
 const ICONS := {
 	Ability.DASH: preload("res://Assets/Textures/UI/ability_dash.svg"),
-	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_double_jump.svg"),
+	Ability.DOUBLE_JUMP: preload("res://Assets/Textures/UI/ability_extra_jump.svg"),
 	Ability.BOMB: preload("res://Assets/Textures/UI/ability_bomb.svg"),
 	Ability.INFINITE_AMMO: preload("res://Assets/Textures/UI/ability_infinite.svg"),
 	Ability.TRIPLE_THROW: preload("res://Assets/Textures/UI/ability_triple.svg"),
 }
 const NAMES := {
 	Ability.DASH: "Dash",
-	Ability.DOUBLE_JUMP: "Double Jump",
+	Ability.DOUBLE_JUMP: "+1 Jump",
 	Ability.BOMB: "Explosion",
 	Ability.INFINITE_AMMO: "Infinite Ammo",
 	Ability.TRIPLE_THROW: "Triple Throw",
-}
-
-# Abilities that stack on a repeat pickup instead of being a no-op: each extra grant raises the
-# effect's level (triple throw triples the thrown balls per level — see Hands).
-const STACKABLE := {
-	Ability.TRIPLE_THROW: true,
 }
 
 # How long a timed orb (time_limit > 0) stays gone after a pickup before it deterministically
@@ -162,26 +165,28 @@ func _local_player() -> Player:
 func _effect_id() -> StringName:
 	return EFFECTS[_resolved]
 
+# Who granted the effect. A stackable ability uses this orb's node path (identical on every
+# peer) so each jump orb is a distinct source and the player's source count is its air-jump
+# count; everything else shares SOURCE so a second orb of the same kind doesn't double up.
+func _grant_source() -> StringName:
+	if STACKABLE.get(_resolved, false):
+		return StringName(str(get_path()))
+	return SOURCE
+
 func _on_body_entered(body: Node3D) -> void:
 	if _collected or not (body is Player):
 		return
 	_collected = true
 	var eid := _effect_id()
-	var stackable: bool = STACKABLE.has(_resolved)
 	if time_limit > 0.0:
 		# Timed buff: grant it (it self-expires on the player) and hide the orb until it respawns.
-		body.grant_timed_effect(eid, time_limit, SOURCE)
-		if stackable:
-			body.add_effect_stack(eid, SOURCE)
+		body.grant_timed_effect(eid, time_limit, _grant_source())
 		_hide_collected()
 		_respawn_left = RESPAWN_DELAY
 	else:
 		# Constant grant: kept until the round resets it, which also respawns this orb. A stackable
-		# ability raises its level on each pickup instead of being a one-shot toggle.
-		if stackable:
-			body.add_effect_stack(eid, SOURCE)
-		else:
-			body.set_effect(eid, true, SOURCE)
+		# ability uses a per-orb source (see _grant_source), so each pickup raises its level.
+		body.set_effect(eid, true, _grant_source())
 		_consume()
 
 # Tint the core, glow and floor ring to the ability's colour so the orb reads at a

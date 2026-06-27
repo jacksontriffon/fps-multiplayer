@@ -153,6 +153,8 @@ const INFINITE_HEARTS := &"infinite_hearts"
 # the Stamina node reserves each owned ability's cost as a container slice, and the HUD
 # draws that container in the bar.
 const ABILITY_DASH := &"ability_dash"
+# ABILITY_DOUBLE_JUMP stacks: each jump orb grants it under its own source, so the source count
+# (effect_count) is how many mid-air jumps the player has — one orb double-jumps, two triple.
 const ABILITY_DOUBLE_JUMP := &"ability_double_jump"
 const ABILITY_BOMB := &"ability_bomb"
 
@@ -174,13 +176,13 @@ var _effects := {}
 # no extra RPC — same deterministic model the granting orb relies on.
 var _timed_effects := {}
 
-# Effect id -> stack count, for effects that stack instead of toggling: each extra grant raises
-# the level the gameplay reads (triple throw flings two more balls per level). Grants fire on
-# every peer, so the counts stay in sync without an RPC.
-var _effect_stacks := {}
-
 func has_effect(id: StringName) -> bool:
 	return _effects.has(id)
+
+# How many distinct sources grant an effect. For a stackable ability (double jump) each orb is
+# its own source, so this is the stack size — the number of mid-air jumps the player owns.
+func effect_count(id: StringName) -> int:
+	return _effects.get(id, {}).size()
 
 func set_effect(id: StringName, active: bool, source: StringName = &"default") -> void:
 	var sources: Dictionary = _effects.get(id, {})
@@ -208,16 +210,6 @@ func effect_time_left(id: StringName) -> float:
 # of it remains as a fraction.
 func effect_total_time(id: StringName) -> float:
 	return _timed_effects.get(id, {}).get("total", 0.0)
-
-# Grant a stacking effect: mark it active and raise its level by one. Runs on every peer like the
-# other orb grants, so every copy agrees without an extra RPC.
-func add_effect_stack(id: StringName, source: StringName = &"default") -> void:
-	set_effect(id, true, source)
-	_effect_stacks[id] = _effect_stacks.get(id, 0) + 1
-
-# How many times a stacking effect has been granted (0 if not held).
-func effect_stacks(id: StringName) -> int:
-	return _effect_stacks.get(id, 0)
 
 func _tick_timed_effects(delta: float) -> void:
 	for id in _timed_effects.keys():
@@ -357,7 +349,6 @@ func reset_upgrades() -> void:
 		return
 	_effects.clear()
 	_timed_effects.clear()
-	_effect_stacks.clear()
 
 func _apply_team_color() -> void:
 	if not is_node_ready():
