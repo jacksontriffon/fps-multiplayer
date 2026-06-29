@@ -44,6 +44,10 @@ var _roster_sig := ""
 const FRIEND_REFRESH := 2.0
 # Cap the rendered friend list; "See all" widens the source, but the column still shows the top N.
 const FRIEND_LIMIT := 20
+# The friend scroll hugs its content so "See all" sits right under the list, growing to a cap and
+# scrolling past it. FRIEND_ROW_H is the approximate per-row pitch used to size it.
+const FRIEND_ROW_H := 42
+const FRIEND_SCROLL_MAX := 252
 var _friend_sig := ""
 var _friend_refresh_t := 0.0
 # False = friends who've played this game; true = every Steam friend (the "See all" toggle).
@@ -240,6 +244,8 @@ func _refresh_friends() -> void:
 	_avatar_rects.clear()
 	for c in friend_list.get_children():
 		c.free()
+	# Size the scroll to its content so the "See all" button below it sits right under the list.
+	friend_scroll.custom_minimum_size.y = minf(maxi(shown.size(), 1) * FRIEND_ROW_H, FRIEND_SCROLL_MAX)
 	if shown.is_empty():
 		var none := Label.new()
 		none.text = "No Steam friends" if _show_all_friends else "You haven't played with anyone yet"

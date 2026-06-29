@@ -224,7 +224,7 @@ text = "Steam Friends"
 
 [node name="FriendScroll" type="ScrollContainer" parent="Center/Panel/VBox/Body/PlayerColumn/PlayerVBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 200)
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 horizontal_scroll_mode = 0
 
