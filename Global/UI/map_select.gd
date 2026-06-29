@@ -26,11 +26,15 @@ extends CanvasLayer
 @onready var net_row: Control = %NetRow
 @onready var local_button: Button = %LocalButton
 @onready var steam_button: Button = %SteamButton
+@onready var spacewar_button: Button = %SpacewarButton
 @onready var error_label: Label = %ErrorLabel
 
 # game.gd NetMode values, mirrored here so the toggle can read/set the host's transport.
 const NET_STEAM := 0
 const NET_LOCAL := 1
+# Valve's public test app (see game.gd). Spacewar is the Steam transport with this appid override,
+# so dev builds can host/join over Steam without a license for our real app.
+const SPACEWAR_APPID := 480
 
 var _mode: int = Pedestal.GameMode.TEAM
 var _selected_map: String = ""
@@ -73,8 +77,10 @@ func _ready() -> void:
 	var net_group := ButtonGroup.new()
 	local_button.button_group = net_group
 	steam_button.button_group = net_group
-	local_button.pressed.connect(_on_net_mode.bind(NET_LOCAL))
-	steam_button.pressed.connect(_on_net_mode.bind(NET_STEAM))
+	spacewar_button.button_group = net_group
+	local_button.pressed.connect(_on_net_mode.bind(NET_LOCAL, 0))
+	steam_button.pressed.connect(_on_net_mode.bind(NET_STEAM, 0))
+	spacewar_button.pressed.connect(_on_net_mode.bind(NET_STEAM, SPACEWAR_APPID))
 
 func open() -> void:
 	_build_map_buttons()  # rebuilt each open so freshly saved player maps show up
@@ -374,19 +380,26 @@ func _refresh_net_mode() -> void:
 	net_row.visible = is_host and root != null
 	if root == null:
 		return
+	# Spacewar is a dev testing aid; only offer it in dev builds.
+	spacewar_button.visible = root.dev_mode
 	if root.net_mode == NET_LOCAL:
 		local_button.button_pressed = true
+	elif root.steam_appid_override == SPACEWAR_APPID:
+		spacewar_button.button_pressed = true
 	else:
 		steam_button.button_pressed = true
 
 # Switching transport re-hosts the session. On success the menu closes (its player is about to
 # respawn); on failure the session is untouched, so keep the menu open and show why.
-func _on_net_mode(mode: int) -> void:
+func _on_net_mode(mode: int, appid_override: int) -> void:
 	var root := get_tree().get_first_node_in_group("game_root")
-	if root == null or root.net_mode == mode:
+	if root == null:
+		return
+	# Already on this exact transport (and, for Steam, this appid)? Nothing to do.
+	if root.net_mode == mode and (mode == NET_LOCAL or root.steam_appid_override == appid_override):
 		return
 	_clear_error()
-	var err: String = root.switch_net_mode(mode)
+	var err: String = root.switch_net_mode(mode, appid_override)
 	if err != "":
 		_show_error(err)
 		_refresh_net_mode()  # re-sync the toggle to the mode that's actually active
