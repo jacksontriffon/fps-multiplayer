@@ -12,6 +12,9 @@ extends Node3D
 enum NetMode { STEAM, LOCAL }
 
 const LOBBY_MAP := "res://Screens/Maps/LobbyMap.tscn"
+# Valve's public test app. Every Steam account owns it, so dev builds can host/join/invite over the
+# Steam transport without a license for our real app — handy before playtest grants propagate.
+const SPACEWAR_APPID := 480
 
 ## Defaults to STEAM. Set to LOCAL in the inspector to test two windows on one machine over
 ## ENet loopback, bypassing Steam entirely. Leave as STEAM for real builds.
@@ -37,6 +40,13 @@ var is_joining: bool = false
 var _tearing_down: bool = false
 # Steam is initialised lazily so a session that boots in LOCAL can still switch to STEAM later.
 var _steam_ready: bool = false
+# Which appid Steam should init against. 0 = resolve from steam_appid.txt (our real app). Set to
+# SPACEWAR_APPID by the dev net selector to test Steam paths against Valve's test app.
+var steam_appid_override: int = 0
+# The override Steam actually came up under, so a dev appid switch knows when to reinit.
+var _active_steam_appid: int = -1
+# Lobby callbacks are wired exactly once for the process; a Steam reinit must not re-connect them.
+var _steam_signals_wired: bool = false
 # Reason the last Steam init failed (Steamworks' verbal), kept so the lobby menu can explain why
 # we dropped to LOCAL. Empty once Steam comes up.
 var last_steam_error: String = ""
@@ -84,9 +94,14 @@ func _auto_host() -> void:
 # Initialise Steam once, wiring the lobby callbacks a single time. Returns false on failure so
 # callers can fall back. Safe to call repeatedly.
 func _ensure_steam_init() -> bool:
-	if _steam_ready:
+	if _steam_ready and _active_steam_appid == steam_appid_override:
 		return true
-	var init := Steam.steamInitEx(0, true)
+	# Switching appid (dev Spacewar toggle) means tearing the old Steam session down first; Steam can
+	# only run one appid per process, so reinit against the new one.
+	if _steam_ready and _active_steam_appid != steam_appid_override:
+		Steam.steamShutdown()
+		_steam_ready = false
+	var init := Steam.steamInitEx(steam_appid_override, true)
 	print("Steam init: ", init)
 	if init["status"] != Steam.STEAM_API_INIT_RESULT_OK:
 		push_error("Steam init failed (%d): %s" % [init["status"], init["verbal"]])
@@ -94,12 +109,16 @@ func _ensure_steam_init() -> bool:
 		_log_steam_diagnostics()
 		return false
 	last_steam_error = ""
+	_active_steam_appid = steam_appid_override
 	print("Steam ready: user %d, subscribed to app %d = %s" % [Steam.getSteamID(), Steam.getAppID(), Steam.isSubscribedApp(Steam.getAppID())])
 	Steam.initRelayNetworkAccess()
-	Steam.lobby_created.connect(_on_lobby_created)
-	Steam.lobby_joined.connect(_on_lobby_joined)
-	# Accepting a friend's invite or "Join Game" from the Steam overlay routes here.
-	Steam.join_requested.connect(_on_join_requested)
+	# Wire lobby callbacks once; they persist across a reinit, so don't reconnect them.
+	if not _steam_signals_wired:
+		Steam.lobby_created.connect(_on_lobby_created)
+		Steam.lobby_joined.connect(_on_lobby_joined)
+		# Accepting a friend's invite or "Join Game" from the Steam overlay routes here.
+		Steam.join_requested.connect(_on_join_requested)
+		_steam_signals_wired = true
 	_steam_ready = true
 	return true
 
@@ -125,13 +144,17 @@ func _log_steam_diagnostics() -> void:
 # chosen mode. Driven by the lobby pedestal menu — typically the host flipping Local <-> Steam
 # while testing. Returns "" on success or a player-facing error the menu can surface; on a
 # pre-host failure (e.g. Steam unavailable) the current session is left untouched.
-func switch_net_mode(mode: NetMode) -> String:
+func switch_net_mode(mode: NetMode, appid_override: int = 0) -> String:
 	if not multiplayer.is_server():
 		return "Only the host can change the network mode."
-	if mode == net_mode and multiplayer.has_multiplayer_peer():
+	# No-op only if the transport already matches — and, for Steam, the same appid is live.
+	var same_steam := mode == NetMode.STEAM and appid_override == steam_appid_override
+	if mode == net_mode and multiplayer.has_multiplayer_peer() and (mode == NetMode.LOCAL or same_steam):
 		return ""
-	if mode == NetMode.STEAM and not _ensure_steam_init():
-		return "Steam isn't available. Is the Steam client running?"
+	if mode == NetMode.STEAM:
+		steam_appid_override = appid_override
+		if not _ensure_steam_init():
+			return "Steam isn't available. Is the Steam client running?"
 	_teardown_session()
 	net_mode = mode
 	return host_lobby()
