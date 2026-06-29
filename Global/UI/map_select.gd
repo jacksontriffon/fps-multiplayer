@@ -242,7 +242,7 @@ func _refresh_friends() -> void:
 		c.free()
 	if shown.is_empty():
 		var none := Label.new()
-		none.text = "No Steam friends" if _show_all_friends else "Play with someone to see them here"
+		none.text = "No Steam friends" if _show_all_friends else "You haven't played with anyone yet"
 		none.modulate = Color(1, 1, 1, 0.55)
 		friend_list.add_child(none)
 		return
