@@ -12,6 +12,8 @@ extends CanvasLayer
 @onready var mode_list: VBoxContainer = %ModeList
 @onready var map_list: VBoxContainer = %MapList
 @onready var player_list: VBoxContainer = %PlayerList
+@onready var friend_column: Control = %FriendColumn
+@onready var friend_list: VBoxContainer = %FriendList
 @onready var start_button: Button = %StartButton
 @onready var customise_button: Button = %CustomiseButton
 @onready var close_button: Button = %CloseButton
@@ -34,6 +36,11 @@ var _mode_group: ButtonGroup
 var _saved_mouse_mode: Input.MouseMode = Input.MOUSE_MODE_VISIBLE
 # Last roster rendered, so the player list is only rebuilt when someone joins or leaves.
 var _roster_sig := ""
+# Steam friend queries are throttled: the list only rebuilds when its contents change, and we only
+# re-query every FRIEND_REFRESH seconds rather than every frame.
+const FRIEND_REFRESH := 2.0
+var _friend_sig := ""
+var _friend_refresh_t := 0.0
 
 func is_open() -> bool:
 	return visible
@@ -58,8 +65,11 @@ func open() -> void:
 	_select_default_mode()
 	_select_default_map()
 	_roster_sig = ""
+	_friend_sig = ""
+	_friend_refresh_t = 0.0
 	_clear_error()
 	_refresh_players()
+	_refresh_friends()
 	_update_start_state()
 	_refresh_net_mode()
 	_show_main()
@@ -94,7 +104,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			close()
 		get_viewport().set_input_as_handled()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not visible:
 		return
 	# Close if a match started from elsewhere; otherwise keep the roster and Start state live.
@@ -103,6 +113,10 @@ func _process(_delta: float) -> void:
 		return
 	_refresh_players()
 	_update_start_state()
+	_friend_refresh_t -= delta
+	if _friend_refresh_t <= 0.0:
+		_friend_refresh_t = FRIEND_REFRESH
+		_refresh_friends()
 
 func _build_mode_buttons() -> void:
 	_mode_group = ButtonGroup.new()
@@ -183,6 +197,53 @@ func _refresh_players() -> void:
 			who += "  — You"
 		label.text = who
 		player_list.add_child(label)
+
+# Steam friends currently in this game, each with a Join button that leaves our lobby and drops
+# into theirs. Local sessions can't join over Steam, so the column shows a hint instead of a list.
+func _refresh_friends() -> void:
+	var root := get_tree().get_first_node_in_group("game_root")
+	var is_steam: bool = root != null and root.net_mode == NET_STEAM
+	friend_column.visible = is_steam
+	if not is_steam:
+		_friend_sig = ""
+		return
+	var friends := SteamFriends.list_friends_in_game()
+	var sig := str(friends)
+	if sig == _friend_sig:
+		return
+	_friend_sig = sig
+	for c in friend_list.get_children():
+		c.free()
+	if friends.is_empty():
+		var none := Label.new()
+		none.text = "No friends in game"
+		none.modulate = Color(1, 1, 1, 0.55)
+		friend_list.add_child(none)
+		return
+	for entry in friends:
+		_add_friend_row(entry)
+
+func _add_friend_row(entry: Dictionary) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var name_label := Label.new()
+	name_label.text = entry["name"]
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(name_label)
+	var join := Button.new()
+	join.text = "Join"
+	join.disabled = not SteamFriends.can_join(entry)
+	join.pressed.connect(_on_join_friend.bind(int(entry["lobby_id"])))
+	row.add_child(join)
+	friend_list.add_child(row)
+
+func _on_join_friend(lobby_id: int) -> void:
+	var root := get_tree().get_first_node_in_group("game_root")
+	if root == null:
+		return
+	root.leave_and_join_lobby(lobby_id)
+	close()
 
 func _update_start_state() -> void:
 	var ready := MatchManager.can_start()
