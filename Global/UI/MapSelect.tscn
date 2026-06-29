@@ -284,7 +284,7 @@ custom_minimum_size = Vector2(110, 36)
 layout_mode = 2
 tooltip_text = "Dev: host over Steam using Valve's test app (480) so any account can join without owning the game."
 toggle_mode = true
-text = "Spacewar"
+text = "Dev"
 
 [node name="ErrorLabel" type="Label" parent="Center/Panel/VBox"]
 unique_name_in_owner = true
