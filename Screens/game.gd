@@ -32,6 +32,9 @@ var match_seed: int = randi()
 var peer: MultiplayerPeer
 var is_host: bool = false
 var is_joining: bool = false
+# Set while we intentionally close our own peer (leave / re-host) so the server_disconnected
+# handler doesn't mistake it for the host dropping us and trigger a recovery re-host.
+var _tearing_down: bool = false
 # Steam is initialised lazily so a session that boots in LOCAL can still switch to STEAM later.
 var _steam_ready: bool = false
 # The map currently loaded under MapContainer. On the server this is the source of truth a
@@ -46,6 +49,9 @@ func _ready() -> void:
 	# Keep our "in a party" presence current as players join/leave, on host and client alike.
 	multiplayer.peer_connected.connect(_on_peer_count_changed)
 	multiplayer.peer_disconnected.connect(_on_peer_count_changed)
+	# Recover instead of freezing if a join never connects or the host drops us.
+	multiplayer.connection_failed.connect(_on_connection_failed)
+	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	# The lobby map is authored under MapContainer for an editor preview; only instance it at
 	# runtime as a fallback if it isn't already there (no peer yet, so call load_map directly,
 	# not via .rpc()). Every peer boots into the lobby; a mid-match joiner pulls the live map.
@@ -111,6 +117,7 @@ func switch_net_mode(mode: NetMode) -> String:
 # Drop every spawned player, reset match state and close the peer, leaving a bare lobby ready
 # to be re-hosted.
 func _teardown_session() -> void:
+	_tearing_down = true
 	for child in get_children():
 		if str(child.name).is_valid_int():  # player nodes are named by peer id
 			child.free()
@@ -122,6 +129,7 @@ func _teardown_session() -> void:
 	current_map_path = LOBBY_MAP
 	MatchManager.reset_for_rehost()
 	load_map(LOBBY_MAP, randi())
+	_tearing_down = false
 
 
 # --- Map swapping ----------------------------------------------------------
@@ -180,6 +188,23 @@ func _update_rich_presence() -> void:
 func _on_peer_count_changed(_id: int) -> void:
 	_update_rich_presence()
 
+# A join attempt never connected (host gone, relay failure). Don't strand the player on a dead
+# peer — drop it and re-host our own lobby so they're back in a working session.
+func _on_connection_failed() -> void:
+	push_error("Connection to host failed; re-hosting.")
+	multiplayer.multiplayer_peer = null
+	is_joining = false
+	_auto_host()
+
+# The host dropped us mid-session (closed lobby, crash). Return to a fresh lobby of our own rather
+# than freezing on a dead session. Ignored when we closed the peer ourselves (leave / re-host).
+func _on_server_disconnected() -> void:
+	if _tearing_down:
+		return
+	push_error("Host disconnected; returning to a fresh lobby.")
+	_teardown_session()
+	_auto_host()
+
 # Invite a friend to the Steam lobby we're currently in (host or client). They get the usual Steam
 # invite, and accepting routes through _on_join_requested. No-op outside a Steam lobby.
 func invite_to_lobby(friend_steam_id: int) -> void:
@@ -209,18 +234,27 @@ func host_lobby() -> String:
 	return _host_enet()
 
 func _on_lobby_created(result: int, new_lobby_id: int):
-	if result == Steam.Result.RESULT_OK:
-		lobby_id = new_lobby_id
-		# Make the lobby discoverable/joinable so friends' presence resolves a lobby to join into.
-		Steam.setLobbyJoinable(lobby_id, true)
-		Steam.setLobbyData(lobby_id, "name", "%s's lobby" % Steam.getPersonaName())
+	# Lobby creation failed (Steam down, not logged in, etc.). Don't leave the player in a dead
+	# session with no body — fall back to a local host so they at least spawn into the lobby solo.
+	if result != Steam.Result.RESULT_OK:
+		push_error("Steam lobby creation failed (%d); falling back to local host." % result)
+		net_mode = NetMode.LOCAL
+		is_host = true
+		if _host_enet() != "":
+			is_host = false
+		return
 
-		var steam_peer := SteamMultiplayerPeer.new()
-		steam_peer.server_relay = true
-		steam_peer.create_host()
-		_start_host(steam_peer)
+	lobby_id = new_lobby_id
+	# Make the lobby discoverable/joinable so friends' presence resolves a lobby to join into.
+	Steam.setLobbyJoinable(lobby_id, true)
+	Steam.setLobbyData(lobby_id, "name", "%s's lobby" % Steam.getPersonaName())
 
-		print("Lobby created: ID #", lobby_id)
+	var steam_peer := SteamMultiplayerPeer.new()
+	steam_peer.server_relay = true
+	steam_peer.create_host()
+	_start_host(steam_peer)
+
+	print("Lobby created: ID #", lobby_id)
 
 func _host_enet() -> String:
 	var enet_peer := ENetMultiplayerPeer.new()
@@ -271,8 +305,16 @@ func join_lobby(target_lobby_id: int):
 	is_joining = true
 	Steam.joinLobby(target_lobby_id)
 
-func _on_lobby_joined(joined_lobby_id: int, _permissions: int, _locked: bool, _response: int):
+func _on_lobby_joined(joined_lobby_id: int, _permissions: int, _locked: bool, response: int):
 	if !is_joining:
+		return
+	is_joining = false
+
+	# Join failed (lobby full, gone, banned, …). We've usually already left our own lobby to get
+	# here, so re-host a fresh one instead of leaving the player stranded with no session.
+	if response != Steam.CHAT_ROOM_ENTER_RESPONSE_SUCCESS:
+		push_error("Failed to join lobby %d (response %d); re-hosting." % [joined_lobby_id, response])
+		host_lobby()
 		return
 
 	lobby_id = joined_lobby_id
@@ -283,8 +325,6 @@ func _on_lobby_joined(joined_lobby_id: int, _permissions: int, _locked: bool, _r
 	multiplayer.multiplayer_peer = peer
 	if not multiplayer.connected_to_server.is_connected(_on_connected_to_server):
 		multiplayer.connected_to_server.connect(_on_connected_to_server)
-
-	is_joining = false
 
 func _join_enet():
 	var enet_peer := ENetMultiplayerPeer.new()
