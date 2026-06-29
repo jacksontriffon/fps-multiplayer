@@ -27,15 +27,7 @@ extends CanvasLayer
 @onready var local_button: Button = %LocalButton
 @onready var steam_button: Button = %SteamButton
 @onready var spacewar_button: Button = %SpacewarButton
-@onready var spacewar_row: Control = %SpacewarRow
-@onready var local_light: Panel = %LocalLight
-@onready var steam_light: Panel = %SteamLight
-@onready var spacewar_light: Panel = %SpacewarLight
 @onready var error_label: Label = %ErrorLabel
-
-# Active/inactive tints for the per-mode LED. Active is full green; inactive is a dim dot.
-const NET_LIGHT_ON := Color(1, 1, 1, 1)
-const NET_LIGHT_OFF := Color(0.22, 0.28, 0.24, 1)
 
 # game.gd NetMode values, mirrored here so the toggle can read/set the host's transport.
 const NET_STEAM := 0
@@ -389,18 +381,13 @@ func _refresh_net_mode() -> void:
 	if root == null:
 		return
 	# Spacewar is a dev testing aid; only offer it in dev builds.
-	spacewar_row.visible = root.dev_mode
-	var active: Button
+	spacewar_button.visible = root.dev_mode
 	if root.net_mode == NET_LOCAL:
-		active = local_button
+		local_button.button_pressed = true
 	elif root.steam_appid_override == SPACEWAR_APPID:
-		active = spacewar_button
+		spacewar_button.button_pressed = true
 	else:
-		active = steam_button
-	active.button_pressed = true
-	local_light.modulate = NET_LIGHT_ON if active == local_button else NET_LIGHT_OFF
-	steam_light.modulate = NET_LIGHT_ON if active == steam_button else NET_LIGHT_OFF
-	spacewar_light.modulate = NET_LIGHT_ON if active == spacewar_button else NET_LIGHT_OFF
+		steam_button.button_pressed = true
 
 # Switching transport re-hosts the session. On success the menu closes (its player is about to
 # respawn); on failure the session is untouched, so keep the menu open and show why.
