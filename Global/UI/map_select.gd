@@ -81,6 +81,7 @@ func open() -> void:
 	_friend_refresh_t = 0.0
 	_show_all_friends = false
 	see_all_button.text = "See all"
+	see_all_button.disabled = false
 	_clear_error()
 	_refresh_players()
 	_refresh_friends()
@@ -230,7 +231,7 @@ func _refresh_friends() -> void:
 		if our_lobby != 0 and int(entry["lobby_id"]) == our_lobby:
 			continue
 		shown.append(entry)
-		if shown.size() >= FRIEND_LIMIT:
+		if not _show_all_friends and shown.size() >= FRIEND_LIMIT:
 			break
 	var sig := str(_show_all_friends) + str(shown)
 	if sig == _friend_sig:
@@ -248,17 +249,23 @@ func _refresh_friends() -> void:
 	for entry in shown:
 		_add_friend_row(entry)
 
+# One-shot "show more": brief loading state, then expand to all friends and the button goes away.
 func _on_see_all() -> void:
-	_show_all_friends = not _show_all_friends
-	see_all_button.text = "See fewer" if _show_all_friends else "See all"
-	_friend_sig = ""  # force a rebuild against the other source
-	_refresh_friends()
+	see_all_button.disabled = true
+	see_all_button.text = "Loading…"
+	await get_tree().create_timer(0.2).timeout
+	if not visible:
+		return
+	_show_all_friends = true
+	_friend_sig = ""  # force a rebuild against the full friend list
+	_refresh_friends()  # _set_friend_section_visible then hides the button
 
 func _set_friend_section_visible(v: bool) -> void:
 	friend_separator.visible = v
 	friend_heading.visible = v
 	friend_scroll.visible = v
-	see_all_button.visible = v
+	# Only offer "See all" before it's been expanded.
+	see_all_button.visible = v and not _show_all_friends
 
 # Row: [avatar] [name / status under it] ... [Join]. The avatar loads async, so we register the
 # TextureRect to be filled in when SteamFriends reports it.
