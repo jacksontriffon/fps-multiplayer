@@ -12,7 +12,9 @@ extends CanvasLayer
 @onready var mode_list: VBoxContainer = %ModeList
 @onready var map_list: VBoxContainer = %MapList
 @onready var player_list: VBoxContainer = %PlayerList
-@onready var friend_column: Control = %FriendColumn
+@onready var friend_separator: Control = %FriendSeparator
+@onready var friend_heading: Control = %FriendHeading
+@onready var friend_scroll: Control = %FriendScroll
 @onready var friend_list: VBoxContainer = %FriendList
 @onready var start_button: Button = %StartButton
 @onready var customise_button: Button = %CustomiseButton
@@ -198,30 +200,42 @@ func _refresh_players() -> void:
 		label.text = who
 		player_list.add_child(label)
 
-# Steam friends currently in this game, each with a Join button that leaves our lobby and drops
-# into theirs. Local sessions can't join over Steam, so the column shows a hint instead of a list.
+# Friends who have played this game (in-game + Steam coplay history), each tagged with their
+# status. In-game friends get a Join button; others just show Online/Offline. Local sessions can't
+# reach Steam, so the section is hidden in that mode.
 func _refresh_friends() -> void:
 	var root := get_tree().get_first_node_in_group("game_root")
 	var is_steam: bool = root != null and root.net_mode == NET_STEAM
-	friend_column.visible = is_steam
+	_set_friend_section_visible(is_steam)
 	if not is_steam:
 		_friend_sig = ""
 		return
-	var friends := SteamFriends.list_friends_in_game()
-	var sig := str(friends)
+	# Friends already in our own lobby are shown in the roster above, so drop them here.
+	var our_lobby: int = int(root.lobby_id)
+	var shown: Array = []
+	for entry in SteamFriends.list_played_with():
+		if our_lobby != 0 and int(entry["lobby_id"]) == our_lobby:
+			continue
+		shown.append(entry)
+	var sig := str(shown)
 	if sig == _friend_sig:
 		return
 	_friend_sig = sig
 	for c in friend_list.get_children():
 		c.free()
-	if friends.is_empty():
+	if shown.is_empty():
 		var none := Label.new()
-		none.text = "No friends in game"
+		none.text = "Play with someone to see them here"
 		none.modulate = Color(1, 1, 1, 0.55)
 		friend_list.add_child(none)
 		return
-	for entry in friends:
+	for entry in shown:
 		_add_friend_row(entry)
+
+func _set_friend_section_visible(v: bool) -> void:
+	friend_separator.visible = v
+	friend_heading.visible = v
+	friend_scroll.visible = v
 
 func _add_friend_row(entry: Dictionary) -> void:
 	var row := HBoxContainer.new()
@@ -230,12 +244,20 @@ func _add_friend_row(entry: Dictionary) -> void:
 	name_label.text = entry["name"]
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	if not entry["online"]:
+		name_label.modulate = Color(1, 1, 1, 0.5)
 	row.add_child(name_label)
-	var join := Button.new()
-	join.text = "Join"
-	join.disabled = not SteamFriends.can_join(entry)
-	join.pressed.connect(_on_join_friend.bind(int(entry["lobby_id"])))
-	row.add_child(join)
+	if SteamFriends.can_join(entry):
+		var join := Button.new()
+		join.text = "Join"
+		join.pressed.connect(_on_join_friend.bind(int(entry["lobby_id"])))
+		row.add_child(join)
+	else:
+		var status := Label.new()
+		status.text = "In game" if entry["in_game"] else ("Online" if entry["online"] else "Offline")
+		status.modulate = Color(1, 1, 1, 0.55)
+		status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.add_child(status)
 	friend_list.add_child(row)
 
 func _on_join_friend(lobby_id: int) -> void:
