@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://c2tpf5xkf832t"]
+[gd_scene load_steps=7 format=3 uid="uid://c2tpf5xkf832t"]
 
 [ext_resource type="Script" path="res://Global/UI/map_select.gd" id="1_ms"]
 
@@ -28,6 +28,29 @@ corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="net_panel_bg"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0, 0, 0, 0.72)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.18)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="net_light"]
+bg_color = Color(0.32, 0.95, 0.45, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="start_bg"]
 content_margin_left = 28.0
@@ -251,41 +274,6 @@ theme_override_font_sizes/font_size = 16
 text = ""
 horizontal_alignment = 1
 
-[node name="NetRow" type="HBoxContainer" parent="Center/Panel/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="NetLabel" type="Label" parent="Center/Panel/VBox/NetRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-theme_override_font_sizes/font_size = 16
-text = "Network:"
-vertical_alignment = 1
-
-[node name="LocalButton" type="Button" parent="Center/Panel/VBox/NetRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(110, 36)
-layout_mode = 2
-toggle_mode = true
-text = "Local"
-
-[node name="SteamButton" type="Button" parent="Center/Panel/VBox/NetRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(110, 36)
-layout_mode = 2
-toggle_mode = true
-text = "Steam"
-
-[node name="SpacewarButton" type="Button" parent="Center/Panel/VBox/NetRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(110, 36)
-layout_mode = 2
-tooltip_text = "Dev: host over Steam using Valve's test app (480) so any account can join without owning the game."
-toggle_mode = true
-text = "Dev"
-
 [node name="ErrorLabel" type="Label" parent="Center/Panel/VBox"]
 unique_name_in_owner = true
 visible = false
@@ -296,3 +284,87 @@ theme_override_font_sizes/font_size = 16
 text = ""
 horizontal_alignment = 1
 autowrap_mode = 2
+
+[node name="NetRow" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -188.0
+offset_top = -208.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("net_panel_bg")
+
+[node name="NetVBox" type="VBoxContainer" parent="NetRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NetLabel" type="Label" parent="NetRow/NetVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 16
+text = "Network"
+
+[node name="LocalRow" type="HBoxContainer" parent="NetRow/NetVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LocalLight" type="Panel" parent="NetRow/NetVBox/LocalRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("net_light")
+
+[node name="LocalButton" type="Button" parent="NetRow/NetVBox/LocalRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Local"
+
+[node name="SteamRow" type="HBoxContainer" parent="NetRow/NetVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SteamLight" type="Panel" parent="NetRow/NetVBox/SteamRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("net_light")
+
+[node name="SteamButton" type="Button" parent="NetRow/NetVBox/SteamRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Steam"
+
+[node name="SpacewarRow" type="HBoxContainer" parent="NetRow/NetVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SpacewarLight" type="Panel" parent="NetRow/NetVBox/SpacewarRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("net_light")
+
+[node name="SpacewarButton" type="Button" parent="NetRow/NetVBox/SpacewarRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Dev: host over Steam using Valve's test app (480) so any account can join without owning the game."
+toggle_mode = true
+text = "Dev"
