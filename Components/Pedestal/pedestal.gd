@@ -99,10 +99,10 @@ func _process(delta: float) -> void:
 
 # Crosshair prompt fields, read by the HUD while this pedestal is targeted.
 func interact_name() -> String:
-	return "Lobby"
+	return "Match"
 
 func interact_action() -> String:
-	return "open"
+	return "start"
 
 # Only offer the pedestal between matches, while the lobby is waiting to start.
 func can_interact() -> bool:
