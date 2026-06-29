@@ -335,37 +335,37 @@ size = Vector3(1.6541138, 3.3691406, 0.65494585)
 
 [node name="BallSpawner1" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9906893, 0.3, -0.5367317)
-progress = 0.4747222222222166
+progress = 0.04944444444444435
 pending = true
 
 [node name="BallSpawner2" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0869493, 0.3, 0)
-progress = 0.4747222222222166
+progress = 0.04944444444444435
 pending = true
 
 [node name="BallSpawner3" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.423424, 0.3, -6.8136425)
-progress = 0.4747222222222166
+progress = 0.04944444444444435
 pending = true
 
 [node name="BallSpawner4" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 4.2471514)
-progress = 0.4747222222222166
+progress = 0.04944444444444435
 pending = true
 
 [node name="BallSpawner5" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.374577, 0.3, 12.015091)
-progress = 0.4747222222222166
+progress = 0.04944444444444435
 pending = true
 
 [node name="BallSpawner6" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0031314, 0.3, 17.065756)
-progress = 0.4747222222222166
+progress = 0.04944444444444435
 pending = true
 
 [node name="BallSpawner7" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.667146, 0.3, 18.087046)
-progress = 0.4747222222222166
+progress = 0.04944444444444435
 pending = true
 
 [node name="Dodgeball" parent="." instance=ExtResource("1_ball")]
@@ -1315,24 +1315,24 @@ sides = 6
 
 [node name="AbilityOrb" parent="." instance=ExtResource("9_bs2ym")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.368045, 0.34513164, 4.689991)
-ability = 5
+ability = 6
 
 [node name="AbilityOrb2" parent="." instance=ExtResource("9_bs2ym")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.841363, 0.34513164, 20.094248)
-ability = 5
+ability = 6
 
 [node name="AbilityOrb3" parent="." instance=ExtResource("9_bs2ym")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.262746, 0.34513164, 17.703287)
-ability = 5
+ability = 6
 
 [node name="AbilityOrb4" parent="." instance=ExtResource("9_bs2ym")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2713165, 0.34513164, 4.97509)
-ability = 5
+ability = 6
 
 [node name="AbilityOrb5" parent="." instance=ExtResource("9_bs2ym")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.358297, 0.34513164, -4.437622)
-ability = 5
+ability = 6
 
 [node name="AbilityOrb6" parent="." instance=ExtResource("9_bs2ym")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.019722939, 0.34513164, -13.109301)
-ability = 5
+ability = 6
