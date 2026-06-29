@@ -86,7 +86,7 @@ func _auto_host() -> void:
 func _ensure_steam_init() -> bool:
 	if _steam_ready:
 		return true
-	var init := Steam.steamInitEx(4847730, true)
+	var init := Steam.steamInitEx(0, true)
 	print("Steam init: ", init)
 	if init["status"] != Steam.STEAM_API_INIT_RESULT_OK:
 		push_error("Steam init failed (%d): %s" % [init["status"], init["verbal"]])
@@ -94,7 +94,7 @@ func _ensure_steam_init() -> bool:
 		_log_steam_diagnostics()
 		return false
 	last_steam_error = ""
-	print("Steam ready: user %d, subscribed to app %d = %s" % [Steam.getSteamID(), Steam.getAppID(), Steam.isSubscribedApp(4847730)])
+	print("Steam ready: user %d, subscribed to app %d = %s" % [Steam.getSteamID(), Steam.getAppID(), Steam.isSubscribedApp(Steam.getAppID())])
 	Steam.initRelayNetworkAccess()
 	Steam.lobby_created.connect(_on_lobby_created)
 	Steam.lobby_joined.connect(_on_lobby_joined)
@@ -385,5 +385,3 @@ func _remove_player(id: int):
 		return
 
 	self.get_node(str(id)).queue_free()
-
-
