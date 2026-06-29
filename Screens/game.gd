@@ -37,6 +37,9 @@ var is_joining: bool = false
 var _tearing_down: bool = false
 # Steam is initialised lazily so a session that boots in LOCAL can still switch to STEAM later.
 var _steam_ready: bool = false
+# Reason the last Steam init failed (Steamworks' verbal), kept so the lobby menu can explain why
+# we dropped to LOCAL. Empty once Steam comes up.
+var last_steam_error: String = ""
 # The map currently loaded under MapContainer. On the server this is the source of truth a
 # late-joiner pulls so it loads the live arena instead of the lobby.
 var current_map_path: String = LOBBY_MAP
@@ -87,7 +90,11 @@ func _ensure_steam_init() -> bool:
 	print("Steam init: ", init)
 	if init["status"] != Steam.STEAM_API_INIT_RESULT_OK:
 		push_error("Steam init failed (%d): %s" % [init["status"], init["verbal"]])
+		last_steam_error = init["verbal"]
+		_log_steam_diagnostics()
 		return false
+	last_steam_error = ""
+	print("Steam ready: user %d, subscribed to app %d = %s" % [Steam.getSteamID(), Steam.getAppID(), Steam.isSubscribedApp(4847730)])
 	Steam.initRelayNetworkAccess()
 	Steam.lobby_created.connect(_on_lobby_created)
 	Steam.lobby_joined.connect(_on_lobby_joined)
@@ -95,6 +102,21 @@ func _ensure_steam_init() -> bool:
 	Steam.join_requested.connect(_on_join_requested)
 	_steam_ready = true
 	return true
+
+# Dump the surrounding state when init fails so a player's log tells us *why*. The key signal is
+# isSteamRunning: false means our process can't reach the Steam client at all (Steam closed, a
+# different Windows user, or an elevation mismatch — game run as admin while Steam isn't, or vice
+# versa); true means Steam is reachable but rejected this app (the logged-in account has no license
+# for this app_id). The env vars show which appid/Steam install the SDK resolved.
+func _log_steam_diagnostics() -> void:
+	print("--- Steam diagnostics ---")
+	print("  isSteamRunning: ", Steam.isSteamRunning())
+	print("  resolved AppID: ", Steam.getAppID())
+	print("  SteamAppId env: '%s'  SteamGameId env: '%s'" % [OS.get_environment("SteamAppId"), OS.get_environment("SteamGameId")])
+	print("  SteamPath env: '%s'" % OS.get_environment("SteamPath"))
+	print("  SteamClientLaunch env: '%s'" % OS.get_environment("SteamClientLaunch"))
+	print("  executable: ", OS.get_executable_path())
+	print("-------------------------")
 
 # --- Runtime transport switch ----------------------------------------------
 

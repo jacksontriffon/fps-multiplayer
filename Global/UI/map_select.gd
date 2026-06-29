@@ -91,6 +91,7 @@ func open() -> void:
 	_refresh_friends()
 	_update_start_state()
 	_refresh_net_mode()
+	_maybe_show_local_fallback_notice()
 	_show_main()
 	_saved_mouse_mode = Input.get_mouse_mode()
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -391,6 +392,17 @@ func _on_net_mode(mode: int) -> void:
 		_refresh_net_mode()  # re-sync the toggle to the mode that's actually active
 		return
 	close()
+
+# We boot into LOCAL whenever Steam can't init (client closed, logged out, Offline mode). That
+# fallback is otherwise silent — friends vanish with no explanation — so tell the host why and how
+# to get online. Host-only: a client can't change the transport.
+func _maybe_show_local_fallback_notice() -> void:
+	var root := get_tree().get_first_node_in_group("game_root")
+	var is_host := multiplayer.has_multiplayer_peer() and multiplayer.is_server()
+	if root == null or not is_host:
+		return
+	if root.net_mode == NET_LOCAL and root.last_steam_error != "":
+		_show_error("Steam isn't connected, so you're playing local only. Start Steam, then choose Steam above to host online for friends.")
 
 func _show_error(text: String) -> void:
 	error_label.text = text
