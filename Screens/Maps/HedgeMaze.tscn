@@ -335,37 +335,37 @@ size = Vector3(1.6541138, 3.3691406, 0.65494585)
 
 [node name="BallSpawner1" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9906893, 0.3, -0.5367317)
-progress = 0.6811111111110938
+progress = 0.4747222222222166
 pending = true
 
 [node name="BallSpawner2" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0869493, 0.3, 0)
-progress = 0.6811111111110938
+progress = 0.4747222222222166
 pending = true
 
 [node name="BallSpawner3" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.423424, 0.3, -6.8136425)
-progress = 0.6811111111110938
+progress = 0.4747222222222166
 pending = true
 
 [node name="BallSpawner4" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 4.2471514)
-progress = 0.6811111111110938
+progress = 0.4747222222222166
 pending = true
 
 [node name="BallSpawner5" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.374577, 0.3, 12.015091)
-progress = 0.5947222222222098
+progress = 0.4747222222222166
 pending = true
 
 [node name="BallSpawner6" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0031314, 0.3, 17.065756)
-progress = 0.524444444444436
+progress = 0.4747222222222166
 pending = true
 
 [node name="BallSpawner7" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.667146, 0.3, 18.087046)
-progress = 0.49111111111110456
+progress = 0.4747222222222166
 pending = true
 
 [node name="Dodgeball" parent="." instance=ExtResource("1_ball")]
