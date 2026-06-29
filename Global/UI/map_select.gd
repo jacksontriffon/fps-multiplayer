@@ -313,7 +313,20 @@ func _add_friend_row(entry: Dictionary) -> void:
 		join.text = "Join"
 		join.pressed.connect(_on_join_friend.bind(int(entry["lobby_id"])))
 		row.add_child(join)
+	# Invite to our lobby is always offered, even for away friends.
+	var invite := Button.new()
+	invite.text = "Invite"
+	invite.pressed.connect(_on_invite_friend.bind(sid, invite))
+	row.add_child(invite)
 	friend_list.add_child(row)
+
+func _on_invite_friend(steam_id: int, btn: Button) -> void:
+	var root := get_tree().get_first_node_in_group("game_root")
+	if root == null:
+		return
+	root.invite_to_lobby(steam_id)
+	btn.text = "Invited"
+	btn.disabled = true
 
 func _on_avatar_updated(steam_id: int, texture: Texture2D) -> void:
 	var rect: TextureRect = _avatar_rects.get(steam_id)

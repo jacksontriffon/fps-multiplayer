@@ -180,6 +180,13 @@ func _update_rich_presence() -> void:
 func _on_peer_count_changed(_id: int) -> void:
 	_update_rich_presence()
 
+# Invite a friend to the Steam lobby we're currently in (host or client). They get the usual Steam
+# invite, and accepting routes through _on_join_requested. No-op outside a Steam lobby.
+func invite_to_lobby(friend_steam_id: int) -> void:
+	if net_mode != NetMode.STEAM or lobby_id == 0:
+		return
+	Steam.inviteUserToLobby(lobby_id, friend_steam_id)
+
 # Human-readable map label for presence/UI: the lobby reads "Lobby", everything else uses the
 # curated name MatchManager already keeps, falling back to the file stem.
 func _map_display_name(path: String) -> String:
