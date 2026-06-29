@@ -43,6 +43,9 @@ var current_map_path: String = LOBBY_MAP
 
 func _ready() -> void:
 	add_to_group("game_root")
+	# Keep our "in a party" presence current as players join/leave, on host and client alike.
+	multiplayer.peer_connected.connect(_on_peer_count_changed)
+	multiplayer.peer_disconnected.connect(_on_peer_count_changed)
 	# The lobby map is authored under MapContainer for an editor preview; only instance it at
 	# runtime as a fallback if it isn't already there (no peer yet, so call load_map directly,
 	# not via .rpc()). Every peer boots into the lobby; a mid-match joiner pulls the live map.
@@ -170,6 +173,12 @@ func _update_rich_presence() -> void:
 		return
 	Steam.setRichPresence("map", _map_display_name(current_map_path))
 	Steam.setRichPresence("in_lobby", "1" if current_map_path == LOBBY_MAP else "0")
+	# "In a party" = sharing the session with at least one other player.
+	var party := multiplayer.has_multiplayer_peer() and multiplayer.get_peers().size() >= 1
+	Steam.setRichPresence("party", "1" if party else "0")
+
+func _on_peer_count_changed(_id: int) -> void:
+	_update_rich_presence()
 
 # Human-readable map label for presence/UI: the lobby reads "Lobby", everything else uses the
 # curated name MatchManager already keeps, falling back to the file stem.

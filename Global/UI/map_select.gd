@@ -48,6 +48,9 @@ var _friend_sig := ""
 var _friend_refresh_t := 0.0
 # False = friends who've played this game; true = every Steam friend (the "See all" toggle).
 var _show_all_friends := false
+# Avatar TextureRects keyed by steam id for the rows currently shown, so a late-arriving avatar can
+# be dropped into the right row. Cleared each rebuild.
+var _avatar_rects := {}
 
 func is_open() -> bool:
 	return visible
@@ -62,6 +65,7 @@ func _ready() -> void:
 	customise_back_button.pressed.connect(_show_main)
 	close_button.pressed.connect(close)
 	see_all_button.pressed.connect(_on_see_all)
+	SteamFriends.avatar_updated.connect(_on_avatar_updated)
 	var net_group := ButtonGroup.new()
 	local_button.button_group = net_group
 	steam_button.button_group = net_group
@@ -232,6 +236,7 @@ func _refresh_friends() -> void:
 	if sig == _friend_sig:
 		return
 	_friend_sig = sig
+	_avatar_rects.clear()
 	for c in friend_list.get_children():
 		c.free()
 	if shown.is_empty():
@@ -255,22 +260,40 @@ func _set_friend_section_visible(v: bool) -> void:
 	friend_scroll.visible = v
 	see_all_button.visible = v
 
+# Row: [avatar] [name / status under it] ... [Join]. The avatar loads async, so we register the
+# TextureRect to be filled in when SteamFriends reports it.
 func _add_friend_row(entry: Dictionary) -> void:
+	var sid: int = int(entry["steam_id"])
+	var dim: bool = not entry["online"]
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
+
+	var avatar := TextureRect.new()
+	avatar.custom_minimum_size = Vector2(32, 32)
+	avatar.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	avatar.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	avatar.texture = SteamFriends.get_avatar(sid)
+	if dim:
+		avatar.modulate = Color(1, 1, 1, 0.5)
+	_avatar_rects[sid] = avatar
+	row.add_child(avatar)
+
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	info.add_theme_constant_override("separation", 0)
 	var name_label := Label.new()
 	name_label.text = entry["name"]
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	if not entry["online"]:
+	if dim:
 		name_label.modulate = Color(1, 1, 1, 0.5)
-	row.add_child(name_label)
-	# Status text: in-game friends show the map they're on; others show Online/Offline.
+	info.add_child(name_label)
 	var status := Label.new()
-	status.text = _friend_status(entry)
+	status.text = entry["status"]
 	status.modulate = Color(1, 1, 1, 0.55)
-	status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	row.add_child(status)
+	status.add_theme_font_size_override("font_size", 12)
+	info.add_child(status)
+	row.add_child(info)
+
 	# Join only when they're waiting in the joinable lobby — not mid-match.
 	if SteamFriends.can_join(entry):
 		var join := Button.new()
@@ -279,11 +302,10 @@ func _add_friend_row(entry: Dictionary) -> void:
 		row.add_child(join)
 	friend_list.add_child(row)
 
-func _friend_status(entry: Dictionary) -> String:
-	if entry["in_game"]:
-		var map_name: String = entry["map"]
-		return map_name if map_name != "" else "In game"
-	return "Online" if entry["online"] else "Offline"
+func _on_avatar_updated(steam_id: int, texture: Texture2D) -> void:
+	var rect: TextureRect = _avatar_rects.get(steam_id)
+	if is_instance_valid(rect):
+		rect.texture = texture
 
 func _on_join_friend(lobby_id: int) -> void:
 	var root := get_tree().get_first_node_in_group("game_root")
