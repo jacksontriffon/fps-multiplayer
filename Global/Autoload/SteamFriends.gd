@@ -37,12 +37,17 @@ func list_played_with() -> Array:
 	# Keyed by steam id so a friend who is both in-game and in coplay history appears once.
 	var by_id: Dictionary = {}
 	for entry in list_friends_in_game():
-		by_id[entry["steam_id"]] = {
-			"steam_id": entry["steam_id"],
+		var fid: int = entry["steam_id"]
+		by_id[fid] = {
+			"steam_id": fid,
 			"name": entry["name"],
 			"lobby_id": entry["lobby_id"],
 			"in_game": true,
 			"online": true,
+			# Map + lobby status come from the friend's rich presence (set by game.gd). Empty/false
+			# for friends on an older build that doesn't publish it.
+			"map": Steam.getFriendRichPresence(fid, "map"),
+			"in_lobby": Steam.getFriendRichPresence(fid, "in_lobby") == "1",
 		}
 	var count: int = Steam.getCoplayFriendCount()
 	for i in count:
@@ -55,6 +60,8 @@ func list_played_with() -> Array:
 			"lobby_id": 0,
 			"in_game": false,
 			"online": Steam.getFriendPersonaState(fid) != Steam.PERSONA_STATE_OFFLINE,
+			"map": "",
+			"in_lobby": false,
 		}
 	var out: Array = by_id.values()
 	out.sort_custom(_by_status)
@@ -73,9 +80,10 @@ func _status_rank(entry: Dictionary) -> int:
 		return 0
 	return 1 if entry["online"] else 2
 
-# True when this friend entry carries a lobby we can drop into.
+# True when we can drop into this friend: they're in a joinable lobby AND waiting in the lobby map
+# (you can't join a friend who's mid-match).
 func can_join(entry: Dictionary) -> bool:
-	return int(entry.get("lobby_id", 0)) != 0
+	return int(entry.get("lobby_id", 0)) != 0 and bool(entry.get("in_lobby", false))
 
 func _steam_ready() -> bool:
 	return Engine.has_singleton("Steam") and Steam.isSteamRunning()

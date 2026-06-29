@@ -143,6 +143,8 @@ func load_map(path: String, p_match_seed: int = match_seed) -> void:
 	# Re-apply any saved creative edits for this map (host broadcasts them; a no-peer boot
 	# applies directly).
 	CreativeManager.notify_map_loaded(path)
+	# Tell friends which map we're on now (and whether we're back in the joinable lobby).
+	_update_rich_presence()
 
 # Pull model for late joiners: a client asks once it is connected, the server replies with the
 # live map. Avoids a client receiving load_map before its MapContainer exists.
@@ -157,6 +159,25 @@ func request_current_map() -> void:
 
 func _on_connected_to_server() -> void:
 	request_current_map.rpc_id(1)
+
+
+# --- Steam presence --------------------------------------------------------
+
+# Publish the map we're on so friends' lobby list can show it, plus whether we're in the joinable
+# lobby (friends can only join from there). Steam-only and safe to call before Steam is up.
+func _update_rich_presence() -> void:
+	if net_mode != NetMode.STEAM or not _steam_ready:
+		return
+	Steam.setRichPresence("map", _map_display_name(current_map_path))
+	Steam.setRichPresence("in_lobby", "1" if current_map_path == LOBBY_MAP else "0")
+
+# Human-readable map label for presence/UI: the lobby reads "Lobby", everything else uses the
+# curated name MatchManager already keeps, falling back to the file stem.
+func _map_display_name(path: String) -> String:
+	if path == LOBBY_MAP:
+		return "Lobby"
+	var stem := path.get_file().get_basename()
+	return MatchManager.NAME_OVERRIDES.get(stem, stem)
 
 
 # --- Hosting ---------------------------------------------------------------
@@ -204,6 +225,8 @@ func _start_host(new_peer: MultiplayerPeer):
 	if not multiplayer.peer_disconnected.is_connected(_remove_player):
 		multiplayer.peer_disconnected.connect(_remove_player)
 	_add_player()
+	# The lobby map loaded before Steam was up at boot, so publish our presence now we're hosting.
+	_update_rich_presence()
 
 
 # --- Joining ---------------------------------------------------------------

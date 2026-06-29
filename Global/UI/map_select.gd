@@ -247,18 +247,25 @@ func _add_friend_row(entry: Dictionary) -> void:
 	if not entry["online"]:
 		name_label.modulate = Color(1, 1, 1, 0.5)
 	row.add_child(name_label)
+	# Status text: in-game friends show the map they're on; others show Online/Offline.
+	var status := Label.new()
+	status.text = _friend_status(entry)
+	status.modulate = Color(1, 1, 1, 0.55)
+	status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(status)
+	# Join only when they're waiting in the joinable lobby — not mid-match.
 	if SteamFriends.can_join(entry):
 		var join := Button.new()
 		join.text = "Join"
 		join.pressed.connect(_on_join_friend.bind(int(entry["lobby_id"])))
 		row.add_child(join)
-	else:
-		var status := Label.new()
-		status.text = "In game" if entry["in_game"] else ("Online" if entry["online"] else "Offline")
-		status.modulate = Color(1, 1, 1, 0.55)
-		status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		row.add_child(status)
 	friend_list.add_child(row)
+
+func _friend_status(entry: Dictionary) -> String:
+	if entry["in_game"]:
+		var map_name: String = entry["map"]
+		return map_name if map_name != "" else "In game"
+	return "Online" if entry["online"] else "Offline"
 
 func _on_join_friend(lobby_id: int) -> void:
 	var root := get_tree().get_first_node_in_group("game_root")
