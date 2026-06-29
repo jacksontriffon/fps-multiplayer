@@ -4,6 +4,7 @@
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.065540075, 0.9388596, -0.001804173)
+use_collision = true
 radius = 0.54003906
 height = 0.119140625
 sides = 7

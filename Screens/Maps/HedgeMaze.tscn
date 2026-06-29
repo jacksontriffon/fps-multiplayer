@@ -335,41 +335,41 @@ size = Vector3(1.6541138, 3.3691406, 0.65494585)
 
 [node name="BallSpawner1" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9906893, 0.3, -0.5367317)
-progress = 0.04944444444444435
+progress = 0.5161111111111032
 pending = true
 
 [node name="BallSpawner2" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0869493, 0.3, 0)
-progress = 0.04944444444444435
+progress = 0.5161111111111032
 pending = true
 
 [node name="BallSpawner3" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.423424, 0.3, -6.8136425)
-progress = 0.04944444444444435
+progress = 0.5161111111111032
 pending = true
 
 [node name="BallSpawner4" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 4.2471514)
-progress = 0.04944444444444435
+progress = 0.5161111111111032
 pending = true
 
 [node name="BallSpawner5" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.374577, 0.3, 12.015091)
-progress = 0.04944444444444435
+progress = 0.5161111111111032
 pending = true
 
 [node name="BallSpawner6" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0031314, 0.3, 17.065756)
-progress = 0.04944444444444435
+progress = 0.5161111111111032
 pending = true
 
 [node name="BallSpawner7" parent="BallSpawners" instance=ExtResource("99_bspawn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.667146, 0.3, 18.087046)
-progress = 0.04944444444444435
+progress = 0.5161111111111032
 pending = true
 
 [node name="Dodgeball" parent="." instance=ExtResource("1_ball")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.013073, 0.3, 0.96621954)
 
 [node name="Dodgeball7" parent="." instance=ExtResource("1_ball")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.316811, 0.3, 18.046986)
@@ -459,10 +459,10 @@ use_collision = true
 size = Vector3(4.0231476, 3.3691406, 0.65494585)
 
 [node name="CSGBox3D103" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 12.50673, 1.2947626, 12.223579)
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 12.173145, 1.2947626, 12.223579)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.4007454, 3.5922852, 0.65494585)
+size = Vector3(0.7335758, 3.5922852, 0.65494585)
 
 [node name="CSGBox3D104" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, 15.427764, 1.5219965, 12.448871)
@@ -477,10 +477,10 @@ use_collision = true
 size = Vector3(4.0231476, 3.8399658, 0.8810216)
 
 [node name="CSGBox3D116" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-1, 0, 8.742277e-08, 0, 1, 0, -8.742277e-08, 0, -1, 13.518362, 1.2864618, 6.325701)
+transform = Transform3D(-1, 0, 8.742277e-08, 0, 1, 0, -8.742277e-08, 0, -1, 13.518362, 1.2864618, 6.1274357)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(6.017433, 3.5756836, 5.77773)
+size = Vector3(6.017433, 3.5756836, 5.3812)
 
 [node name="CSGBox3D60" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 9.050275, 1.3877802, -7.927595)
@@ -495,10 +495,10 @@ use_collision = true
 size = Vector3(2.3021011, 4.1746826, 2.26009)
 
 [node name="CSGBox3D63" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 13.154994, 0.029625893, -9.523808)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 13.154994, 0.258996, -9.523808)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(0.82426167, 1.0620117, 0.97302747)
+size = Vector3(0.82426167, 0.6032715, 0.97302747)
 
 [node name="CSGBox3D65" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 9.966081, -0.15848446, -6.5438776)
@@ -513,22 +513,22 @@ use_collision = true
 size = Vector3(0.51507837, 0.810791, 0.49457946)
 
 [node name="CSGBox3D64" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 11.900738, 0.23879337, -9.929499)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 11.900738, 0.4626398, -9.929499)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 1.2731348)
+size = Vector3(1.0526338, 1.0326538, 1.2731348)
 
 [node name="CSGBox3D158" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.2420435, 0.029625893, -14.433364)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.2420435, 0.24190617, -14.433364)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(0.82426167, 1.0620117, 0.97302747)
+size = Vector3(0.82426167, 0.6374512, 0.97302747)
 
 [node name="CSGBox3D159" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -6.4962997, 0.23879337, -14.839055)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -6.4962997, 0.46483707, -14.839055)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 1.2731348)
+size = Vector3(1.0526338, 1.0282593, 1.2731348)
 
 [node name="CSGBox3D61" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 12.987023, 1.5934076, -10.918489)
@@ -615,16 +615,16 @@ use_collision = true
 size = Vector3(1.0526338, 1.4803467, 1.2731348)
 
 [node name="CSGBox3D99" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.7889118, 0.23879337, 2.705284)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.7889118, 0.46361637, 2.705284)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 3.1146703)
+size = Vector3(1.0526338, 1.0307007, 3.1146703)
 
 [node name="CSGBox3D122" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 2.9609723, 0.23879433, 10.150857)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 2.9609723, 0.45433998, 10.150857)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 3.3667834)
+size = Vector3(1.0526338, 1.0492554, 3.3667834)
 
 [node name="CSGBox3D98" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 2.6649342, 1.1831903, -2.4929597)
@@ -633,22 +633,22 @@ use_collision = true
 size = Vector3(5.613678, 3.3691406, 0.65494585)
 
 [node name="CSGBox3D68" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.6673155, 1.4212275, 8.113442)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.733713, 1.4212275, 8.113442)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(2.6232553, 3.8452148, 0.65494585)
+size = Vector3(2.4904606, 3.8452148, 0.65494585)
 
 [node name="CSGBox3D78" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.090043, 1.4005365, 8.113442)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.9586735, 1.4005365, 8.113442)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.9942269, 3.803833, 0.65494585)
+size = Vector3(1.7314885, 3.803833, 0.65494585)
 
 [node name="CSGBox3D112" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.345316, 1.1831903, 10.072974)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.254124, 1.1831903, 10.072974)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(3.888205, 3.3691406, 0.65494585)
+size = Vector3(3.7058213, 3.3691406, 0.65494585)
 
 [node name="CSGBox3D106" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.597572, 1.4210443, 18.266472)
@@ -657,10 +657,10 @@ use_collision = true
 size = Vector3(1.9942269, 3.8448486, 0.65494585)
 
 [node name="CSGBox3D110" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.659295, 1.3803949, 15.121275)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.802383, 1.3803949, 15.121275)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.9942269, 3.7635498, 0.65494585)
+size = Vector3(1.708051, 3.7635498, 0.65494585)
 
 [node name="CSGBox3D107" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5435405, 2.3975763, 21.974592)
@@ -675,10 +675,10 @@ use_collision = true
 size = Vector3(3.030983, 3.9018555, 0.65494585)
 
 [node name="CSGBox3D113" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -4.5813375, 1.1831913, 9.813466)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -4.5813375, 1.1831913, 9.664851)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(3.030983, 3.3691406, 0.65494585)
+size = Vector3(2.7337532, 3.3691406, 0.65494585)
 
 [node name="CSGBox3D120" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 10.553131, 1.1831913, 8.963903)
@@ -711,10 +711,10 @@ use_collision = true
 size = Vector3(3.030983, 4.890747, 0.65494585)
 
 [node name="CSGBox3D111" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -2.6999493, 1.1831903, 13.825747)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -2.6999493, 1.1831903, 13.701808)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(2.7655306, 3.3691406, 0.65494585)
+size = Vector3(2.517653, 3.3691406, 0.65494585)
 
 [node name="CSGBox3D70" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.726398, 2.2185602, 15.829743)
@@ -723,10 +723,10 @@ use_collision = true
 size = Vector3(3.2241592, 5.4398804, 0.65494585)
 
 [node name="CSGBox3D114" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.858026, 0.45055485, 15.829743)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.858026, 0.51013374, 15.829743)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(4.4895725, 1.9038696, 0.65494585)
+size = Vector3(4.4895725, 1.1006031, 0.65494585)
 
 [node name="CSGBox3D101" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.735817, 1.8481998, 19.955545)
@@ -759,7 +759,7 @@ use_collision = true
 size = Vector3(0.95371723, 3.3691406, 0.9846394)
 
 [node name="CSGBox3D125" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3946452, 1.1831903, 15.404484)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.060652137, 1.1831903, 15.695302)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
 size = Vector3(0.95371723, 3.3691406, 0.9846394)
@@ -771,10 +771,10 @@ use_collision = true
 size = Vector3(0.95371723, 3.3691406, 0.9846394)
 
 [node name="CSGBox3D72" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.1278515, 0.029625893, 11.725024)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.1278515, 0.25801945, 11.725024)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(0.82426167, 1.0620117, 0.97302747)
+size = Vector3(0.82426167, 0.6052246, 0.97302747)
 
 [node name="CSGBox3D73" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.147921, -0.15848446, 14.913938)
@@ -789,10 +789,10 @@ use_collision = true
 size = Vector3(0.51507837, 0.810791, 0.49457946)
 
 [node name="CSGBox3D75" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.533542, 0.23879337, 12.97928)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.533542, 0.44970036, 12.97928)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 1.2731348)
+size = Vector3(1.0526338, 1.0585327, 1.2731348)
 
 [node name="CSGBox3D76" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -13.522532, 2.0262232, 2.074809)
@@ -801,10 +801,10 @@ use_collision = true
 size = Vector3(25.25005, 5.0552063, 0.65494585)
 
 [node name="CSGBox3D79" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, 7.556282, 1.3590317, 20.786755)
+transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, 7.556282, 1.3590317, 20.890322)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(2.6232553, 3.7208252, 1.9344065)
+size = Vector3(2.4161198, 3.7208252, 1.9344065)
 
 [node name="CSGBox3D80" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, 8.1960125, 1.3448105, 16.935646)
@@ -843,28 +843,28 @@ use_collision = true
 size = Vector3(3.5862923, 3.3691406, 0.65494585)
 
 [node name="CSGBox3D127" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.6637707, 0.23879433, 0.3541429)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.6637707, 0.48729897, 0.3541429)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 3.3667834)
+size = Vector3(1.0526338, 0.9833374, 3.3667834)
 
 [node name="CSGBox3D132" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -7.556936, 0.23879433, -9.226049)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -7.556936, 0.50455713, -9.226049)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 3.3667834)
+size = Vector3(1.0526338, 1.09, 3.3667834)
 
 [node name="CSGBox3D156" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0.34869242, 0.23879433, -14.933921)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0.34869242, 0.46190834, -14.933921)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 7.939739)
+size = Vector3(1.0526338, 1.0341187, 7.939739)
 
 [node name="CSGBox3D133" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -9.256301, 0.23879433, -12.327296)
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -9.256301, 0.50455713, -12.327296)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 3.3667834)
+size = Vector3(1.0526338, 1.09, 3.3667834)
 
 [node name="CSGBox3D128" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(1, 0, -1.7484555e-07, 0, 1, 0, 1.7484555e-07, 0, 1, -2.0384014, 1.1831894, 2.5428994)
@@ -891,10 +891,10 @@ use_collision = true
 size = Vector3(4.718605, 3.3691406, 0.65494585)
 
 [node name="CSGBox3D143" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, -0.41520882, 0.23879433, -5.9380674)
+transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, -0.41520882, 0.5030608, -5.9380674)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(1.0526338, 1.4803467, 3.3667834)
+size = Vector3(1.053, 1.065, 3.367)
 
 [node name="CSGBox3D144" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 7.4206867, 1.1831903, -5.942486)
@@ -1011,10 +1011,10 @@ use_collision = true
 size = Vector3(3.030983, 4.0635986, 0.65494585)
 
 [node name="CSGBox3D119" type="CSGBox3D" parent="BetterHedges"]
-transform = Transform3D(1, 0, -1.7484555e-07, 0, 1, 0, 1.7484555e-07, 0, 1, 11.7694235, 1.1831894, 8.892506)
+transform = Transform3D(1, 0, -1.7484555e-07, 0, 1, 0, 1.7484555e-07, 0, 1, 11.7694235, 1.1831894, 8.658457)
 material_override = SubResource("StandardMaterial3D_ikx7c")
 use_collision = true
-size = Vector3(3.030983, 3.3691406, 0.65494585)
+size = Vector3(3.030983, 3.3691406, 0.18684793)
 
 [node name="CSGBox3D83" type="CSGBox3D" parent="BetterHedges"]
 transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, 15.912313, 1.8472915, 16.186903)
