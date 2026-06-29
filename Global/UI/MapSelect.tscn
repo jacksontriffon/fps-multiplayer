@@ -234,6 +234,12 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
+[node name="SeeAllButton" type="Button" parent="Center/Panel/VBox/Body/PlayerColumn/PlayerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "See all friends"
+
 [node name="Hint" type="Label" parent="Center/Panel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2

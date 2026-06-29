@@ -16,6 +16,7 @@ extends CanvasLayer
 @onready var friend_heading: Control = %FriendHeading
 @onready var friend_scroll: Control = %FriendScroll
 @onready var friend_list: VBoxContainer = %FriendList
+@onready var see_all_button: Button = %SeeAllButton
 @onready var start_button: Button = %StartButton
 @onready var customise_button: Button = %CustomiseButton
 @onready var close_button: Button = %CloseButton
@@ -43,6 +44,8 @@ var _roster_sig := ""
 const FRIEND_REFRESH := 2.0
 var _friend_sig := ""
 var _friend_refresh_t := 0.0
+# False = friends who've played this game; true = every Steam friend (the "See all" toggle).
+var _show_all_friends := false
 
 func is_open() -> bool:
 	return visible
@@ -56,6 +59,7 @@ func _ready() -> void:
 	custom_start_button.pressed.connect(_on_start_custom)
 	customise_back_button.pressed.connect(_show_main)
 	close_button.pressed.connect(close)
+	see_all_button.pressed.connect(_on_see_all)
 	var net_group := ButtonGroup.new()
 	local_button.button_group = net_group
 	steam_button.button_group = net_group
@@ -69,6 +73,8 @@ func open() -> void:
 	_roster_sig = ""
 	_friend_sig = ""
 	_friend_refresh_t = 0.0
+	_show_all_friends = false
+	see_all_button.text = "See all friends"
 	_clear_error()
 	_refresh_players()
 	_refresh_friends()
@@ -212,12 +218,13 @@ func _refresh_friends() -> void:
 		return
 	# Friends already in our own lobby are shown in the roster above, so drop them here.
 	var our_lobby: int = int(root.lobby_id)
+	var source: Array = SteamFriends.list_all_friends() if _show_all_friends else SteamFriends.list_played_with()
 	var shown: Array = []
-	for entry in SteamFriends.list_played_with():
+	for entry in source:
 		if our_lobby != 0 and int(entry["lobby_id"]) == our_lobby:
 			continue
 		shown.append(entry)
-	var sig := str(shown)
+	var sig := str(_show_all_friends) + str(shown)
 	if sig == _friend_sig:
 		return
 	_friend_sig = sig
@@ -225,17 +232,24 @@ func _refresh_friends() -> void:
 		c.free()
 	if shown.is_empty():
 		var none := Label.new()
-		none.text = "Play with someone to see them here"
+		none.text = "No Steam friends" if _show_all_friends else "Play with someone to see them here"
 		none.modulate = Color(1, 1, 1, 0.55)
 		friend_list.add_child(none)
 		return
 	for entry in shown:
 		_add_friend_row(entry)
 
+func _on_see_all() -> void:
+	_show_all_friends = not _show_all_friends
+	see_all_button.text = "Show players only" if _show_all_friends else "See all friends"
+	_friend_sig = ""  # force a rebuild against the other source
+	_refresh_friends()
+
 func _set_friend_section_visible(v: bool) -> void:
 	friend_separator.visible = v
 	friend_heading.visible = v
 	friend_scroll.visible = v
+	see_all_button.visible = v
 
 func _add_friend_row(entry: Dictionary) -> void:
 	var row := HBoxContainer.new()

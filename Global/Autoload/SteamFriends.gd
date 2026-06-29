@@ -4,68 +4,56 @@ extends Node
 # All Steam friend-presence querying lives here so the lobby UI and game root stay
 # free of raw Steam calls. Safe to call even when Steam isn't initialised (returns []).
 
-# A friend is "joinable" when Steam reports them inside a lobby for this same app. The
-# lobby id is what we hand to joinLobby() to drop in beside them.
-func list_friends_in_game() -> Array:
-	if not _steam_ready():
-		return []
-	var our_app: int = Steam.getAppID()
-	var out: Array = []
-	var count: int = Steam.getFriendCount(Steam.FRIEND_FLAG_IMMEDIATE)
-	for i in count:
-		var friend_id: int = Steam.getFriendByIndex(i, Steam.FRIEND_FLAG_IMMEDIATE)
-		var played: Dictionary = Steam.getFriendGamePlayed(friend_id)
-		# getFriendGamePlayed returns {} when the friend isn't in a game.
-		if played.is_empty() or int(played.get("id", 0)) != our_app:
-			continue
-		out.append({
-			"steam_id": friend_id,
-			"name": Steam.getFriendPersonaName(friend_id),
-			"lobby_id": int(played.get("lobby", 0)),
-		})
-	return out
-
 # Friends who have played this game: everyone currently in-game, plus everyone Steam's coplay
 # history says we've recently played THIS game with (online or offline). Steam's client API can't
-# enumerate game owners, so coplay is the closest signal for "has played this game". Each entry
-# carries in_game/online flags and a lobby_id (non-zero only when joinable). Sorted in-game, then
-# online, then offline.
+# enumerate game owners, so coplay is the closest signal for "has played this game". Sorted
+# in-game, then online, then offline.
 func list_played_with() -> Array:
 	if not _steam_ready():
 		return []
 	var our_app: int = Steam.getAppID()
-	# Keyed by steam id so a friend who is both in-game and in coplay history appears once.
-	var by_id: Dictionary = {}
-	for entry in list_friends_in_game():
-		var fid: int = entry["steam_id"]
-		by_id[fid] = {
-			"steam_id": fid,
-			"name": entry["name"],
-			"lobby_id": entry["lobby_id"],
-			"in_game": true,
-			"online": true,
-			# Map + lobby status come from the friend's rich presence (set by game.gd). Empty/false
-			# for friends on an older build that doesn't publish it.
-			"map": Steam.getFriendRichPresence(fid, "map"),
-			"in_lobby": Steam.getFriendRichPresence(fid, "in_lobby") == "1",
-		}
-	var count: int = Steam.getCoplayFriendCount()
-	for i in count:
-		var fid: int = Steam.getCoplayFriend(i)
-		if Steam.getFriendCoplayGame(fid) != our_app or by_id.has(fid):
-			continue
-		by_id[fid] = {
-			"steam_id": fid,
-			"name": Steam.getFriendPersonaName(fid),
-			"lobby_id": 0,
-			"in_game": false,
-			"online": Steam.getFriendPersonaState(fid) != Steam.PERSONA_STATE_OFFLINE,
-			"map": "",
-			"in_lobby": false,
-		}
-	var out: Array = by_id.values()
+	# Friends Steam's coplay history pairs with this game.
+	var coplay: Dictionary = {}
+	for i in Steam.getCoplayFriendCount():
+		var cid: int = Steam.getCoplayFriend(i)
+		if Steam.getFriendCoplayGame(cid) == our_app:
+			coplay[cid] = true
+	var out: Array = []
+	for i in Steam.getFriendCount(Steam.FRIEND_FLAG_IMMEDIATE):
+		var fid: int = Steam.getFriendByIndex(i, Steam.FRIEND_FLAG_IMMEDIATE)
+		var entry: Dictionary = _entry_for(fid)
+		if entry["in_game"] or coplay.has(fid):
+			out.append(entry)
 	out.sort_custom(_by_status)
 	return out
+
+# Every immediate Steam friend, played-this-game or not. Used by the menu's "See all" toggle so
+# you can invite friends who haven't played yet. Same entry shape and sort as list_played_with.
+func list_all_friends() -> Array:
+	if not _steam_ready():
+		return []
+	var out: Array = []
+	for i in Steam.getFriendCount(Steam.FRIEND_FLAG_IMMEDIATE):
+		var fid: int = Steam.getFriendByIndex(i, Steam.FRIEND_FLAG_IMMEDIATE)
+		out.append(_entry_for(fid))
+	out.sort_custom(_by_status)
+	return out
+
+# Full status entry for one friend. in_game/lobby_id come from getFriendGamePlayed; map + in_lobby
+# from the rich presence game.gd publishes (empty/false for friends not in this game or on an older
+# build); online from persona state (in-game implies online).
+func _entry_for(fid: int) -> Dictionary:
+	var played: Dictionary = Steam.getFriendGamePlayed(fid)
+	var in_game: bool = not played.is_empty() and int(played.get("id", 0)) == Steam.getAppID()
+	return {
+		"steam_id": fid,
+		"name": Steam.getFriendPersonaName(fid),
+		"lobby_id": int(played.get("lobby", 0)) if in_game else 0,
+		"in_game": in_game,
+		"online": in_game or Steam.getFriendPersonaState(fid) != Steam.PERSONA_STATE_OFFLINE,
+		"map": Steam.getFriendRichPresence(fid, "map") if in_game else "",
+		"in_lobby": (Steam.getFriendRichPresence(fid, "in_lobby") == "1") if in_game else false,
+	}
 
 # In-game first, then online, then offline; alphabetical within a tier.
 func _by_status(a: Dictionary, b: Dictionary) -> bool:
