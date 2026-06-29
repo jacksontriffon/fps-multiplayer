@@ -42,6 +42,8 @@ var _roster_sig := ""
 # Steam friend queries are throttled: the list only rebuilds when its contents change, and we only
 # re-query every FRIEND_REFRESH seconds rather than every frame.
 const FRIEND_REFRESH := 2.0
+# Cap the rendered friend list; "See all" widens the source, but the column still shows the top N.
+const FRIEND_LIMIT := 20
 var _friend_sig := ""
 var _friend_refresh_t := 0.0
 # False = friends who've played this game; true = every Steam friend (the "See all" toggle).
@@ -74,7 +76,7 @@ func open() -> void:
 	_friend_sig = ""
 	_friend_refresh_t = 0.0
 	_show_all_friends = false
-	see_all_button.text = "See all friends"
+	see_all_button.text = "See all"
 	_clear_error()
 	_refresh_players()
 	_refresh_friends()
@@ -224,6 +226,8 @@ func _refresh_friends() -> void:
 		if our_lobby != 0 and int(entry["lobby_id"]) == our_lobby:
 			continue
 		shown.append(entry)
+		if shown.size() >= FRIEND_LIMIT:
+			break
 	var sig := str(_show_all_friends) + str(shown)
 	if sig == _friend_sig:
 		return
@@ -241,7 +245,7 @@ func _refresh_friends() -> void:
 
 func _on_see_all() -> void:
 	_show_all_friends = not _show_all_friends
-	see_all_button.text = "Show players only" if _show_all_friends else "See all friends"
+	see_all_button.text = "See fewer" if _show_all_friends else "See all"
 	_friend_sig = ""  # force a rebuild against the other source
 	_refresh_friends()
 
