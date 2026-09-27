@@ -29,17 +29,18 @@ const TEAM_NAMES := ["Red", "Blue"]
 # picks the mode; this is the single source of truth mapping mode -> map. The persistent root
 # (group "game_root") loads these on every peer.
 const LOBBY_MAP := "res://Screens/Maps/LobbyMap.tscn"
-# Both modes currently point at the Colosseum sandbox for testing; the original
-# arenas are TeamArena.tscn and CTFArena.tscn.
+# Every mode ships pointing at the Colosseum, the one template arena. Add your own maps under
+# res://Screens/Maps and point modes at them here. Race needs a map with a RaceFinish trigger.
+const DEFAULT_MAP := "res://Screens/Maps/ColosseumMap.tscn"
 const MAP_OF := {
-	Pedestal.GameMode.TEAM: "res://Screens/Maps/ColosseumMap.tscn",
-	Pedestal.GameMode.CAPTURE_THE_FLAG: "res://Screens/Maps/ColosseumMap.tscn",
-	Pedestal.GameMode.BATTLE_ROYALE: "res://Screens/Maps/HungerGamesSandbox.tscn",
-	Pedestal.GameMode.RACE: "res://Screens/Maps/GauntletRun.tscn",
+	Pedestal.GameMode.TEAM: DEFAULT_MAP,
+	Pedestal.GameMode.CAPTURE_THE_FLAG: DEFAULT_MAP,
+	Pedestal.GameMode.BATTLE_ROYALE: DEFAULT_MAP,
+	Pedestal.GameMode.RACE: DEFAULT_MAP,
 }
 # Sandbox override for map testing: when true, a start with no chosen map falls back to
 # SANDBOX_MAP. The Map Select menu always passes an explicit map, so it overrides this.
-const SANDBOX_MAP := "res://Screens/Maps/HungerGamesSandbox.tscn"
+const SANDBOX_MAP := DEFAULT_MAP
 const USE_SANDBOX_MAP := true
 
 # The Map Select menu auto-discovers every .tscn in MAP_DIR (see map_choices), so a new map
@@ -49,17 +50,13 @@ const MAP_DIR := "res://Screens/Maps/"
 const EXCLUDE_MAPS := ["LobbyMap"]
 const NAME_OVERRIDES := {
 	"ColosseumMap": "Colosseum",
-	"CTFArena": "CTF Arena",
-	"HungerGamesSandbox": "Hunger Games",
-	"PirateShipSandbox": "Pirate Ship",
 }
 
 # Classic mode is a Team-Battle tournament: TOURNAMENT_MAPS maps drawn at random from this
 # pool, played back to back. The team that wins the most maps wins the tournament.
+# Add maps to this pool as you build them; with a single map the series is one map long.
 const CLASSIC_MAP_POOL := [
-	"res://Screens/Maps/ColosseumMap.tscn",
-	"res://Screens/Maps/HungerGamesSandbox.tscn",
-	"res://Screens/Maps/PirateShipSandbox.tscn",
+	DEFAULT_MAP,
 ]
 const TOURNAMENT_MAPS := 3
 
