@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://bkeyc0od54dog"]
+
+[ext_resource type="Script" path="res://Global/Audio/audio.gd" id="1_h00nn"]
+[ext_resource type="Script" path="res://Global/ResourceScripts/AudioDetailsResource.gd" id="2_im4a6"]
+
+[node name="Audio" type="Node"]
+script = ExtResource("1_h00nn")
+all_audio = Array[ExtResource("2_im4a6")]([])
+
+

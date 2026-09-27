@@ -1,0 +1,140 @@
+[gd_scene load_steps=12 format=3 uid="uid://dn5gm2e014upj"]
+
+[ext_resource type="Script" uid="uid://b0dhcl4edi5pu" path="res://Components/Player/player.gd" id="1_1xasy"]
+[ext_resource type="Script" path="res://Components/Player/Creative/creative_mode.gd" id="8_creative"]
+[ext_resource type="PackedScene" uid="uid://br0nkwt1yd1i5" path="res://Components/Player/Hands/hands.tscn" id="2_1xasy"]
+[ext_resource type="Script" uid="uid://cp6no4h2gdagm" path="res://Components/Player/Head/head.gd" id="3_head"]
+[ext_resource type="Script" uid="uid://cxhwx6l78bddc" path="res://Components/Player/Stamina/stamina.gd" id="4_stmna"]
+[ext_resource type="Script" uid="uid://d281gvnn52dcj" path="res://Components/Player/DoubleJump/double_jump.gd" id="5_djump"]
+[ext_resource type="Script" uid="uid://cw5prans3kt8r" path="res://Components/Player/Dash/dash.gd" id="6_dash"]
+[ext_resource type="Script" uid="uid://b7kqx2mfcrh8c" path="res://Components/Player/Crouch/crouch.gd" id="7_crouch"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_y2flf"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ragdoll"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_1vjd0"]
+points = PackedVector3Array(-0.12520654, -0.532801, -0.4805069, 0.022783129, 0.4760704, 0.49888408, 0.16971254, 0.5591441, 0.46417162, 0.23105091, -0.8035912, 0.32045516, 0.40741014, 0.651043, -0.24352328, -0.4827893, 0.59484255, 0.082213186, -0.3628679, -0.68231165, 0.2896967, 0.46904355, -0.65452886, -0.06627126, -0.12744367, 0.8427015, -0.33810276, -0.39343542, -0.6839421, -0.24471663, 0.43825462, 0.62330925, 0.20084947, 0.0841477, 0.977454, 0.11479468, -0.06820232, -0.9764576, -0.12927033, 0.20054972, -0.56312895, -0.4514544, -0.18552664, 0.59545326, -0.4534751, -0.27336287, 0.59226835, 0.40775412, -0.0069364863, -0.47682306, 0.49966025, 0.37582088, -0.5886136, 0.31695515, 0.111579016, 0.5630594, -0.48117727, -0.41725034, 0.5278656, -0.27049688, -0.48454633, -0.59697217, -0.06650971, -0.27974695, 0.90856135, 0.05333608, -0.25019687, -0.8807117, 0.20531891, 0.263647, -0.90277094, -0.1273943, 0.29336792, 0.8715263, -0.15719566, 0.3734115, -0.5263189, -0.32824618, 0.4996626, 0.47664148, -0.0068885577, 0.053105574, 0.8750009, 0.32470253, -0.15454252, -0.5908538, 0.4658794, -0.09727988, -0.7823577, -0.39818847, -0.3876489, -0.49817133, 0.31564978, -0.30067965, -0.58799505, -0.38890144)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_1xasy"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath("Head:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath("Head/Camera3D:rotation")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath(".:team")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath(".:rotation")
+properties/4/spawn = true
+properties/4/replication_mode = 1
+properties/5/path = NodePath(".:crouching")
+properties/5/spawn = true
+properties/5/replication_mode = 2
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_1xasy")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.37879586, 0)
+mesh = SubResource("CapsuleMesh_y2flf")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.37879586, 0)
+shape = SubResource("ConvexPolygonShape3D_1vjd0")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.201397, 0)
+script = ExtResource("3_head")
+
+[node name="Crosshairs" type="CanvasLayer" parent="Head"]
+unique_name_in_owner = true
+visible = false
+
+[node name="Control" type="Control" parent="Head/Crosshairs"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="Head/Crosshairs/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Head/Crosshairs/Control/CenterContainer"]
+layout_mode = 2
+text = "+"
+
+[node name="ChargeBar" type="ProgressBar" parent="Head/Crosshairs/Control"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -70.0
+offset_top = -300.0
+offset_right = -46.0
+offset_bottom = -140.0
+grow_horizontal = 0
+grow_vertical = 0
+max_value = 1.0
+step = 0.01
+value = 0.0
+fill_mode = 3
+show_percentage = false
+
+[node name="Camera3D" type="Camera3D" parent="Head"]
+
+[node name="Hands" parent="Head/Camera3D" node_paths=PackedStringArray("camera") instance=ExtResource("2_1xasy")]
+camera = NodePath("..")
+
+[node name="Ragdoll" type="RigidBody3D" parent="."]
+top_level = true
+mass = 1.5
+freeze = true
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ragdoll"]
+shape = SubResource("CapsuleShape3D_ragdoll")
+
+[node name="Stamina" type="Node" parent="." node_paths=PackedStringArray("player")]
+script = ExtResource("4_stmna")
+player = NodePath("..")
+
+[node name="DoubleJump" type="Node" parent="." node_paths=PackedStringArray("player")]
+script = ExtResource("5_djump")
+player = NodePath("..")
+
+[node name="Dash" type="Node" parent="." node_paths=PackedStringArray("player", "head")]
+script = ExtResource("6_dash")
+player = NodePath("..")
+head = NodePath("../Head")
+
+[node name="Crouch" type="Node" parent="." node_paths=PackedStringArray("player", "head", "mesh", "collision_shape")]
+script = ExtResource("7_crouch")
+player = NodePath("..")
+head = NodePath("../Head")
+mesh = NodePath("../MeshInstance3D")
+collision_shape = NodePath("../CollisionShape3D")
+
+[node name="Creative" type="Node3D" parent="." node_paths=PackedStringArray("player", "camera")]
+script = ExtResource("8_creative")
+player = NodePath("..")
+camera = NodePath("../Head/Camera3D")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_1xasy")

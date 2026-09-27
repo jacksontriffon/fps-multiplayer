@@ -1,0 +1,1809 @@
+[gd_scene load_steps=15 format=3 uid="uid://blg2uymfm5m1u"]
+
+[ext_resource type="Material" uid="uid://dmqveijwescc" path="res://Assets/Textures/Prototype/grid.tres" id="1_grid"]
+[ext_resource type="Material" uid="uid://by0fj5s5fgaqa" path="res://Assets/Textures/Prototype/grid2.tres" id="2_grid2"]
+[ext_resource type="PackedScene" uid="uid://1xfx84i2ndhj" path="res://Components/Dodgeball/dodgeball.tscn" id="3_ball"]
+[ext_resource type="Script" uid="uid://cecy85ew5gbd3" path="res://Components/SpawnPoints/spawn_points.gd" id="4_spawn"]
+[ext_resource type="PackedScene" uid="uid://waof3iv58jdc" path="res://Components/SpawnPoints/SpawnPoint.tscn" id="5_sp"]
+[ext_resource type="PackedScene" uid="uid://c60hxnsma28oh" path="res://Components/Pedestal/pedestal.tscn" id="6_ped"]
+[ext_resource type="Script" uid="uid://crd0u7gufnfiq" path="res://Components/InfiniteHeartZone/infinite_heart_zone.gd" id="7_infzone"]
+[ext_resource type="PackedScene" path="res://Components/Dodgeball/exploding_dodgeball.tscn" id="8_xball"]
+[ext_resource type="PackedScene" uid="uid://uexgtf7lwynk" path="res://Components/AbilityOrb/ability_orb.tscn" id="9_orb"]
+[ext_resource type="PackedScene" uid="uid://cryyg8edx41b5" path="res://Components/BallSpawner/BallSpawner.tscn" id="99_bspawn"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lm"]
+
+[sub_resource type="Sky" id="Sky_lm"]
+sky_material = SubResource("ProceduralSkyMaterial_lm")
+
+[sub_resource type="Environment" id="Environment_lm"]
+background_mode = 2
+sky = SubResource("Sky_lm")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_infzone"]
+size = Vector3(31, 8, 23.5)
+
+[node name="LobbyMap" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_lm")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.45353946, 0.8912362, 0, -0.8912362, 0.45353946, 0, 18.786436, 17.95136)
+shadow_enabled = true
+
+[node name="LobbyTerrain" type="Node3D" parent="."]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="LobbyTerrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0060042143, -0.5132015, 5.2158647)
+use_collision = true
+size = Vector3(31.46582, 1, 49.033936)
+material = ExtResource("1_grid")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="LobbyTerrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5341797, -19.563137)
+use_collision = true
+size = Vector3(31.926025, 4.0683594, 1)
+material = ExtResource("2_grid2")
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="LobbyTerrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.039295, 1.5341797, -7.587002)
+use_collision = true
+size = Vector3(0.52453613, 4.0683594, 24.95227)
+material = ExtResource("2_grid2")
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="LobbyTerrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.700745, 1.5341797, -7.587002)
+use_collision = true
+size = Vector3(0.52453613, 4.0683594, 24.95227)
+material = ExtResource("2_grid2")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="LobbyTerrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5341797, -12.2987385)
+use_collision = true
+size = Vector3(19.10254, 4.0683594, 1)
+material = ExtResource("2_grid2")
+
+[node name="Dodgeball" parent="LobbyTerrain" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.99360275, 0.26177016, -2.3973625)
+
+[node name="Dodgeball2" parent="LobbyTerrain" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2891388, 0.26177016, -3.331491)
+
+[node name="Dodgeball3" parent="LobbyTerrain" instance=ExtResource("3_ball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7926931, 0.26177016, -2.3606162)
+
+[node name="ExplodingDodgeball" parent="LobbyTerrain" instance=ExtResource("8_xball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 0.26177016, -3.4)
+
+[node name="Ship" type="Node3D" parent="LobbyTerrain"]
+transform = Transform3D(-3.059797e-08, 0, 0.7, 0, 0.7, 0, -0.7, 0, -3.059797e-08, -28.40216, -2.3075619, 15.21446)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12160492, 0.5485264, 32.737488)
+use_collision = true
+size = Vector3(16.714218, 1, 43.477905)
+
+[node name="CSGBox3D169" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.135853, 1.2990104, 49.270706)
+use_collision = true
+size = Vector3(2.6857224, 1, 6.5642395)
+
+[node name="CSGBox3D171" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -0.38821507, 1.2936491, 52.582127)
+use_collision = true
+size = Vector3(2.6857224, 0.76416016, 6.5642395)
+
+[node name="CSGBox3D172" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 4.939209, 2.5957704, 55.333183)
+use_collision = true
+size = Vector3(2.6857224, 0.76416016, 6.5642395)
+
+[node name="CSGBox3D173" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -5.070757, 2.5957704, 55.333183)
+use_collision = true
+size = Vector3(2.6857224, 0.76416016, 6.5642395)
+
+[node name="CSGBox3D174" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -0.06141138, 2.9786382, 55.739613)
+use_collision = true
+size = Vector3(2.6857224, 0.9772949, 6.5642395)
+
+[node name="CSGBox3D175" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -2.9796853, 3.774877, 56.756565)
+use_collision = true
+size = Vector3(2.6857224, 1.925415, 6.5642395)
+
+[node name="CSGBox3D199" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -2.9284215, 5.5250344, 58.713703)
+use_collision = true
+size = Vector3(2.6857224, 1.925415, 6.461685)
+
+[node name="CSGBox3D200" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 2.3459864, 5.5250344, 58.693707)
+use_collision = true
+size = Vector3(2.6857224, 1.925415, 8.417374)
+
+[node name="CSGBox3D176" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 3.2501721, 4.3474784, 56.756565)
+use_collision = true
+size = Vector3(2.6857224, 3.0706177, 6.5642395)
+
+[node name="CSGBox3D179" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 7.9090457, 3.8496332, 55.58568)
+use_collision = true
+size = Vector3(2.6857224, 3.0706177, 6.5642395)
+
+[node name="CSGBox3D180" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 10.159138, 5.724519, 53.60934)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D181" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 10.159138, 6.623434, 51.3871)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D182" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 10.159138, 7.7135935, 49.001194)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D183" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 10.159138, 8.741263, 46.841007)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D184" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 10.159138, 9.799437, 44.507835)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D185" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 10.159138, 10.861309, 42.11189)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D186" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, 10.159138, 11.968172, 39.782967)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D187" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 9.971606, 13.018185, 37.34475)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D252" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 5.977316, 14.975362, 50.865517)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D254" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 2.467405, 10.995567, 2.1936226)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D255" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 1.7234751, 10.995567, 3.4925227)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D256" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 3.0192559, 10.995568, 4.1439843)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D257" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 2.5927532, 12.154538, 3.3979928)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D258" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 1.5116646, 11.235469, 12.265595)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D270" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -1.1109821, 11.183148, 14.3027)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D259" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 3.0981815, 11.235469, 11.576769)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D265" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 3.056072, 11.186378, 20.76791)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D269" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.543122, 10.980727, 21.75752)
+use_collision = true
+size = Vector3(1.1, 1.1, 1.1)
+
+[node name="CSGBox3D260" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 1.4128026, 11.235469, 10.699252)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D261" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 1.7134364, 12.673054, 11.542759)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D266" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 1.9319075, 13.88365, 11.542759)
+use_collision = true
+
+[node name="CSGBox3D274" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 2.5692008, 13.176648, 3.4331195)
+use_collision = true
+
+[node name="CSGBox3D275" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 0.5268271, 10.953556, 2.6610386)
+use_collision = true
+
+[node name="CSGBox3D276" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 1.071103, 12.013079, 3.1169693)
+use_collision = true
+
+[node name="CSGBox3D280" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.99846894, 0, -0.05531609, 0, 1, 0, 0.05531609, 0, 0.99846894, -4.380937, 10.995567, 6.9322586)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D281" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.99846894, 0, -0.05531609, 0, 1, 0, 0.05531609, 0, 0.99846894, -3.1441152, 10.995567, 7.7753744)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D282" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.99846894, 0, -0.05531609, 0, 1, 0, 0.05531609, 0, 0.99846894, -2.393429, 10.995568, 6.534439)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D283" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.99846894, 0, -0.05531609, 0, 1, 0, 0.05531609, 0, 0.99846894, -3.1704557, 12.154538, 6.9013677)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D284" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.99846894, 0, -0.05531609, 0, 1, 0, 0.05531609, 0, 0.99846894, -3.137276, 13.176648, 6.9275928)
+use_collision = true
+
+[node name="CSGBox3D285" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.99846894, 0, -0.05531609, 0, 1, 0, 0.05531609, 0, 0.99846894, -4.0665298, 10.953556, 8.903418)
+use_collision = true
+
+[node name="CSGBox3D286" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.99846894, 0, -0.05531609, 0, 1, 0, 0.05531609, 0, 0.99846894, -3.5694783, 12.013079, 8.396418)
+use_collision = true
+
+[node name="CSGBox3D287" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -3.0228608, 10.995567, 29.603252)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D288" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -1.6179991, 10.995567, 29.086596)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D289" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -2.1917102, 10.995568, 27.754566)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D290" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -2.344609, 12.154538, 28.600159)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D291" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -2.3039846, 13.176648, 28.588396)
+use_collision = true
+
+[node name="CSGBox3D292" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -1.2359526, 10.953556, 30.492788)
+use_collision = true
+
+[node name="CSGBox3D293" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -1.3597412, 12.013079, 29.793655)
+use_collision = true
+
+[node name="CSGBox3D294" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -3.0228608, 15.132757, 48.269688)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D295" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -1.6179991, 15.132757, 47.753025)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D296" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -2.1917102, 15.132759, 46.420998)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D297" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -2.344609, 16.291729, 47.26659)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="CSGBox3D298" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -2.3039846, 17.313839, 47.254826)
+use_collision = true
+
+[node name="CSGBox3D299" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -1.2359526, 15.090747, 49.15922)
+use_collision = true
+
+[node name="CSGBox3D300" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6252154, 0, 0.7804522, 0, 1, 0, -0.7804522, 0, 0.6252154, -1.3597412, 16.150269, 48.460083)
+use_collision = true
+
+[node name="CSGBox3D271" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -1.0769132, 12.395305, 14.26246)
+use_collision = true
+
+[node name="CSGBox3D272" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -2.5525022, 10.921493, 14.26246)
+use_collision = true
+
+[node name="CSGBox3D273" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -2.4912446, 11.879158, 14.42123)
+use_collision = true
+
+[node name="CSGBox3D267" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 1.6880643, 12.5158205, 12.683432)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D277" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 5.7209525, 11.746463, 13.876395)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D268" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 3.0526924, 10.836341, 12.764237)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D301" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.3560834, 1.6549734, 12.265595)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D302" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 5.9426003, 1.6549734, 11.576769)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D303" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.257221, 1.6549734, 10.699252)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D304" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.557855, 3.0925584, 11.542759)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D305" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.776326, 4.303154, 11.542759)
+use_collision = true
+
+[node name="CSGBox3D322" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -3.589626, 1.6549734, 20.125177)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D323" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -3.688488, 1.6549734, 18.558834)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D330" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -1.696898, 1.6549734, 16.241142)
+use_collision = true
+size = Vector3(1.8, 1.8, 1.8)
+
+[node name="CSGBox3D331" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 2.7158964, 1.6549734, 21.78005)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D324" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -3.387854, 3.0925584, 19.402342)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D325" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -3.169383, 4.303154, 19.402342)
+use_collision = true
+
+[node name="CSGBox3D326" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.361874, 1.6549734, 20.125177)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D327" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.263012, 1.6549734, 18.558834)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D332" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -1.4129384, 3.1141198, 16.746937)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D333" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 0.0034267562, 1.5777894, 16.746937)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D328" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.5636463, 3.0925584, 19.402342)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D329" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.7821174, 4.303154, 19.402342)
+use_collision = true
+
+[node name="CSGBox3D306" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 5.8971114, 1.2558457, 12.764237)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D307" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -6.585568, 1.6549734, 34.744682)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D308" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -4.999051, 1.6549734, 34.055855)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D309" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -6.68443, 1.6549734, 33.178337)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D310" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -6.3837967, 3.0925584, 34.021847)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D311" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -6.1653247, 4.303154, 34.021847)
+use_collision = true
+
+[node name="CSGBox3D312" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -5.04454, 1.2558457, 35.243324)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D313" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.29983997, 0, 0.9539896, 0, 1, 0, -0.9539896, 0, 0.29983997, -4.2526503, 1.6549734, 28.86507)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D314" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.29983997, 0, 0.9539896, 0, 1, 0, -0.9539896, 0, 0.29983997, -5.976405, 1.6549734, 29.007164)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D315" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.29983997, 0, 0.9539896, 0, 1, 0, -0.9539896, 0, 0.29983997, -4.6627045, 1.6549734, 30.380018)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D316" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.29983997, 0, 0.9539896, 0, 1, 0, -0.9539896, 0, 0.29983997, -4.6761374, 3.0925584, 29.484638)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D317" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.29983997, 0, 0.9539896, 0, 1, 0, -0.9539896, 0, 0.29983997, -4.8830066, 4.303154, 29.414387)
+use_collision = true
+
+[node name="CSGBox3D318" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.29983997, 0, 0.9539896, 0, 1, 0, -0.9539896, 0, 0.29983997, -5.5514956, 1.2558457, 27.897388)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D319" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.29983997, 0, 0.9539896, 0, 1, 0, -0.9539896, 0, 0.29983997, -2.4343097, 1.2558457, 32.244396)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D320" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.29983997, 0, 0.9539896, 0, 1, 0, -0.9539896, 0, 0.29983997, 6.9357533, 1.2558457, 38.660145)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D321" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.29983997, 0, 0.9539896, 0, 1, 0, -0.9539896, 0, 0.29983997, 5.347042, 0.8761934, 38.660145)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D279" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 5.2041197, 10.836341, 14.165903)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D278" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 5.9085727, 12.5196705, 13.8486595)
+use_collision = true
+size = Vector3(0.8, 0.8, 0.8)
+
+[node name="CSGBox3D262" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 6.3527546, 10.621783, 14.051393)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D263" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -6.9148445, 10.621784, 13.167746)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D264" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -6.5190344, 11.085031, 11.411421)
+use_collision = true
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="CSGBox3D253" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 4.7616954, 15.47447, 51.679024)
+use_collision = true
+size = Vector3(1, 2.0682373, 1)
+
+[node name="CSGBox3D188" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, 9.624211, 13.564125, 34.99987)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D189" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -8.496362, 3.8496332, 55.570457)
+use_collision = true
+size = Vector3(2.6857224, 3.0706177, 5.231827)
+
+[node name="CSGBox3D190" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -9.970208, 5.724519, 53.60934)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D191" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -9.970208, 6.623434, 51.3871)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D192" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -9.970208, 7.7135935, 49.001194)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D193" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -9.970208, 8.741263, 46.841007)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D194" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -9.970208, 9.799437, 44.507835)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D195" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -9.970208, 10.861309, 42.11189)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D196" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.999739, 0, 1, 0, 0.999739, 0, 0.022844434, -9.970208, 11.968172, 39.782967)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D197" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -9.545174, 13.018185, 37.34475)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D198" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.022844434, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, 0.022844434, -9.740056, 13.564125, 34.99987)
+use_collision = true
+size = Vector3(2.6857224, 1.2389221, 2.0628815)
+
+[node name="CSGBox3D170" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.6126156, 5.184512, 49.270706)
+use_collision = true
+size = Vector3(2.6857224, 1, 6.5642395)
+
+[node name="CSGBox3D178" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.6126156, 1.1738117, 44.14258)
+use_collision = true
+size = Vector3(2.6857224, 1, 3.99897)
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12160492, 9.97936, 40.243187)
+use_collision = true
+size = Vector3(16.714218, 1, 27.694706)
+
+[node name="CSGBox3D17" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.188587, 9.97936, 23.297606)
+use_collision = true
+size = Vector3(6.5802536, 1, 12.301941)
+
+[node name="CSGBox3D68" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.200568, 10.539134, 26.49023)
+use_collision = true
+size = Vector3(11.588467, 0.38452148, 2.0337944)
+
+[node name="CSGBox3D18" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2807083, 9.97936, 23.297606)
+use_collision = true
+size = Vector3(6.5802536, 1, 12.301941)
+
+[node name="CSGBox3D16" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12160492, 9.97936, 13.74744)
+use_collision = true
+size = Vector3(16.714218, 1, 7.2710876)
+
+[node name="CSGBox3D112" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0050575733, 24.936596, 11.677517)
+use_collision = true
+size = Vector3(1.1526904, 30.337631, 0.93055344)
+
+[node name="CSGBox3D154" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 0.9966015, 0.082373366, 0, -0.082373366, 0.9966015, 0.2715242, 27.802145, 9.105653)
+use_collision = true
+size = Vector3(12.332057, 7.6317863, 0.09843588)
+
+[node name="CSGBox3D156" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 0.78417015, 0.6205457, 0, -0.6205457, 0.78417015, 0.2715242, 23.0268, 10.203283)
+use_collision = true
+size = Vector3(12.332057, 2.6373777, 0.09843588)
+
+[node name="CSGBox3D157" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, -0.6409541, 0.7675791, 0, -0.7675791, -0.6409541, 0.2715242, 36.51553, 10.233621)
+use_collision = true
+size = Vector3(12.332057, 2.5583313, 0.09843588)
+
+[node name="CSGBox3D155" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 0.9939954, -0.10942205, 0, 0.10942205, 0.9939954, 0.2715242, 33.593494, 9.044743)
+use_collision = true
+size = Vector3(12.332057, 4.3898983, 0.09843588)
+
+[node name="CSGBox3D158" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 0.9913969, 0.13088956, 0, -0.13088956, 0.9913969, 0.18914652, 39.170044, 24.804596)
+use_collision = true
+size = Vector3(18.550936, 7.6317863, 0.09843588)
+
+[node name="CSGBox3D159" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 0.78417015, 0.6205457, 0, -0.6205457, 0.78417015, 0.1976142, 33.93325, 26.42975)
+use_collision = true
+size = Vector3(18.538704, 3.7677855, 0.09843588)
+
+[node name="CSGBox3D160" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, -0.7209624, 0.69297403, 0, -0.69297403, -0.7209624, 0.1664486, 49.78409, 26.810572)
+use_collision = true
+size = Vector3(18.432564, 2.3935456, 0.09843588)
+
+[node name="CSGBox3D161" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 0.96094847, -0.2767277, 0, 0.2767277, 0.96094847, 0.20424652, 45.8616, 25.143618)
+use_collision = true
+size = Vector3(18.54691, 6.2471952, 0.09843588)
+
+[node name="CSGBox3D113" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0050575733, 31.405685, 28.232847)
+use_collision = true
+size = Vector3(1.1526904, 43.27581, 0.93055344)
+
+[node name="CSGBox3D39" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16353416, 9.127472, 17.255539)
+use_collision = true
+size = Vector3(6.813442, 1, 1.5237656)
+
+[node name="CSGBox3D40" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0851078, 8.282781, 17.92711)
+use_collision = true
+size = Vector3(6.657131, 1, 1.5237656)
+
+[node name="CSGBox3D41" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22841454, 7.5295362, 18.65729)
+use_collision = true
+size = Vector3(6.588711, 1, 1.5237656)
+
+[node name="CSGBox3D42" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30238914, 6.74769, 19.360403)
+use_collision = true
+size = Vector3(6.908535, 1, 1.5237656)
+
+[node name="CSGBox3D43" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31117105, 5.902999, 20.031975)
+use_collision = true
+size = Vector3(7.021323, 1, 1.5237656)
+
+[node name="CSGBox3D44" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.27512002, 5.1497545, 20.762154)
+use_collision = true
+size = Vector3(7.1285815, 1, 1.5237656)
+
+[node name="CSGBox3D45" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16353416, 4.369296, 21.57177)
+use_collision = true
+size = Vector3(6.813442, 1, 1.5237656)
+
+[node name="CSGBox3D46" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0851078, 3.5246048, 22.243341)
+use_collision = true
+size = Vector3(6.657131, 1, 1.5237656)
+
+[node name="CSGBox3D47" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22841454, 2.7713604, 22.97352)
+use_collision = true
+size = Vector3(6.588711, 1, 1.5237656)
+
+[node name="CSGBox3D48" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30238914, 1.9895144, 23.676634)
+use_collision = true
+size = Vector3(6.908535, 1, 1.5237656)
+
+[node name="CSGBox3D49" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35198402, 1.1448231, 24.348206)
+use_collision = true
+size = Vector3(7.7354393, 1, 1.5237656)
+
+[node name="CSGBox3D50" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38811684, 0.39157867, 25.078384)
+use_collision = true
+size = Vector3(7.868252, 1, 1.5237656)
+
+[node name="CSGBox3D15" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12160492, 9.97936, 10.553198)
+use_collision = true
+size = Vector3(16.714218, 1, 1.9025269)
+
+[node name="CSGBox3D19" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09256935, 9.97936, 9.010336)
+use_collision = true
+size = Vector3(15.32272, 1, 1.9025269)
+
+[node name="CSGBox3D20" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.014970303, 9.97936, 7.5491095)
+use_collision = true
+size = Vector3(14.006095, 1, 1.9025269)
+
+[node name="CSGBox3D21" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.01826477, 9.97936, 6.115964)
+use_collision = true
+size = Vector3(12.75189, 1, 1.9025269)
+
+[node name="CSGBox3D22" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.049110413, 9.97936, 4.670044)
+use_collision = true
+size = Vector3(11.73436, 1, 1.9025269)
+
+[node name="CSGBox3D23" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.080602646, 9.97936, 3.393321)
+use_collision = true
+size = Vector3(10.484859, 1, 1.9025269)
+
+[node name="CSGBox3D24" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14676428, 9.97936, 1.988586)
+use_collision = true
+size = Vector3(9.531737, 1, 1.9025269)
+
+[node name="CSGBox3D25" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1902523, 9.97936, 0.4284625)
+use_collision = true
+size = Vector3(8.819519, 1, 1.9025269)
+
+[node name="CSGBox3D26" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22950554, 9.97936, -1.0413802)
+use_collision = true
+size = Vector3(8.226425, 1, 1.9025269)
+
+[node name="CSGBox3D27" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15197754, 9.97936, -2.5404081)
+use_collision = true
+size = Vector3(7.3603783, 1, 1.9025269)
+
+[node name="CSGBox3D28" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.17562532, 9.97936, -4.181384)
+use_collision = true
+size = Vector3(6.3552923, 1, 1.9025269)
+
+[node name="CSGBox3D29" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15680456, 9.97936, -5.6452746)
+use_collision = true
+size = Vector3(5.157671, 1, 1.9025269)
+
+[node name="CSGBox3D30" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24774146, 9.97936, -7.27162)
+use_collision = true
+size = Vector3(4.0012097, 1, 1.9025269)
+
+[node name="CSGBox3D31" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.269377, 9.97936, -9.016201)
+use_collision = true
+size = Vector3(2.947568, 1, 2.3733368)
+
+[node name="CSGBox3D32" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.40112865, 9.97936, -11.366301)
+use_collision = true
+size = Vector3(1.7761986, 1, 2.8712387)
+
+[node name="CSGBox3D51" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12160492, 0.5685177, 10.553198)
+use_collision = true
+size = Vector3(16.714218, 1, 1.9025269)
+
+[node name="CSGBox3D52" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09256935, 0.5685177, 9.010336)
+use_collision = true
+size = Vector3(15.32272, 1, 1.9025269)
+
+[node name="CSGBox3D53" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.014970303, 0.5685177, 7.5491095)
+use_collision = true
+size = Vector3(14.006095, 1, 1.9025269)
+
+[node name="CSGBox3D54" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.01826477, 0.5685177, 6.115964)
+use_collision = true
+size = Vector3(12.75189, 1, 1.9025269)
+
+[node name="CSGBox3D55" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.049110413, 0.5685177, 4.670044)
+use_collision = true
+size = Vector3(11.73436, 1, 1.9025269)
+
+[node name="CSGBox3D56" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.080602646, 0.5685177, 3.393321)
+use_collision = true
+size = Vector3(10.484859, 1, 1.9025269)
+
+[node name="CSGBox3D57" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14676428, 0.5685177, 1.988586)
+use_collision = true
+size = Vector3(9.531737, 1, 1.9025269)
+
+[node name="CSGBox3D58" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1902523, 0.5685177, 0.4284625)
+use_collision = true
+size = Vector3(8.819519, 1, 1.9025269)
+
+[node name="CSGBox3D59" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22950554, 0.5685177, -1.0413802)
+use_collision = true
+size = Vector3(8.226425, 1, 1.9025269)
+
+[node name="CSGBox3D60" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15197754, 0.5685177, -2.5404081)
+use_collision = true
+size = Vector3(7.3603783, 1, 1.9025269)
+
+[node name="CSGBox3D61" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.17562532, 0.5685177, -4.181384)
+use_collision = true
+size = Vector3(6.3552923, 1, 1.9025269)
+
+[node name="CSGBox3D62" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15680456, 0.5685177, -5.6452746)
+use_collision = true
+size = Vector3(5.157671, 1, 1.9025269)
+
+[node name="CSGBox3D63" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24774146, 0.5685177, -7.27162)
+use_collision = true
+size = Vector3(4.0012097, 1, 1.9025269)
+
+[node name="CSGBox3D64" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.269377, 0.5685177, -9.016201)
+use_collision = true
+size = Vector3(2.947568, 1, 2.3733368)
+
+[node name="CSGBox3D65" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.40112865, 0.5685177, -11.366301)
+use_collision = true
+size = Vector3(1.7761986, 1, 2.8712387)
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.7899055, 10.9475975, 34.586525)
+use_collision = true
+size = Vector3(5.377617, 1, 2.112976)
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.7899055, 11.687918, 35.98312)
+use_collision = true
+size = Vector3(5.377617, 1, 2.3756714)
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.7899055, 12.481707, 37.340706)
+use_collision = true
+size = Vector3(5.377617, 1, 2.6375122)
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.7899055, 13.2335205, 39.257526)
+use_collision = true
+size = Vector3(5.377617, 1, 3.378479)
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6173716, 10.9475975, 34.70127)
+use_collision = true
+size = Vector3(5.377617, 1, 2.3424683)
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6173716, 11.723013, 35.9894)
+use_collision = true
+size = Vector3(5.377617, 1, 2.3937378)
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6173716, 12.481707, 37.22004)
+use_collision = true
+size = Vector3(5.377617, 1, 2.3961792)
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6173716, 13.2335205, 39.129597)
+use_collision = true
+size = Vector3(5.377617, 1, 3.1226196)
+
+[node name="CSGBox3D33" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.7899055, 14.010025, 46.544384)
+use_collision = true
+size = Vector3(5.377617, 1, 14.3341675)
+
+[node name="CSGBox3D131" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.07551336, 14.010025, 46.650623)
+use_collision = true
+size = Vector3(13.5201025, 1, 14.121689)
+
+[node name="CSGBox3D34" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6173716, 14.010025, 46.497204)
+use_collision = true
+size = Vector3(5.377617, 1, 14.239807)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.171262, 5.646464, 32.6268)
+use_collision = true
+size = Vector3(16.714218, 1, 10.127747)
+
+[node name="CSGBox3D66" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.171262, 12.157646, 18.579746)
+use_collision = true
+size = Vector3(0.9761276, 1, 13.942535)
+
+[node name="CSGBox3D114" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.724373, 17.39097, 46.23391)
+use_collision = true
+size = Vector3(0.75759506, 1, 17.006752)
+
+[node name="CSGBox3D69" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.171262, 4.0025773, 18.579746)
+use_collision = true
+size = Vector3(13.426445, 1, 13.942535)
+
+[node name="CSGBox3D67" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.171262, 3.7303605, 25.24378)
+use_collision = true
+size = Vector3(12.882011, 1, 13.42511)
+
+[node name="CSGBox3D37" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.805718, 5.925674, 46.161053)
+use_collision = true
+size = Vector3(17.276054, 1, 17.352661)
+
+[node name="CSGBox3D38" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.7619505, 6.005508, 46.161053)
+use_collision = true
+size = Vector3(17.116386, 1, 17.352661)
+
+[node name="CSGBox3D130" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, -0.44517708, 1.2585878, 53.9379)
+use_collision = true
+size = Vector3(3.007224, 1, 17.352661)
+
+[node name="CSGBox3D168" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, -0.44517708, 11.948323, 53.9379)
+use_collision = true
+size = Vector3(5.2307568, 1, 17.352661)
+
+[node name="CSGBox3D162" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, 5.3260326, 7.043149, 39.477654)
+use_collision = true
+size = Vector3(5.330145, 1, 5.8102417)
+
+[node name="CSGBox3D177" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, 5.3260326, 1.5563571, 39.477654)
+use_collision = true
+size = Vector3(0.9224881, 1, 5.8102417)
+
+[node name="CSGBox3D164" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, -1.8038158, 8.743867, 39.477654)
+use_collision = true
+size = Vector3(2.3504748, 1, 14.52346)
+
+[node name="CSGBox3D163" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, -4.0759764, 5.045094, 39.477654)
+use_collision = true
+size = Vector3(9.756353, 1, 2.2171326)
+
+[node name="CSGBox3D165" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -3.7244139, 5.045094, 43.808315)
+use_collision = true
+size = Vector3(9.756353, 0.296875, 3.7081757)
+
+[node name="CSGBox3D166" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, -6.2209063, 5.045094, 45.41707)
+use_collision = true
+size = Vector3(9.756353, 0.296875, 5.0813503)
+
+[node name="CSGBox3D167" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, 6.483987, 5.045094, 47.289825)
+use_collision = true
+size = Vector3(9.756353, 0.296875, 5.0813503)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 12.185356, 24.344604)
+use_collision = true
+size = Vector3(0.9207077, 1, 26.692139)
+
+[node name="CSGBox3D115" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.76278, 17.472918, 46.075356)
+use_collision = true
+size = Vector3(0.9207077, 1, 17.153748)
+
+[node name="CSGBox3D132" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, 0.19647694, 17.472918, 54.03584)
+use_collision = true
+size = Vector3(0.9207077, 1, 17.153748)
+
+[node name="CSGBox3D74" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 10.14819, 27.506027)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D75" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 10.14819, 25.308285)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D76" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 10.14819, 23.402502)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D77" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 10.14819, 21.376434)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D78" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 10.14819, 19.178692)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D79" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 10.14819, 17.27291)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D83" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.051953, 10.14819, 25.186806)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D84" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.051953, 10.14819, 23.160738)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D85" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.051953, 10.14819, 20.962996)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D86" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.051953, 10.14819, 19.057213)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D87" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.051953, 10.14819, 17.232145)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D88" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.051953, 10.14819, 15.206078)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D89" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.051953, 10.14819, 13.008335)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D90" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.051953, 10.14819, 11.102552)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D80" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 10.14819, 15.365824)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D116" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.737158, 15.6719, 50.195026)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D117" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.737158, 15.6719, 47.997284)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D118" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.737158, 15.6719, 46.091503)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D119" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.737158, 15.6719, 44.065434)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D120" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.737158, 15.6719, 41.86769)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D139" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.14409418, 15.198354, 41.86769)
+use_collision = true
+size = Vector3(1.6251965, 0.54052734, 0.78067017)
+
+[node name="CSGBox3D201" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 0.40895173, -1.7875847e-08, 0.91255605, -0.91255605, 3.9889095e-08, 0.40895173, 0.8866191, 10.954251, 29.251244)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D202" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 1.1578752e-15, 0.523421, -2.2879458e-08, 0.8520744, -0.8520744, 3.7245357e-08, 0.523421, 0.8866191, 11.514326, 28.1823)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D203" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.56749415, -0.8214436, 0.056403562, 0.41454703, -0.22585876, 0.8815549, -0.71140796, 0.52365917, 0.46870032, 0.58756286, 12.1542225, 27.348856)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D204" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.9305644, 0.0080432, 0.36604032, 0.36592737, -0.012728205, 0.930557, 0.012143723, 0.99988747, 0.008901124, -0.18794432, 12.601528, 27.141123)
+use_collision = true
+size = Vector3(1.3411136, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D205" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.42246488, 0.8886732, 0.17828314, 0.3659274, -0.012728206, 0.93055713, 0.8292292, 0.45836636, -0.31981227, -1.020991, 12.917934, 27.77891)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D206" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.50939125, 0.83956295, -0.18882687, 0.3659274, -0.012728196, 0.930557, 0.7788569, -0.5431145, -0.31370232, -0.8345902, 13.354202, 28.719206)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D207" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.8193156, 0.47863975, -0.31563658, 0.3659274, -0.012728193, 0.930557, 0.44138357, -0.87791973, -0.18557556, 0.037492175, 13.808896, 29.372602)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D208" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.5821992, -0.77695024, -0.23956814, 0.3659274, -0.012728167, 0.930557, -0.7260452, -0.62943393, 0.27689683, 0.833251, 14.139575, 29.04944)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D209" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 1.1578752e-15, 0.523421, -2.2879458e-08, 0.8520744, -0.8520744, 3.7245357e-08, 0.523421, 0.8866191, 14.500655, 28.1823)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D210" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.56749415, -0.8214436, 0.056403562, 0.41454703, -0.22585876, 0.8815549, -0.71140796, 0.52365917, 0.46870032, 0.58756286, 15.140552, 27.348856)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D211" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.9305644, 0.0080432, 0.36604032, 0.36592737, -0.012728205, 0.930557, 0.012143723, 0.99988747, 0.008901124, -0.18794432, 15.587857, 27.141123)
+use_collision = true
+size = Vector3(1.3411136, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D212" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.42246488, 0.8886732, 0.17828314, 0.3659274, -0.012728206, 0.93055713, 0.8292292, 0.45836636, -0.31981227, -1.020991, 15.9042635, 27.77891)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D213" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.50939125, 0.83956295, -0.18882687, 0.3659274, -0.012728196, 0.930557, 0.7788569, -0.5431145, -0.31370232, -0.8345902, 16.34053, 28.719206)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D214" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.8193156, 0.47863975, -0.31563658, 0.3659274, -0.012728193, 0.930557, 0.44138357, -0.87791973, -0.18557556, 0.037492175, 16.795225, 29.372602)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D215" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.5821992, -0.77695024, -0.23956814, 0.3659274, -0.012728167, 0.930557, -0.7260452, -0.62943393, 0.27689683, 0.833251, 17.125904, 29.04944)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D216" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 1.1578752e-15, 0.523421, -2.2879458e-08, 0.8520744, -0.8520744, 3.7245357e-08, 0.523421, 0.8866191, 17.536125, 28.1823)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D217" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.56749415, -0.8214436, 0.056403562, 0.41454703, -0.22585876, 0.8815549, -0.71140796, 0.52365917, 0.46870032, 0.58756286, 18.176022, 27.348856)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D218" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.9305644, 0.0080432, 0.36604032, 0.36592737, -0.012728205, 0.930557, 0.012143723, 0.99988747, 0.008901124, -0.18794432, 18.623327, 27.141123)
+use_collision = true
+size = Vector3(1.3411136, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D219" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.42246488, 0.8886732, 0.17828314, 0.3659274, -0.012728206, 0.93055713, 0.8292292, 0.45836636, -0.31981227, -1.020991, 18.939734, 27.77891)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D220" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.50939125, 0.83956295, -0.18882687, 0.3659274, -0.012728196, 0.930557, 0.7788569, -0.5431145, -0.31370232, -0.8345902, 19.376001, 28.719206)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D221" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.8193156, 0.47863975, -0.31563658, 0.3659274, -0.012728193, 0.930557, 0.44138357, -0.87791973, -0.18557556, 0.037492175, 19.830698, 29.372602)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D222" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.5821992, -0.77695024, -0.23956814, 0.3659274, -0.012728167, 0.930557, -0.7260452, -0.62943393, 0.27689683, 0.833251, 20.161375, 29.04944)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D223" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 1.1578752e-15, 0.523421, -2.2879458e-08, 0.8520744, -0.8520744, 3.7245357e-08, 0.523421, 0.8866191, 20.521164, 28.1823)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D224" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.56749415, -0.8214436, 0.056403562, 0.41454703, -0.22585876, 0.8815549, -0.71140796, 0.52365917, 0.46870032, 0.58756286, 21.16106, 27.348856)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D225" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.9305644, 0.0080432, 0.36604032, 0.36592737, -0.012728205, 0.930557, 0.012143723, 0.99988747, 0.008901124, -0.18794432, 21.608366, 27.141123)
+use_collision = true
+size = Vector3(1.3411136, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D226" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.42246488, 0.8886732, 0.17828314, 0.3659274, -0.012728206, 0.93055713, 0.8292292, 0.45836636, -0.31981227, -1.020991, 21.924772, 27.77891)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D227" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.50939125, 0.83956295, -0.18882687, 0.3659274, -0.012728196, 0.930557, 0.7788569, -0.5431145, -0.31370232, -0.8345902, 22.36104, 28.719206)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D228" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.8193156, 0.47863975, -0.31563658, 0.3659274, -0.012728193, 0.930557, 0.44138357, -0.87791973, -0.18557556, 0.037492175, 22.815737, 29.372602)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D229" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.5821992, -0.77695024, -0.23956814, 0.3659274, -0.012728167, 0.930557, -0.7260452, -0.62943393, 0.27689683, 0.833251, 23.146414, 29.04944)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D230" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 1.1578752e-15, 0.523421, -2.2879458e-08, 0.8520744, -0.8520744, 3.7245357e-08, 0.523421, 0.8866191, 23.523062, 28.1823)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D231" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.56749415, -0.8214436, 0.056403562, 0.41454703, -0.22585876, 0.8815549, -0.71140796, 0.52365917, 0.46870032, 0.58756286, 24.162958, 27.348856)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D232" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.9305644, 0.0080432, 0.36604032, 0.36592737, -0.012728205, 0.930557, 0.012143723, 0.99988747, 0.008901124, -0.18794432, 24.610264, 27.141123)
+use_collision = true
+size = Vector3(1.3411136, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D233" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.42246488, 0.8886732, 0.17828314, 0.3659274, -0.012728206, 0.93055713, 0.8292292, 0.45836636, -0.31981227, -1.020991, 24.926672, 27.77891)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D234" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.50939125, 0.83956295, -0.18882687, 0.3659274, -0.012728196, 0.930557, 0.7788569, -0.5431145, -0.31370232, -0.8345902, 25.362936, 28.719206)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D235" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.8193156, 0.47863975, -0.31563658, 0.3659274, -0.012728193, 0.930557, 0.44138357, -0.87791973, -0.18557556, 0.037492175, 25.817635, 29.372602)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D236" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.5821992, -0.77695024, -0.23956814, 0.3659274, -0.012728167, 0.930557, -0.7260452, -0.62943393, 0.27689683, 0.833251, 26.148312, 29.04944)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D237" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 1.1578752e-15, 0.523421, -2.2879458e-08, 0.8520744, -0.8520744, 3.7245357e-08, 0.523421, 0.8866191, 26.602268, 28.1823)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D251" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 1.1578752e-15, 0.523421, -2.2879458e-08, 0.8520744, -0.8520744, 3.7245357e-08, 0.523421, 0.8866191, 32.689896, 28.1823)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D238" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.56749415, -0.8214436, 0.056403562, 0.41454703, -0.22585876, 0.8815549, -0.71140796, 0.52365917, 0.46870032, 0.58756286, 27.242165, 27.348856)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D239" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.9305644, 0.0080432, 0.36604032, 0.36592737, -0.012728205, 0.930557, 0.012143723, 0.99988747, 0.008901124, -0.18794432, 27.68947, 27.141123)
+use_collision = true
+size = Vector3(1.3411136, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D240" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.42246488, 0.8886732, 0.17828314, 0.3659274, -0.012728206, 0.93055713, 0.8292292, 0.45836636, -0.31981227, -1.020991, 28.005878, 27.77891)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D241" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.50939125, 0.83956295, -0.18882687, 0.3659274, -0.012728196, 0.930557, 0.7788569, -0.5431145, -0.31370232, -0.8345902, 28.442144, 28.719206)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D242" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.8193156, 0.47863975, -0.31563658, 0.3659274, -0.012728193, 0.930557, 0.44138357, -0.87791973, -0.18557556, 0.037492175, 28.896843, 29.372602)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D243" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.5821992, -0.77695024, -0.23956814, 0.3659274, -0.012728167, 0.930557, -0.7260452, -0.62943393, 0.27689683, 0.833251, 29.22752, 29.04944)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D244" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 1.1578752e-15, 0.523421, -2.2879458e-08, 0.8520744, -0.8520744, 3.7245357e-08, 0.523421, 0.8866191, 29.592234, 28.1823)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D245" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.56749415, -0.8214436, 0.056403562, 0.41454703, -0.22585876, 0.8815549, -0.71140796, 0.52365917, 0.46870032, 0.58756286, 30.23213, 27.348856)
+use_collision = true
+size = Vector3(1.3238287, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D246" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.9305644, 0.0080432, 0.36604032, 0.36592737, -0.012728205, 0.930557, 0.012143723, 0.99988747, 0.008901124, -0.18794432, 30.679436, 27.141123)
+use_collision = true
+size = Vector3(1.3411136, 0.5706787, 0.3520279)
+
+[node name="CSGBox3D247" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.42246488, 0.8886732, 0.17828314, 0.3659274, -0.012728206, 0.93055713, 0.8292292, 0.45836636, -0.31981227, -1.020991, 30.995844, 27.77891)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D248" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.50939125, 0.83956295, -0.18882687, 0.3659274, -0.012728196, 0.930557, 0.7788569, -0.5431145, -0.31370232, -0.8345902, 31.43211, 28.719206)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D249" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.8193156, 0.47863975, -0.31563658, 0.3659274, -0.012728193, 0.930557, 0.44138357, -0.87791973, -0.18557556, 0.037492175, 31.886806, 29.372602)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D250" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.5821992, -0.77695024, -0.23956814, 0.3659274, -0.012728167, 0.930557, -0.7260452, -0.62943393, 0.27689683, 0.833251, 32.217484, 29.04944)
+use_collision = true
+size = Vector3(1.3411136, 0.5993042, 0.3520279)
+
+[node name="CSGBox3D140" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.98961663, 17.310879, 41.86769)
+use_collision = true
+size = Vector3(1.027442, 0.29125977, 0.78067017)
+
+[node name="CSGBox3D142" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.77548456, -0.6313664, 0, 0.6313664, 0.77548456, 0, 0, 0, 1, -0.6152086, 18.030535, 41.86769)
+use_collision = true
+size = Vector3(1.027442, 0.29125977, 0.78067017)
+
+[node name="CSGBox3D143" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.77548456, -0.6313664, 0, 0.6313664, 0.77548456, 0, 0, 0, 1, 0.33254826, 16.544247, 41.86769)
+use_collision = true
+size = Vector3(1.027442, 0.29125977, 0.78067017)
+
+[node name="CSGBox3D144" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.8076917, -0.5896051, 0, 0.5896051, -0.8076917, 0, 0, 0, 1, -0.6285285, 16.544247, 41.86769)
+use_collision = true
+size = Vector3(1.027442, 0.29125977, 0.78067017)
+
+[node name="CSGBox3D145" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.8076917, -0.5896051, 0, 0.5896051, -0.8076917, 0, 0, 0, 1, 0.3029523, 18.063349, 41.86769)
+use_collision = true
+size = Vector3(1.027442, 0.29125977, 0.78067017)
+
+[node name="CSGBox3D141" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.68544674, 17.310879, 41.86769)
+use_collision = true
+size = Vector3(1.027442, 0.29125977, 0.78067017)
+
+[node name="CSGBox3D146" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, -4.371139e-08, -4.371139e-08, 1.9106855e-15, -1, 0, 1, 1.9106855e-15, 0.9631026, 17.310879, 41.808193)
+use_collision = true
+size = Vector3(1.2705569, 0.29125977, 0.28110504)
+
+[node name="CSGBox3D147" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1, 0, -4.371139e-08, -4.371139e-08, 1.9106855e-15, -1, 0, 1, 1.9106855e-15, -1.2027462, 17.310879, 41.808193)
+use_collision = true
+size = Vector3(1.2705569, 0.29125977, 0.28110504)
+
+[node name="CSGBox3D148" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6115822, 1.5116978e-15, -0.7911809, -0.7911809, 1.1685413e-15, -0.6115822, 0, 1, 1.9106855e-15, -0.87480545, 18.215143, 41.808193)
+use_collision = true
+size = Vector3(1.2705569, 0.29125977, 0.28110504)
+
+[node name="CSGBox3D150" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.60083884, 1.5273448e-15, -0.7993701, -0.7993701, -1.148014e-15, 0.60083884, -6.618284e-23, 1, 1.9106855e-15, 0.5332656, 18.275993, 41.808193)
+use_collision = true
+size = Vector3(1.2705569, 0.29125977, 0.28110504)
+
+[node name="CSGBox3D151" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-0.60083884, 1.5273448e-15, -0.7993701, -0.7993701, -1.148014e-15, 0.60083884, -6.618284e-23, 1, 1.9106855e-15, -0.8135978, 16.231174, 41.808193)
+use_collision = true
+size = Vector3(1.2705569, 0.29125977, 0.28110504)
+
+[node name="CSGBox3D149" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(0.6269981, 1.4884637e-15, -0.7790207, -0.7790207, 1.1979964e-15, -0.6269981, 0, 1, 1.9106855e-15, 0.44635284, 16.321686, 41.808193)
+use_collision = true
+size = Vector3(1.2705569, 0.29125977, 0.28110504)
+
+[node name="CSGBox3D121" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.737158, 15.6719, 39.96191)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D133" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.3711378e-08, -0.99999976, -0.0006981436, 1, -4.371139e-08, 0, -3.051684e-11, -0.0006981436, 0.99999976, -4.5010295, 15.6719, 54.095833)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D152" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.3711378e-08, -0.99999976, -0.0006981436, 1, -4.371139e-08, 0, -3.051684e-11, -0.0006981436, 0.99999976, -8.63384, 15.6719, 54.095833)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D153" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.3711378e-08, -0.99999976, -0.0006981436, 1, -4.371139e-08, 0, -3.051684e-11, -0.0006981436, 0.99999976, 8.458549, 15.6719, 54.095833)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D134" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.3711378e-08, -0.99999976, -0.0006981436, 1, -4.371139e-08, 0, -3.051684e-11, -0.0006981436, 0.99999976, -2.3032875, 15.6719, 54.09737)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D135" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.3711378e-08, -0.99999976, -0.0006981436, 1, -4.371139e-08, 0, -3.051684e-11, -0.0006981436, 0.99999976, -0.3975073, 15.6719, 54.0987)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D136" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.3711378e-08, -0.99999976, -0.0006981436, 1, -4.371139e-08, 0, -3.051684e-11, -0.0006981436, 0.99999976, 1.6285617, 15.6719, 54.100117)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D137" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.3711378e-08, -0.99999976, -0.0006981436, 1, -4.371139e-08, 0, -3.051684e-11, -0.0006981436, 0.99999976, 3.8263035, 15.6719, 54.101646)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D138" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.3711378e-08, -0.99999976, -0.0006981436, 1, -4.371139e-08, 0, -3.051684e-11, -0.0006981436, 0.99999976, 5.732084, 15.6719, 54.10298)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D122" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.737158, 15.6719, 38.05482)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D123" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.812679, 15.6719, 50.195026)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D124" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.812679, 15.6719, 47.997284)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D125" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.812679, 15.6719, 46.091503)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D126" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.812679, 15.6719, 44.065434)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D127" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.812679, 15.6719, 41.86769)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D128" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.812679, 15.6719, 39.96191)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D129" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -8.812679, 15.6719, 38.05482)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D81" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 10.14819, 13.168081)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D82" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 10.14819, 11.262299)
+use_collision = true
+size = Vector3(3.9427757, 1, 0.78067017)
+
+[node name="CSGBox3D73" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 11.506306, 33.60176)
+use_collision = true
+size = Vector3(4.9945335, 1, 9.022213)
+
+[node name="CSGBox3D70" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.164536, 3.9025578, 24.344604)
+use_collision = true
+size = Vector3(13.226406, 1, 26.692139)
+
+[node name="CSGBox3D35" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -3.545644, 12.339201, 36.955658)
+use_collision = true
+size = Vector3(4.2806664, 1, 6.2548676)
+
+[node name="CSGBox3D109" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, 2.0645347, 12.339201, 39.556393)
+use_collision = true
+size = Vector3(4.2806664, 1, 1.9552288)
+
+[node name="CSGBox3D110" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -2.3829465, 12.339201, 39.556393)
+use_collision = true
+size = Vector3(4.2806664, 1, 1.659544)
+
+[node name="CSGBox3D111" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.23772812, 14.065971, 39.556393)
+use_collision = true
+size = Vector3(0.8271246, 1, 4.2634125)
+
+[node name="CSGBox3D36" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 3.3546197, 12.339201, 36.955658)
+use_collision = true
+size = Vector3(4.2806664, 1, 6.2548676)
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1799847e-08, -0.95626915, 0.29248855, 1, -4.3711392e-08, 9.075855e-16, 1.27850805e-08, 0.29248855, 0.95626915, 4.456654, 12.10186, -0.6632117)
+use_collision = true
+size = Vector3(1.0876999, 1, 26.692139)
+
+[node name="CSGBox3D71" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1799847e-08, -0.95626915, 0.29248855, 1, -4.3711392e-08, 9.075855e-16, 1.27850805e-08, 0.29248855, 0.95626915, 4.4566545, 3.9473405, -0.6632118)
+use_collision = true
+size = Vector3(13.315971, 1, 26.692139)
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -4.091551, 12.134148, -0.6632117)
+use_collision = true
+size = Vector3(1.0231247, 1, 26.692139)
+
+[node name="CSGBox3D91" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -7.342296, 10.102832, 9.253653)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D92" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -6.4494033, 10.102832, 6.7755833)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D93" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -5.5394692, 10.102834, 4.004286)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D94" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -4.382543, 10.102832, 0.6143198)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D95" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -3.4896502, 10.102832, -1.8637495)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D96" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -2.7503924, 10.102834, -4.4996233)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D97" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -2.0664907, 10.102833, -6.494758)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D98" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -1.1735978, 10.102833, -8.972828)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D99" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -0.43434, 10.102835, -11.608702)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D100" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1919574e-08, -0.95900786, 0.28337938, 1, -4.3711385e-08, 1.3401655e-15, 1.2386912e-08, 0.28337938, 0.95900786, 1.0850513, 10.102832, -11.620251)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D101" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1919574e-08, -0.95900786, 0.28337938, 1, -4.3711385e-08, 1.3401655e-15, 1.2386912e-08, 0.28337938, 0.95900786, 1.7661209, 10.102832, -9.075799)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D102" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1919574e-08, -0.95900786, 0.28337938, 1, -4.3711385e-08, 1.3401655e-15, 1.2386912e-08, 0.28337938, 0.95900786, 2.6005464, 10.102834, -6.2808385)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D103" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1919574e-08, -0.95900786, 0.28337938, 1, -4.3711385e-08, 1.3401655e-15, 1.2386912e-08, 0.28337938, 0.95900786, 3.5852365, 10.102832, -2.8368971)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D104" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1919574e-08, -0.95900786, 0.28337938, 1, -4.3711385e-08, 1.3401655e-15, 1.2386912e-08, 0.28337938, 0.95900786, 4.266306, 10.102832, -0.29244655)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D105" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1919574e-08, -0.95900786, 0.28337938, 1, -4.3711385e-08, 1.3401655e-15, 1.2386912e-08, 0.28337938, 0.95900786, 5.163594, 10.102834, 2.2939036)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D106" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1919574e-08, -0.95900786, 0.28337938, 1, -4.3711385e-08, 1.3401655e-15, 1.2386912e-08, 0.28337938, 0.95900786, 5.7406588, 10.102833, 4.322519)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D107" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1919574e-08, -0.95900786, 0.28337938, 1, -4.3711385e-08, 1.3401655e-15, 1.2386912e-08, 0.28337938, 0.95900786, 6.421728, 10.102833, 6.8669705)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D108" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(-4.1919574e-08, -0.95900786, 0.28337938, 1, -4.3711385e-08, 1.3401655e-15, 1.2386912e-08, 0.28337938, 0.95900786, 7.3190155, 10.102835, 9.4533205)
+use_collision = true
+size = Vector3(3.773281, 1, 1.0927124)
+
+[node name="CSGBox3D72" type="CSGBox3D" parent="LobbyTerrain/Ship"]
+transform = Transform3D(4.14916e-08, 0.9492169, 0.31462193, 1, -4.3711385e-08, 1.5309233e-15, 1.3752561e-08, 0.31462193, -0.9492169, -4.0915513, 4.0217595, -0.6632118)
+use_collision = true
+size = Vector3(13.464809, 1, 26.692139)
+
+[node name="BallSpawners" type="Node3D" parent="."]
+
+[node name="BallSpawner1" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.99360275, 0.26177016, -2.3973625)
+
+[node name="BallSpawner2" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2891388, 0.26177016, -3.331491)
+
+[node name="BallSpawner3" parent="BallSpawners" instance=ExtResource("99_bspawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7926931, 0.26177016, -2.3606162)
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+script = ExtResource("4_spawn")
+
+[node name="Spawn1" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.384892, 0.08085677, 2.3524404)
+team = -1
+
+[node name="Spawn2" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.263889, 0.1, 0.79646635)
+team = -1
+
+[node name="Spawn3" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9043412, 0.1, 0.65613174)
+team = -1
+
+[node name="Spawn4" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1768069, 0.032584757, 0.7821579)
+team = -1
+
+[node name="Spawn5" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3512921, 0.1, 0.85092545)
+team = -1
+
+[node name="Spawn6" parent="SpawnPoints" instance=ExtResource("5_sp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38397503, 0.111757874, 0.041238785)
+team = -1
+
+[node name="Pedestal" parent="." instance=ExtResource("6_ped")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11)
+
+[node name="InfiniteHeartZone" type="Area3D" parent="."]
+script = ExtResource("7_infzone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InfiniteHeartZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -7.7)
+shape = SubResource("BoxShape3D_infzone")
+
+[node name="DashOrb" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.1, 0.8)
+
+[node name="DoubleJumpOrb" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.1, 0.8)
+ability = 1
+
+[node name="BombOrb" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.1, 0.8)
+ability = 2
+
+[node name="InfiniteAmmoOrb" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.1, 0.8)
+ability = 3
+
+[node name="TripleThrowOrb" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.1, 0.8)
+ability = 4
+
+[node name="TripleThrowOrb2" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.1, -6.2288876)
+ability = 4
+
+[node name="TripleThrowOrb3" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9097767, 0.1, -6.2288876)
+ability = 4
+
+[node name="TripleThrowOrb4" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5675592, 0.1, -6.2288876)
+ability = 4
+
+[node name="DoubleJumpOrb2" parent="." instance=ExtResource("9_orb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0.1, 0.8)
+ability = 1

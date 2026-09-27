@@ -1,0 +1,52 @@
+[gd_scene load_steps=8 format=3 uid="uid://dballspawner01"]
+
+[ext_resource type="Script" uid="uid://d072ofbqdstop" path="res://Components/BallSpawner/ball_spawner.gd" id="1_bs"]
+[ext_resource type="Shader" uid="uid://blp58wma7fk1c" path="res://Components/BallSpawner/radial_progress.gdshader" id="2_shader"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_ghost"]
+radius = 0.25
+height = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_ghost"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.55, 0.8, 1, 0.08)
+
+[sub_resource type="QuadMesh" id="QuadMesh_bar"]
+size = Vector2(0.32, 0.32)
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_bar"]
+render_priority = 0
+shader = ExtResource("2_shader")
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_bs"]
+properties/0/path = NodePath(".:progress")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:pending")
+properties/1/spawn = true
+properties/1/replication_mode = 2
+
+[node name="BallSpawner" type="Node3D"]
+script = ExtResource("1_bs")
+
+[node name="Balls" type="Node3D" parent="."]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://1xfx84i2ndhj")
+spawn_path = NodePath("../Balls")
+
+[node name="GhostBall" type="MeshInstance3D" parent="."]
+visible = false
+cast_shadow = 0
+mesh = SubResource("SphereMesh_ghost")
+surface_material_override/0 = SubResource("Mat_ghost")
+
+[node name="RadialBar" type="MeshInstance3D" parent="."]
+visible = false
+cast_shadow = 0
+mesh = SubResource("QuadMesh_bar")
+surface_material_override/0 = SubResource("ShaderMat_bar")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_bs")
